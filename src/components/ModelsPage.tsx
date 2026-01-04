@@ -49,7 +49,7 @@ const ModelsPage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
         {/* Premium Headline Section */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6 flex items-baseline justify-center">
+          <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6 flex items-baseline justify-center">
             <RotatingWord 
               words={['Enterprise', 'Agentic', 'Multimodal', 'Generative', 'Vision', 'Workflow']}
               interval={2200}
@@ -57,7 +57,7 @@ const ModelsPage: React.FC = () => {
             />
             <span className="text-foreground">Models</span>
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground/70 font-light tracking-wide">
+          <p className="text-base md:text-lg text-muted-foreground/70 font-light tracking-wide">
             Models built for real-world enterprise AI.
           </p>
         </div>

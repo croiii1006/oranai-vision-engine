@@ -49,7 +49,7 @@ const NarrativeHero: React.FC = () => {
         <AnimatedHeadline 
           text="AI Integrated Marketing Framework"
           as="h1"
-          className="text-[100px] md:text-[120px] font-normal tracking-tight leading-[1.05] mb-8"
+          className="text-[90px] md:text-[108px] font-normal tracking-tight leading-[1.05] mb-8"
         />
         <motion.p
           initial={{ opacity: 0, y: 12 }}
@@ -88,7 +88,7 @@ const FrameworkReveal: React.FC = () => {
       <AnimatedHeadline 
         text="The system behind scalable brand growth"
         as="h2"
-        className="text-[56px] font-normal text-center mb-16"
+        className="text-[50px] font-normal text-center mb-16"
       />
       
       <motion.div
@@ -107,7 +107,7 @@ const FrameworkReveal: React.FC = () => {
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <span 
-              className={`text-[44px] font-medium transition-all duration-300 cursor-default ${
+              className={`text-[40px] font-medium transition-all duration-300 cursor-default ${
                 hoveredIndex === index 
                   ? 'text-foreground' 
                   : 'text-muted-foreground/70'

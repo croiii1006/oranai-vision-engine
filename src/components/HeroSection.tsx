@@ -41,7 +41,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab }) => {
           />
           
           {/* Subtitle */}
-          <h2 className="heading-md text-muted-foreground mb-6" style={{ fontSize: '180%' }}>
+          <h2 className="heading-md text-muted-foreground mb-6" style={{ fontSize: '162%' }}>
             {t('hero.subtitle')}
           </h2>
           

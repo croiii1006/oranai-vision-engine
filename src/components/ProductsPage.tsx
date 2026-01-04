@@ -50,7 +50,7 @@ const ProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-medium mb-4">{product.title}</h3>
+              <h3 className="text-lg font-medium mb-4">{product.title}</h3>
               <p className="text-muted-foreground leading-relaxed mb-8">
                 {product.description}
               </p>
