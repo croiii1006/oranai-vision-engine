@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SectionData {
   id: string;
@@ -22,43 +22,43 @@ const ScrollSolutionPage: React.FC = () => {
 
   const sections: SectionData[] = [
     {
-      id: 'know',
-      titleKey: 'solution.know',
-      descKey: 'solution.knowDesc',
+      id: "know",
+      titleKey: "solution.know",
+      descKey: "solution.knowDesc",
       tabs: [
-        { labelKey: 'solution.marketInsight', contentKey: 'solution.marketInsightDesc' },
-        { labelKey: 'solution.consumerInsight', contentKey: 'solution.consumerInsightDesc' },
-        { labelKey: 'solution.healthInsight', contentKey: 'solution.healthInsightDesc' },
+        { labelKey: "solution.marketInsight", contentKey: "solution.marketInsightDesc" },
+        { labelKey: "solution.consumerInsight", contentKey: "solution.consumerInsightDesc" },
+        { labelKey: "solution.healthInsight", contentKey: "solution.healthInsightDesc" },
       ],
     },
     {
-      id: 'build',
-      titleKey: 'solution.build',
-      descKey: 'solution.buildDesc',
+      id: "build",
+      titleKey: "solution.build",
+      descKey: "solution.buildDesc",
       tabs: [
-        { labelKey: 'solution.brandPositioning', contentKey: 'solution.brandPositioningDesc' },
-        { labelKey: 'solution.brandStory', contentKey: 'solution.brandStoryDesc' },
-        { labelKey: 'solution.contentGeneration', contentKey: 'solution.contentGenerationDesc' },
+        { labelKey: "solution.brandPositioning", contentKey: "solution.brandPositioningDesc" },
+        { labelKey: "solution.brandStory", contentKey: "solution.brandStoryDesc" },
+        { labelKey: "solution.contentGeneration", contentKey: "solution.contentGenerationDesc" },
       ],
     },
     {
-      id: 'manage',
-      titleKey: 'solution.manage',
-      descKey: 'solution.manageDesc',
+      id: "manage",
+      titleKey: "solution.manage",
+      descKey: "solution.manageDesc",
       tabs: [
-        { labelKey: 'solution.socialMedia', contentKey: 'solution.socialMediaDesc' },
-        { labelKey: 'solution.dam', contentKey: 'solution.damDesc' },
-        { labelKey: 'solution.sentiment', contentKey: 'solution.sentimentDesc' },
+        { labelKey: "solution.socialMedia", contentKey: "solution.socialMediaDesc" },
+        { labelKey: "solution.dam", contentKey: "solution.damDesc" },
+        { labelKey: "solution.sentiment", contentKey: "solution.sentimentDesc" },
       ],
     },
     {
-      id: 'scale',
-      titleKey: 'solution.scale',
-      descKey: 'solution.scaleDesc',
+      id: "scale",
+      titleKey: "solution.scale",
+      descKey: "solution.scaleDesc",
       tabs: [
-        { labelKey: 'solution.seo', contentKey: 'solution.seoDesc' },
-        { labelKey: 'solution.ads', contentKey: 'solution.adsDesc' },
-        { labelKey: 'solution.predictiveGrowth', contentKey: 'solution.predictiveGrowthDesc' },
+        { labelKey: "solution.seo", contentKey: "solution.seoDesc" },
+        { labelKey: "solution.ads", contentKey: "solution.adsDesc" },
+        { labelKey: "solution.predictiveGrowth", contentKey: "solution.predictiveGrowthDesc" },
       ],
     },
   ];
@@ -77,28 +77,28 @@ const ScrollSolutionPage: React.FC = () => {
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      
+
       const delta = e.deltaY;
-      
+
       if (delta > 0) {
         // Scrolling down
         if (!showDetail) {
           setShowDetail(true);
         } else if (currentTab < currentSectionData.tabs.length - 1) {
-          setCurrentTab(prev => prev + 1);
+          setCurrentTab((prev) => prev + 1);
         } else if (currentSection < sections.length - 1) {
-          setCurrentSection(prev => prev + 1);
+          setCurrentSection((prev) => prev + 1);
           setCurrentTab(0);
           setShowDetail(false);
         }
       } else {
         // Scrolling up
         if (showDetail && currentTab > 0) {
-          setCurrentTab(prev => prev - 1);
+          setCurrentTab((prev) => prev - 1);
         } else if (showDetail && currentTab === 0) {
           setShowDetail(false);
         } else if (!showDetail && currentSection > 0) {
-          setCurrentSection(prev => prev - 1);
+          setCurrentSection((prev) => prev - 1);
           setCurrentTab(sections[currentSection - 1].tabs.length - 1);
           setShowDetail(true);
         }
@@ -107,25 +107,23 @@ const ScrollSolutionPage: React.FC = () => {
 
     const container = containerRef.current;
     if (container) {
-      container.addEventListener('wheel', handleWheel, { passive: false });
-      return () => container.removeEventListener('wheel', handleWheel);
+      container.addEventListener("wheel", handleWheel, { passive: false });
+      return () => container.removeEventListener("wheel", handleWheel);
     }
   }, [showDetail, currentTab, currentSection, currentSectionData.tabs.length, sections.length]);
 
   // Calculate progress
   const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0);
-  const currentStep = sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) 
-    + (showDetail ? currentTab + 1 : 0);
+  const currentStep =
+    sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) +
+    (showDetail ? currentTab + 1 : 0);
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div 
-      ref={containerRef}
-      className="min-h-[calc(100vh-64px)] relative overflow-hidden"
-    >
+    <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative overflow-hidden">
       {/* Progress bar - full width at top */}
       <div className="fixed top-16 left-0 right-0 h-0.5 bg-muted/20 z-40">
-        <motion.div 
+        <motion.div
           className="h-full bg-foreground"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
@@ -134,7 +132,7 @@ const ScrollSolutionPage: React.FC = () => {
       </div>
 
       {/* Left sidebar navigation - compact centered */}
-      <div className="fixed left-0 top-1/2 -translate-y-1/2 w-16 z-30 hidden lg:flex flex-col items-center">
+      <div className="fixed left-0 top-0 h-screen w-20  z-30  hidden lg:flex  flex-col  justify-evenly  items-center  py-24">
         <div className="flex flex-col gap-8">
           {sections.map((section, index) => (
             <button
@@ -146,20 +144,20 @@ const ScrollSolutionPage: React.FC = () => {
               }}
               className="group flex flex-col items-center gap-2"
             >
-              <div 
+              <div
                 className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${
-                  currentSection === index 
-                    ? 'bg-foreground border-foreground' 
-                    : 'border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60'
+                  currentSection === index
+                    ? "bg-foreground border-foreground"
+                    : "border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60"
                 }`}
               />
-              <span 
+              <span
                 className={`text-[9px] font-medium uppercase tracking-widest transition-all duration-300 ${
-                  currentSection === index 
-                    ? 'text-foreground' 
-                    : 'text-muted-foreground/40 group-hover:text-muted-foreground/60'
+                  currentSection === index
+                    ? "text-foreground"
+                    : "text-muted-foreground/40 group-hover:text-muted-foreground/60"
                 }`}
-                style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+                style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
               >
                 {t(section.titleKey)}
               </span>
@@ -187,7 +185,7 @@ const ScrollSolutionPage: React.FC = () => {
                 </h1>
                 <div className="flex flex-col gap-1 pb-2 lg:pb-4">
                   <span className="text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
-                    {t('solution.yourBrand')}
+                    {t("solution.yourBrand")}
                   </span>
                   <p className="text-sm md:text-base lg:text-lg text-muted-foreground max-w-xs lg:max-w-sm leading-snug">
                     {t(currentSectionData.descKey)}
@@ -213,7 +211,7 @@ const ScrollSolutionPage: React.FC = () => {
                   {t(currentSectionData.titleKey)}
                 </h2>
                 <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
-                  {t('solution.yourBrand')}
+                  {t("solution.yourBrand")}
                 </span>
               </div>
 
@@ -228,17 +226,21 @@ const ScrollSolutionPage: React.FC = () => {
                         key={index}
                         onClick={() => setCurrentTab(index)}
                         className={`flex items-center justify-between w-full text-left py-3 border-b border-border/30 transition-all duration-300 ${
-                          currentTab === index ? '' : 'opacity-40 hover:opacity-60'
+                          currentTab === index ? "" : "opacity-40 hover:opacity-60"
                         }`}
                       >
-                        <span className={`text-lg md:text-xl lg:text-2xl font-medium ${
-                          currentTab === index ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
+                        <span
+                          className={`text-lg md:text-xl lg:text-2xl font-medium ${
+                            currentTab === index ? "text-foreground" : "text-muted-foreground"
+                          }`}
+                        >
                           {t(tab.labelKey)}
                         </span>
-                        <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                          currentTab === index ? 'bg-foreground' : 'bg-muted-foreground/20'
-                        }`} />
+                        <div
+                          className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                            currentTab === index ? "bg-foreground" : "bg-muted-foreground/20"
+                          }`}
+                        />
                       </button>
                     ))}
                   </div>
@@ -263,7 +265,7 @@ const ScrollSolutionPage: React.FC = () => {
                   <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
                     {/* Image placeholder */}
                     <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
-                    
+
                     {/* Image indicators (right side inside card) */}
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
                       {[0, 1, 2].map((i) => (
@@ -271,9 +273,7 @@ const ScrollSolutionPage: React.FC = () => {
                           key={i}
                           onClick={() => setImageIndex(i)}
                           className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                            imageIndex === i 
-                              ? 'bg-foreground' 
-                              : 'bg-foreground/20 hover:bg-foreground/40'
+                            imageIndex === i ? "bg-foreground" : "bg-foreground/20 hover:bg-foreground/40"
                           }`}
                         />
                       ))}
@@ -297,9 +297,7 @@ const ScrollSolutionPage: React.FC = () => {
               setShowDetail(false);
             }}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              currentSection === index
-                ? 'bg-foreground text-background'
-                : 'text-muted-foreground'
+              currentSection === index ? "bg-foreground text-background" : "text-muted-foreground"
             }`}
           >
             {t(section.titleKey)}
