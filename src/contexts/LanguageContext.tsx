@@ -93,12 +93,15 @@ const translations: Record<Language, Record<string, string>> = {
     'products.subheadline': 'Always online, Always professional',
     'products.insight': 'Insight',
     'products.strategy': 'Strategy',
-    'products.material': 'Material',
+    'products.material': 'Library',
     'products.operation': 'Operation',
     'products.imageGen': 'Image Generation',
     'products.videoGen': 'Video Generation',
     'products.digitalHuman': 'Digital Human',
     'products.requestDemo': 'Request Demo',
+    'products.geoMonitor': 'GEO Monitor',
+    'products.brandHealth': 'Brand Health',
+    'products.brandStrategy': 'Brand Strategy',
     
     // Library Page
     'library.title': 'LIBRARY',
@@ -202,6 +205,9 @@ const translations: Record<Language, Record<string, string>> = {
     'products.videoGen': '视频生成',
     'products.digitalHuman': '数字人',
     'products.requestDemo': '申请演示',
+    'products.geoMonitor': 'GEO监控平台',
+    'products.brandHealth': '品牌健康度',
+    'products.brandStrategy': '品牌策略',
     
     // Library Page
     'library.title': '素材广场',

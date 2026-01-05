@@ -1,24 +1,74 @@
 import React, { useState } from 'react';
-import { Search, ArrowUp } from 'lucide-react';
+import { ArrowUp, Globe, HeartPulse, Target, Image, Video, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+interface SubTab {
+  id: string;
+  labelKey: string;
+  icon: React.ReactNode;
+}
+
+interface TabConfig {
+  id: string;
+  labelKey: string;
+  subTabs?: SubTab[];
+}
 
 const ProductsPage: React.FC = () => {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('material');
+  const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
 
-  const tabs = [
-    { id: 'insight', label: t('products.insight') },
-    { id: 'strategy', label: t('products.strategy') },
-    { id: 'material', label: t('products.material') },
-    { id: 'operation', label: t('products.operation') },
+  const tabsConfig: TabConfig[] = [
+    {
+      id: 'insight',
+      labelKey: 'products.insight',
+      subTabs: [
+        { id: 'geoMonitor', labelKey: 'products.geoMonitor', icon: <Globe className="w-4 h-4" /> },
+        { id: 'brandHealth', labelKey: 'products.brandHealth', icon: <HeartPulse className="w-4 h-4" /> },
+      ],
+    },
+    {
+      id: 'strategy',
+      labelKey: 'products.strategy',
+      subTabs: [
+        { id: 'brandStrategy', labelKey: 'products.brandStrategy', icon: <Target className="w-4 h-4" /> },
+      ],
+    },
+    {
+      id: 'material',
+      labelKey: 'products.material',
+      subTabs: [
+        { id: 'imageGen', labelKey: 'products.imageGen', icon: <Image className="w-4 h-4" /> },
+        { id: 'videoGen', labelKey: 'products.videoGen', icon: <Video className="w-4 h-4" /> },
+        { id: 'digitalHuman', labelKey: 'products.digitalHuman', icon: <User className="w-4 h-4" /> },
+      ],
+    },
+    {
+      id: 'operation',
+      labelKey: 'products.operation',
+    },
   ];
 
-  const categories = [
-    { id: 'imageGen', label: t('products.imageGen') },
-    { id: 'videoGen', label: t('products.videoGen') },
-    { id: 'digitalHuman', label: t('products.digitalHuman') },
-  ];
+  const currentTabConfig = tabsConfig.find((tab) => tab.id === activeTab);
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    const tab = tabsConfig.find((t) => t.id === tabId);
+    if (tab?.subTabs && tab.subTabs.length > 0) {
+      setActiveSubTab(tab.subTabs[0].id);
+    } else {
+      setActiveSubTab(null);
+    }
+  };
+
+  // Initialize activeSubTab on mount
+  React.useEffect(() => {
+    if (currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && !activeSubTab) {
+      setActiveSubTab(currentTabConfig.subTabs[0].id);
+    }
+  }, [currentTabConfig, activeSubTab]);
 
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -39,21 +89,41 @@ const ProductsPage: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          {tabs.map((tab) => (
+        <div className="flex items-center justify-center gap-4 mb-8">
+          {tabsConfig.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`px-8 py-3 rounded-full text-lg font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-foreground text-background'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
+
+        {/* Sub Tab Navigation */}
+        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && (
+          <div className="flex items-center justify-center gap-3 mb-12">
+            {currentTabConfig.subTabs.map((subTab) => (
+              <button
+                key={subTab.id}
+                onClick={() => setActiveSubTab(subTab.id)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all border ${
+                  activeSubTab === subTab.id
+                    ? 'border-foreground/50 bg-foreground/10 text-foreground'
+                    : 'border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                }`}
+              >
+                {subTab.icon}
+                {t(subTab.labelKey)}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="flex items-center gap-4 max-w-3xl mx-auto mb-12">
@@ -69,18 +139,6 @@ const ProductsPage: React.FC = () => {
           <button className="p-4 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
             <ArrowUp className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Category Tags */}
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              className="px-6 py-3 rounded-lg bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all text-sm"
-            >
-              {category.label}
-            </button>
-          ))}
         </div>
       </div>
     </div>
