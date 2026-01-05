@@ -1,160 +1,154 @@
-import React from 'react';
-import { Brain, Eye, Wand2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, ArrowUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import GlowCard from './GlowCard';
-import ScrollReveal from './ScrollReveal';
-import AnimatedHeadline from './AnimatedHeadline';
-import RotatingWord from './RotatingWord';
-import InvestorLogos from './InvestorLogos';
 
 const ModelsPage: React.FC = () => {
   const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [sidebarFilter, setSidebarFilter] = useState('all');
 
-  const modelCategories = [
-    {
-      icon: Brain,
-      title: t('models.nlp'),
-      models: t('models.nlpModels'),
-      capabilities: [
-        t('models.semantic'),
-        t('models.sentiment'),
-        t('models.translation'),
-      ],
-    },
-    {
-      icon: Eye,
-      title: t('models.multimodal'),
-      models: t('models.multimodalModels'),
-      capabilities: [
-        t('models.crossModal'),
-        t('models.visualQA'),
-        t('models.asrTts'),
-      ],
-    },
-    {
-      icon: Wand2,
-      title: t('models.generation'),
-      models: t('models.generationModels'),
-      capabilities: [
-        t('models.t2i'),
-        t('models.t2v'),
-        t('models.i2t'),
-        t('models.voiceCloning'),
-      ],
-    },
+  const filterCategories = [
+    { id: 'all', label: t('common.all') },
+    { id: 'nlp', label: t('models.nlp') },
+    { id: 'multimodal', label: t('models.multimodal') },
+    { id: 'generation', label: t('models.generation') },
+    { id: 'vision', label: t('models.vision') },
+    { id: 'audio', label: t('models.audio') },
   ];
 
+  const sidebarFilters = [
+    { id: 'all', label: t('common.all') },
+    { id: 'enterprise', label: t('models.enterprise') },
+    { id: 'nlp', label: t('models.nlp') },
+    { id: 'vision', label: t('models.vision') },
+  ];
+
+  const models = [
+    { id: 1, name: 'Oran-R1', version: '28B', category: 'nlp' },
+    { id: 2, name: 'OranLM', version: '127B', category: 'nlp' },
+    { id: 3, name: 'Oran-VL', version: '7B', category: 'multimodal' },
+    { id: 4, name: 'OranVideo', version: '15B', category: 'generation' },
+    { id: 5, name: 'Oran-MV2', version: '354B', category: 'generation' },
+    { id: 6, name: 'Oran-ASR', version: '2B', category: 'audio' },
+    { id: 7, name: 'Oran-TTS', version: '4B', category: 'audio' },
+    { id: 8, name: 'Oran-OCR', version: '1B', category: 'vision' },
+    { id: 9, name: 'Oran-VQA', version: '12B', category: 'multimodal' },
+    { id: 10, name: 'Oran-IMG', version: '8B', category: 'generation' },
+  ];
+
+  const filteredModels = models.filter(model => {
+    const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === 'all' || model.category === activeFilter;
+    const matchesSidebar = sidebarFilter === 'all' || model.category === sidebarFilter;
+    return matchesSearch && matchesFilter && matchesSidebar;
+  });
+
   return (
-    <div className="min-h-screen pt-32">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        {/* Premium Headline Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-light tracking-tight mb-6 flex items-baseline justify-center">
-            <RotatingWord 
-              words={['Enterprise', 'Agentic', 'Multimodal', 'Generative', 'Vision', 'Workflow']}
-              interval={2200}
-              className="text-foreground font-light"
-            />
-            <span className="text-foreground">Models</span>
-          </h2>
-          <p className="text-base md:text-lg text-muted-foreground/70 font-light tracking-wide">
-            Models built for real-world enterprise AI.
-          </p>
+    <div className="min-h-screen pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header with Title and Search */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+            {t('models.title')}
+          </h1>
+          
+          <div className="flex items-center gap-4 flex-1 max-w-2xl">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder={t('common.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-6 py-3 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+              />
+            </div>
+            <button className="px-8 py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
+              <ArrowUp className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Investor Logos */}
-        <InvestorLogos />
+        <div className="flex gap-8">
+          {/* Left Sidebar */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-32">
+              <h3 className="text-sm font-medium mb-4 text-muted-foreground">
+                {t('models.filter')}
+              </h3>
+              <div className="relative mb-4">
+                <input
+                  type="text"
+                  placeholder={t('common.search')}
+                  className="w-full px-4 py-2 rounded-full border border-border/50 bg-background/50 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+                />
+              </div>
+              <div className="space-y-2">
+                {sidebarFilters.map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => setSidebarFilter(filter.id)}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all ${
+                      sidebarFilter === filter.id
+                        ? 'bg-muted/50 text-foreground font-medium'
+                        : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
 
-        <div className="w-16 h-px bg-foreground/20 mx-auto mb-16 mt-8" />
-
-        <div className="space-y-8">
-          {modelCategories.map((category, index) => (
-            <ScrollReveal key={index}>
-              <GlowCard
-                className="glass rounded-3xl hover-lift"
-              >
-                <div className="p-8 md:p-12">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-                    {/* Left - Title and Icon */}
-                    <div className="flex items-start space-x-6">
-                      <div className="glass p-4 rounded-2xl">
-                        <category.icon className="w-8 h-8" />
-                      </div>
-                      <div>
-                        <h3 className="heading-md mb-2">{category.title}</h3>
-                        <p className="font-mono text-sm text-muted-foreground">
-                          {category.models}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right - Capabilities */}
-                    <div className="flex flex-wrap gap-3 lg:max-w-md">
-                      {category.capabilities.map((capability, capIndex) => (
-                        <div
-                          key={capIndex}
-                          className="px-4 py-2 rounded-full border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all duration-200 cursor-pointer"
-                        >
-                          {capability}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Technical Details */}
-                  <div className="mt-8 pt-8 border-t border-border/30">
-                    <div className="flex flex-wrap gap-6 text-xs font-mono text-muted-foreground">
-                      <span className="flex items-center space-x-2">
-                        <span className="w-2 h-2 rounded-full bg-foreground/30" />
-                        <span>Enterprise Ready</span>
-                      </span>
-                      <span className="flex items-center space-x-2">
-                        <span className="w-2 h-2 rounded-full bg-foreground/30" />
-                        <span>API Access</span>
-                      </span>
-                      <span className="flex items-center space-x-2">
-                        <span className="w-2 h-2 rounded-full bg-foreground/30" />
-                        <span>On-premise Available</span>
-                      </span>
-                    </div>
-                  </div>
+              <div className="mt-8">
+                <h3 className="text-sm font-medium mb-4 text-muted-foreground">
+                  {t('models.filter')}
+                </h3>
+                <div className="relative mb-4">
+                  <input
+                    type="text"
+                    placeholder={t('common.search')}
+                    className="w-full px-4 py-2 rounded-full border border-border/50 bg-background/50 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+                  />
                 </div>
-              </GlowCard>
-            </ScrollReveal>
-          ))}
-        </div>
-
-        {/* Technical Architecture Diagram (Minimal) */}
-        <ScrollReveal>
-          <div className="mt-24">
-            <h3 className="text-lg font-medium mb-8 text-center text-muted-foreground">Architecture Overview</h3>
-            <div className="glass rounded-2xl p-12">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-20 h-20 rounded-2xl glass flex items-center justify-center">
-                    <span className="font-mono text-sm">Input</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">Text / Image / Audio</span>
-                </div>
-                <div className="w-16 h-px md:w-px md:h-16 bg-foreground/20" />
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-24 h-24 rounded-2xl bg-foreground/5 border border-foreground/10 flex items-center justify-center">
-                    <span className="font-mono text-sm">OranAI</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">Multimodal Processing</span>
-                </div>
-                <div className="w-16 h-px md:w-px md:h-16 bg-foreground/20" />
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-20 h-20 rounded-2xl glass flex items-center justify-center">
-                    <span className="font-mono text-sm">Output</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">Intelligence / Content</span>
+                <div className="space-y-2">
+                  {sidebarFilters.map((filter) => (
+                    <button
+                      key={filter.id}
+                      className="w-full text-left px-4 py-3 rounded-xl text-sm text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all"
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </ScrollReveal>
-      </section>
+          </aside>
+
+          {/* Main Content - Model Grid */}
+          <main className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredModels.map((model) => (
+                <div
+                  key={model.id}
+                  className="group bg-muted/30 rounded-2xl p-6 hover:bg-muted/50 transition-all cursor-pointer"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-xl bg-muted/50 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-1">
+                        {model.name} {model.version}
+                      </h3>
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide">
+                        MODELS
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
+        </div>
+      </div>
     </div>
   );
 };
