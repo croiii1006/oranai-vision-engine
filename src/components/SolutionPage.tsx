@@ -73,8 +73,8 @@ const SolutionPage: React.FC = () => {
   const currentSection = sections.find(s => s.id === activeSection) || sections[0];
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div className="min-h-screen flex flex-col pt-32 pb-20">
+      <div className="w-full px-6 sm:px-10 lg:px-16">
         <div className="flex gap-8">
           {/* Left Sidebar Navigation */}
           <aside className="hidden lg:block w-20 flex-shrink-0">
