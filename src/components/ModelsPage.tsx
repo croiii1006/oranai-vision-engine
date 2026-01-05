@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
-import { Search, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// Import model category images
+import modelNlp from '@/assets/models/model-nlp.png';
+import modelMultimodal from '@/assets/models/model-multimodal.png';
+import modelGeneration from '@/assets/models/model-generation.png';
+import modelVision from '@/assets/models/model-vision.png';
+import modelAudio from '@/assets/models/model-audio.png';
+
+const categoryImages: Record<string, string> = {
+  nlp: modelNlp,
+  multimodal: modelMultimodal,
+  generation: modelGeneration,
+  vision: modelVision,
+  audio: modelAudio,
+};
 
 const ModelsPage: React.FC = () => {
   const { t } = useLanguage();
@@ -130,10 +145,16 @@ const ModelsPage: React.FC = () => {
               {filteredModels.map((model) => (
                 <div
                   key={model.id}
-                  className="group bg-muted/30 rounded-2xl p-6 hover:bg-muted/50 transition-all cursor-pointer"
+                  className="group bg-muted/30 rounded-2xl p-6 hover:bg-muted/50 transition-all cursor-pointer overflow-hidden"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-xl bg-muted/50 flex-shrink-0" />
+                    <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden bg-muted/50">
+                      <img 
+                        src={categoryImages[model.category] || modelNlp} 
+                        alt={model.category}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold mb-1">
                         {model.name} {model.version}
