@@ -93,7 +93,7 @@ const translations: Record<Language, Record<string, string>> = {
     'products.subheadline': 'Always online, Always professional',
     'products.insight': 'Insight',
     'products.strategy': 'Strategy',
-    'products.material': 'Library',
+    'products.material': 'Content',
     'products.operation': 'Operation',
     'products.imageGen': 'Image Generation',
     'products.videoGen': 'Video Generation',
