@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X } from 'lucide-react';
+import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LibraryItem {
@@ -361,10 +361,16 @@ const LibraryPage: React.FC = () => {
                   ))}
                 </div>
 
-                <button className="mt-auto w-full py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
-                  <Download className="w-5 h-5" />
-                  {t('library.download')}
-                </button>
+                <div className="mt-auto flex gap-3">
+                  <button className="flex-1 py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2">
+                    <Download className="w-5 h-5" />
+                    {t('library.download')}
+                  </button>
+                  <button className="flex-1 py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    {t('library.replicate')}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
