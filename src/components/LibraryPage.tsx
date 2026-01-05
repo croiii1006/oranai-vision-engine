@@ -154,7 +154,7 @@ const LibraryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-6 sm:px-10 lg:px-16">
         {/* Header with Title and Search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
