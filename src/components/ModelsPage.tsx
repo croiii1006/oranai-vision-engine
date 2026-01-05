@@ -39,17 +39,27 @@ const ModelsPage: React.FC = () => {
     { id: 'vision', label: t('models.vision') },
   ];
 
+  // Gradient styles for cards
+  const gradients = [
+    'bg-gradient-to-br from-fuchsia-400 via-orange-300 to-cyan-300',
+    'bg-gradient-to-br from-orange-400 via-pink-300 to-cyan-200',
+    'bg-gradient-to-br from-cyan-200 via-pink-200 to-orange-300',
+    'bg-gradient-to-br from-purple-400 via-pink-300 to-yellow-200',
+    'bg-gradient-to-br from-blue-300 via-purple-200 to-pink-300',
+    'bg-gradient-to-br from-teal-300 via-cyan-200 to-pink-200',
+  ];
+
   const models = [
-    { id: 1, name: 'Oran-R1', version: '28B', category: 'nlp' },
-    { id: 2, name: 'OranLM', version: '127B', category: 'nlp' },
-    { id: 3, name: 'Oran-VL', version: '7B', category: 'multimodal' },
-    { id: 4, name: 'OranVideo', version: '15B', category: 'generation' },
-    { id: 5, name: 'Oran-MV2', version: '354B', category: 'generation' },
-    { id: 6, name: 'Oran-ASR', version: '2B', category: 'audio' },
-    { id: 7, name: 'Oran-TTS', version: '4B', category: 'audio' },
-    { id: 8, name: 'Oran-OCR', version: '1B', category: 'vision' },
-    { id: 9, name: 'Oran-VQA', version: '12B', category: 'multimodal' },
-    { id: 10, name: 'Oran-IMG', version: '8B', category: 'generation' },
+    { id: 1, name: 'Oran-R1', version: '28B', category: 'nlp', inputPrice: '$1.75', outputPrice: '$14.00', contextLength: '400K', maxOutput: '128K', cutoff: 'Aug 31, 2025' },
+    { id: 2, name: 'OranLM', version: '127B', category: 'nlp', inputPrice: '$21.00', outputPrice: '$168.00', contextLength: '400K', maxOutput: '128K', cutoff: 'Aug 31, 2025' },
+    { id: 3, name: 'Oran-VL', version: '7B', category: 'multimodal', inputPrice: '$0.25', outputPrice: '$2.00', contextLength: '400K', maxOutput: '128K', cutoff: 'Sep 30, 2024' },
+    { id: 4, name: 'OranVideo', version: '15B', category: 'generation', inputPrice: '$3.50', outputPrice: '$28.00', contextLength: '200K', maxOutput: '64K', cutoff: 'Jun 15, 2025' },
+    { id: 5, name: 'Oran-MV2', version: '354B', category: 'generation', inputPrice: '$45.00', outputPrice: '$360.00', contextLength: '500K', maxOutput: '256K', cutoff: 'Dec 1, 2025' },
+    { id: 6, name: 'Oran-ASR', version: '2B', category: 'audio', inputPrice: '$0.10', outputPrice: '$0.80', contextLength: '100K', maxOutput: '32K', cutoff: 'Mar 20, 2025' },
+    { id: 7, name: 'Oran-TTS', version: '4B', category: 'audio', inputPrice: '$0.15', outputPrice: '$1.20', contextLength: '100K', maxOutput: '32K', cutoff: 'Mar 20, 2025' },
+    { id: 8, name: 'Oran-OCR', version: '1B', category: 'vision', inputPrice: '$0.05', outputPrice: '$0.40', contextLength: '50K', maxOutput: '16K', cutoff: 'Jan 10, 2025' },
+    { id: 9, name: 'Oran-VQA', version: '12B', category: 'multimodal', inputPrice: '$2.00', outputPrice: '$16.00', contextLength: '300K', maxOutput: '64K', cutoff: 'Jul 25, 2025' },
+    { id: 10, name: 'Oran-IMG', version: '8B', category: 'generation', inputPrice: '$1.00', outputPrice: '$8.00', contextLength: '200K', maxOutput: '64K', cutoff: 'May 5, 2025' },
   ];
 
   const filteredModels = models.filter(model => {
@@ -86,7 +96,7 @@ const ModelsPage: React.FC = () => {
 
         <div className="flex gap-8">
           {/* Left Sidebar */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
+          <aside className="hidden lg:block w-44 flex-shrink-0">
             <div className="sticky top-32">
               <h3 className="text-sm font-medium mb-4 text-muted-foreground">
                 {t('models.filter')}
@@ -141,28 +151,36 @@ const ModelsPage: React.FC = () => {
 
           {/* Main Content - Model Grid */}
           <main className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredModels.map((model) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredModels.map((model, index) => (
                 <div
                   key={model.id}
-                  className="group bg-muted/30 rounded-2xl p-6 hover:bg-muted/50 transition-all cursor-pointer overflow-hidden"
+                  className="group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden bg-muted/50">
-                      <img 
-                        src={categoryImages[model.category] || modelNlp} 
-                        alt={model.category}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
+                  {/* Gradient background area */}
+                  <div className={`h-48 ${gradients[index % gradients.length]} relative`}>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20" />
+                  </div>
+                  
+                  {/* Content area with gradient continuation */}
+                  <div className={`p-6 ${gradients[index % gradients.length]} bg-opacity-30`} style={{ background: 'linear-gradient(to bottom, rgba(200, 230, 255, 0.9), rgba(255, 220, 230, 0.7))' }}>
+                    <h3 className="text-2xl font-serif font-normal text-foreground mb-4">
+                      {model.name} {model.version}
+                    </h3>
+                    
+                    <div className="space-y-1 text-sm text-foreground/80">
+                      <p>Input: {model.inputPrice} per 1M tokens</p>
+                      <p>Output: {model.outputPrice} per 1M tokens</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-1">
-                        {model.name} {model.version}
-                      </h3>
-                      <p className="text-sm text-muted-foreground uppercase tracking-wide">
-                        MODELS
-                      </p>
+                    
+                    <div className="mt-4 space-y-1 text-sm text-foreground/70">
+                      <p>{model.contextLength} context length</p>
+                      <p>{model.maxOutput} max output tokens</p>
                     </div>
+                    
+                    <p className="mt-4 text-sm text-foreground/70">
+                      Knowledge cut-off: {model.cutoff}
+                    </p>
                   </div>
                 </div>
               ))}
