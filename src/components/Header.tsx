@@ -60,14 +60,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
             {/* Center - Main Navigation Tabs with enhanced glassmorphism */}
             <nav className="hidden md:flex items-center space-x-1">
-              <div className="glass-strong rounded-full px-1.5 py-1.5 flex items-center space-x-1 border border-border/30 shadow-lg">
+              <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border border-border/30 shadow-lg bg-background/60 backdrop-blur-md dark:bg-background/40">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                       activeTab === tab.id
-                        ? 'glass bg-foreground/90 text-background shadow-md'
+                        ? 'bg-foreground text-background shadow-md'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                     }`}
                   >
@@ -108,14 +108,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
           {/* Mobile Navigation */}
           <div className="md:hidden pb-4">
-            <div className="glass-strong rounded-full px-1.5 py-1.5 flex items-center justify-center space-x-1 border border-border/30">
+            <div className="rounded-full px-1.5 py-1.5 flex items-center justify-center space-x-1 border border-border/30 bg-background/60 backdrop-blur-md dark:bg-background/40">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     activeTab === tab.id
-                      ? 'glass bg-foreground/90 text-background shadow-md'
+                      ? 'bg-foreground text-background shadow-md'
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                   }`}
                 >
