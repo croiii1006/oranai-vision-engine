@@ -88,10 +88,10 @@ const ModelsPage: React.FC = () => {
                   <button
                     key={filter.id}
                     onClick={() => setSidebarFilter(filter.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all ${
+                    className={`w-full text-left px-4 py-3 rounded-xl text-sm ${
                       sidebarFilter === filter.id
-                        ? 'bg-muted/50 text-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'
+                        ? 'glass-tab-active'
+                        : 'glass-tab text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {filter.label}
@@ -114,7 +114,7 @@ const ModelsPage: React.FC = () => {
                   {sidebarFilters.map((filter) => (
                     <button
                       key={filter.id}
-                      className="w-full text-left px-4 py-3 rounded-xl text-sm text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all"
+                      className="w-full text-left px-4 py-3 rounded-xl text-sm glass-tab text-muted-foreground hover:text-foreground"
                     >
                       {filter.label}
                     </button>
