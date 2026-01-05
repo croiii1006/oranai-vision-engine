@@ -178,17 +178,19 @@ const ScrollSolutionPage: React.FC = () => {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-32 pr-8 lg:pr-16"
           >
-            <div className="w-full max-w-[1320px] mx-auto flex flex-col lg:flex-row items-start lg:items-baseline gap-6 lg:gap-8">
-              <h1 className="text-[60px] md:text-[80px] lg:text-[120px] xl:text-[140px] font-bold tracking-tighter leading-none shrink-0">
-                {t(currentSectionData.titleKey)}
-              </h1>
-              <div className="flex flex-col gap-2 shrink-0">
-                <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
-                  {t('solution.yourBrand')}
-                </span>
-                <p className="text-sm md:text-base lg:text-lg text-muted-foreground/70 max-w-xs lg:max-w-sm">
-                  {t(currentSectionData.descKey)}
-                </p>
+            <div className="w-full max-w-[1320px] mx-auto">
+              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 lg:gap-8">
+                <h1 className="text-[60px] md:text-[80px] lg:text-[120px] xl:text-[140px] font-bold tracking-tighter leading-none shrink-0">
+                  {t(currentSectionData.titleKey)}
+                </h1>
+                <div className="flex flex-col gap-1 pb-2 lg:pb-4">
+                  <span className="text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
+                    {t('solution.yourBrand')}
+                  </span>
+                  <p className="text-sm md:text-base lg:text-lg text-muted-foreground max-w-xs lg:max-w-sm leading-snug">
+                    {t(currentSectionData.descKey)}
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
