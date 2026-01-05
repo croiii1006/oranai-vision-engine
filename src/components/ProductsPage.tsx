@@ -1,85 +1,88 @@
-import React from 'react';
-import { BarChart3, Palette, Cog, Rocket, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, ArrowUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import AnimatedHeadline from './AnimatedHeadline';
 
 const ProductsPage: React.FC = () => {
   const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('material');
 
-  const products = [
-    {
-      icon: BarChart3,
-      title: t('products.dashboard'),
-      description: t('products.dashboardDesc'),
-    },
-    {
-      icon: Palette,
-      title: t('products.studio'),
-      description: t('products.studioDesc'),
-    },
-    {
-      icon: Cog,
-      title: t('products.operations'),
-      description: t('products.operationsDesc'),
-    },
-    {
-      icon: Rocket,
-      title: t('products.growth'),
-      description: t('products.growthDesc'),
-    },
+  const tabs = [
+    { id: 'insight', label: t('products.insight') },
+    { id: 'strategy', label: t('products.strategy') },
+    { id: 'material', label: t('products.material') },
+    { id: 'operation', label: t('products.operation') },
+  ];
+
+  const categories = [
+    { id: 'imageGen', label: t('products.imageGen') },
+    { id: 'videoGen', label: t('products.videoGen') },
+    { id: 'digitalHuman', label: t('products.digitalHuman') },
   ];
 
   return (
-    <div className="min-h-screen pt-32">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        <AnimatedHeadline text={t('products.title')} as="h2" className="heading-lg mb-4" />
-        <div className="w-16 h-px bg-foreground/20 mb-16" />
+    <div className="min-h-screen pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Product Title */}
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-16">
+          {t('products.title')}
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className="group glass rounded-3xl p-8 md:p-10 hover-lift glow-hover cursor-pointer"
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {t('products.headline')}
+          </h2>
+          <p className="text-xl md:text-2xl font-semibold text-foreground">
+            {t('products.subheadline')}
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-8 py-3 rounded-full text-lg font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-foreground text-background'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              <div className="flex items-start justify-between mb-6">
-                <div className="glass p-4 rounded-2xl group-hover:bg-foreground/5 transition-colors duration-300">
-                  <product.icon className="w-6 h-6" />
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-
-              <h3 className="text-lg font-medium mb-4">{product.title}</h3>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                {product.description}
-              </p>
-
-              <button className="flex items-center space-x-2 px-6 py-3 rounded-full border border-border/50 text-sm font-medium hover:bg-foreground hover:text-background transition-all duration-300 group/btn">
-                <span>{t('products.requestDemo')}</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-              </button>
-
-              {/* Decorative corner */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-radial from-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
-            </div>
+              {tab.label}
+            </button>
           ))}
         </div>
 
-        {/* Enterprise CTA */}
-        <div className="mt-24 text-center">
-          <div className="glass inline-block rounded-3xl p-12 md:p-16 max-w-2xl glow">
-            <h3 className="heading-md mb-4">Enterprise Solutions</h3>
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              Custom deployment, dedicated support, and tailored AI solutions for enterprise needs.
-            </p>
-            <button className="flex items-center space-x-2 mx-auto px-8 py-4 rounded-full bg-foreground text-background font-medium hover-lift glow-hover transition-all duration-300">
-              <span>{t('nav.contactUs')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+        {/* Search Bar */}
+        <div className="flex items-center gap-4 max-w-3xl mx-auto mb-12">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder={t('common.search')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-6 py-4 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+            />
           </div>
+          <button className="p-4 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
+            <ArrowUp className="w-5 h-5" />
+          </button>
         </div>
-      </section>
+
+        {/* Category Tags */}
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              className="px-6 py-3 rounded-lg bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all text-sm"
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
