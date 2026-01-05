@@ -133,7 +133,7 @@ const ScrollSolutionPage: React.FC = () => {
 
       {/* Left sidebar navigation - compact centered */}
       <div className="fixed left-0 top-0 h-screen w-20  z-30  hidden lg:flex  flex-col  justify-evenly  items-center  py-24">
-        <div className="flex flex-col gap-22">
+        <div className="flex flex-col gap-20">
           {sections.map((section, index) => (
             <button
               key={section.id}
