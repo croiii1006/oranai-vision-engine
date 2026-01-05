@@ -176,17 +176,17 @@ const ScrollSolutionPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-40 pr-8 lg:pr-16"
+            className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-32 pr-8 lg:pr-16"
           >
-            <div className="w-full max-w-[1320px] mx-auto flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
-              <h1 className="text-[80px] md:text-[120px] lg:text-[160px] font-bold tracking-tighter leading-none">
+            <div className="w-full max-w-[1320px] mx-auto flex flex-col lg:flex-row items-start lg:items-baseline gap-6 lg:gap-8">
+              <h1 className="text-[60px] md:text-[80px] lg:text-[120px] xl:text-[140px] font-bold tracking-tighter leading-none shrink-0">
                 {t(currentSectionData.titleKey)}
               </h1>
-              <div className="flex flex-col gap-2">
-                <span className="text-3xl md:text-4xl lg:text-5xl font-light text-foreground">
+              <div className="flex flex-col gap-2 shrink-0">
+                <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
                   {t('solution.yourBrand')}
                 </span>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-md">
+                <p className="text-sm md:text-base lg:text-lg text-muted-foreground/70 max-w-xs lg:max-w-sm">
                   {t(currentSectionData.descKey)}
                 </p>
               </div>
