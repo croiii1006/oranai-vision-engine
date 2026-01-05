@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
-import HeroSection from '@/components/HeroSection';
-import SolutionPage from '@/components/SolutionPage';
+import HomePage from '@/components/HomePage';
 import ModelsPage from '@/components/ModelsPage';
 import ProductsPage from '@/components/ProductsPage';
 import LibraryPage from '@/components/LibraryPage';
@@ -14,18 +13,22 @@ const Index = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'solution':
-        return <SolutionPage />;
       case 'models':
         return <ModelsPage />;
       case 'products':
         return <ProductsPage />;
       case 'library':
         return <LibraryPage />;
+      case 'home':
+      case 'hero':
+      case 'solution':
       default:
-        return <HeroSection setActiveTab={setActiveTab} />;
+        return <HomePage activeTab={activeTab} setActiveTab={setActiveTab} />;
     }
   };
+
+  // Only show footer for non-scroll pages
+  const showFooter = !['home', 'hero', 'solution'].includes(activeTab);
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +45,7 @@ const Index = () => {
         {renderContent()}
       </main>
 
-      <Footer setActiveTab={setActiveTab} />
+      {showFooter && <Footer setActiveTab={setActiveTab} />}
     </div>
   );
 };
