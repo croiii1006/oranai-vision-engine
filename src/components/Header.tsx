@@ -1,6 +1,7 @@
 import React from 'react';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, Sun, Moon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface HeaderProps {
   activeTab: string;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   const tabs = [
     { id: 'solution', label: t('nav.solution') },
@@ -77,6 +79,17 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
             {/* Right - Actions */}
             <div className="flex items-center space-x-4">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors duration-200"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </button>
               <button
                 onClick={toggleLanguage}
                 className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
