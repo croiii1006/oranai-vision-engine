@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import { ArrowUp, Globe, HeartPulse, Target, Image, Video, User } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// Import thumbnail images
+import imageGenThumb from '@/assets/products/image-gen-thumb.png';
+import videoGenThumb from '@/assets/products/video-gen-thumb.png';
+import digitalHumanThumb from '@/assets/products/digital-human-thumb.png';
+import geoMonitorThumb from '@/assets/products/geo-monitor-thumb.png';
+import brandHealthThumb from '@/assets/products/brand-health-thumb.png';
+import brandStrategyThumb from '@/assets/products/brand-strategy-thumb.png';
 
 interface SubTab {
   id: string;
   labelKey: string;
-  icon: React.ReactNode;
+  image: string;
 }
 
 interface TabConfig {
@@ -25,24 +33,24 @@ const ProductsPage: React.FC = () => {
       id: 'insight',
       labelKey: 'products.insight',
       subTabs: [
-        { id: 'geoMonitor', labelKey: 'products.geoMonitor', icon: <Globe className="w-4 h-4" /> },
-        { id: 'brandHealth', labelKey: 'products.brandHealth', icon: <HeartPulse className="w-4 h-4" /> },
+        { id: 'geoMonitor', labelKey: 'products.geoMonitor', image: geoMonitorThumb },
+        { id: 'brandHealth', labelKey: 'products.brandHealth', image: brandHealthThumb },
       ],
     },
     {
       id: 'strategy',
       labelKey: 'products.strategy',
       subTabs: [
-        { id: 'brandStrategy', labelKey: 'products.brandStrategy', icon: <Target className="w-4 h-4" /> },
+        { id: 'brandStrategy', labelKey: 'products.brandStrategy', image: brandStrategyThumb },
       ],
     },
     {
       id: 'material',
       labelKey: 'products.material',
       subTabs: [
-        { id: 'imageGen', labelKey: 'products.imageGen', icon: <Image className="w-4 h-4" /> },
-        { id: 'videoGen', labelKey: 'products.videoGen', icon: <Video className="w-4 h-4" /> },
-        { id: 'digitalHuman', labelKey: 'products.digitalHuman', icon: <User className="w-4 h-4" /> },
+        { id: 'imageGen', labelKey: 'products.imageGen', image: imageGenThumb },
+        { id: 'videoGen', labelKey: 'products.videoGen', image: videoGenThumb },
+        { id: 'digitalHuman', labelKey: 'products.digitalHuman', image: digitalHumanThumb },
       ],
     },
     {
@@ -121,21 +129,32 @@ const ProductsPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Sub Tab Navigation */}
+        {/* Sub Tab Navigation with Images */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && (
-          <div className="flex items-center justify-center gap-3 mb-12">
+          <div className="flex items-center justify-center gap-6 mb-12">
             {currentTabConfig.subTabs.map((subTab) => (
               <button
                 key={subTab.id}
                 onClick={() => setActiveSubTab(subTab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium ${
+                className={`group relative flex items-center gap-3 pl-6 pr-4 py-3 rounded-2xl text-base font-medium transition-all duration-300 overflow-hidden min-w-[180px] ${
                   activeSubTab === subTab.id
-                    ? 'glass-tab-active'
-                    : 'glass-tab text-muted-foreground hover:text-foreground'
+                    ? 'glass-tab-active shadow-lg'
+                    : 'glass-tab text-muted-foreground hover:text-foreground hover:shadow-md'
                 }`}
               >
-                {subTab.icon}
-                {t(subTab.labelKey)}
+                {/* Text content */}
+                <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
+                
+                {/* Tilted thumbnail image */}
+                <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
+                  <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-xl overflow-hidden shadow-lg">
+                    <img 
+                      src={subTab.image} 
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
               </button>
             ))}
           </div>
