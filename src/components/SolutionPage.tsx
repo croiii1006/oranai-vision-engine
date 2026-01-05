@@ -60,12 +60,12 @@ const SolutionPage: React.FC = () => {
   const currentSection = sections.find(s => s.id === activeSection) || sections[0];
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex gap-8">
           {/* Left Sidebar Navigation */}
           <aside className="hidden lg:block w-20 flex-shrink-0">
-            <div className="sticky top-32 flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4">
               {sections.map((section, index) => (
                 <button
                   key={section.id}
