@@ -183,10 +183,10 @@ const LibraryPage: React.FC = () => {
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+              className={`px-5 py-2.5 rounded-full text-sm font-medium ${
                 activeFilter === filter.id
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  ? 'glass-tab-active'
+                  : 'glass-tab text-muted-foreground hover:text-foreground'
               }`}
             >
               {filter.label}

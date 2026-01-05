@@ -128,10 +128,10 @@ const ProductsPage: React.FC = () => {
               <button
                 key={subTab.id}
                 onClick={() => setActiveSubTab(subTab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all border ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium ${
                   activeSubTab === subTab.id
-                    ? 'border-foreground/50 bg-foreground/10 text-foreground'
-                    : 'border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                    ? 'glass-tab-active'
+                    : 'glass-tab text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {subTab.icon}
