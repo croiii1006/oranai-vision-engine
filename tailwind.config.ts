@@ -55,7 +55,8 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["SF Mono", "Fira Code", "monospace"],
+        serif: ["EB Garamond", "Georgia", "serif"],
+        mono: ["JetBrains Mono", "SF Mono", "Fira Code", "monospace"],
       },
       keyframes: {
         "accordion-down": {
