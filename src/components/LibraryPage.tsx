@@ -229,30 +229,30 @@ const LibraryPage: React.FC = () => {
               )}
               
               {/* Content overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-3">
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                {/* Stats - prominent display at top */}
+                <div className="flex items-center gap-4 text-white mb-3">
+                  <span className="flex items-center gap-1.5">
+                    <Heart className="w-5 h-5" />
+                    <span className="text-base font-bold">{formatNumber(item.likes)}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="text-base font-bold">{item.comments}</span>
+                  </span>
+                </div>
+                
                 {/* Title */}
-                <h3 className="text-white text-sm font-semibold mb-1 line-clamp-2 drop-shadow-lg">
+                <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
                   {item.title}
                 </h3>
                 
-                {/* Publisher */}
-                <p className="text-white/70 text-xs mb-2">
-                  @{item.publisher.replace(/\s+/g, '').toLowerCase()}
-                </p>
-                
-                {/* Stats - prominent display */}
-                <div className="flex items-center gap-3 text-white">
-                  <span className="flex items-center gap-1">
-                    <Heart className="w-3.5 h-3.5" />
-                    <span className="text-xs font-semibold">{formatNumber(item.likes)}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span className="text-xs font-semibold">{item.comments}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span className="text-xs font-semibold">{formatNumber(item.views)}</span>
+                {/* Publisher & Views */}
+                <div className="flex items-center justify-between text-white/80">
+                  <span className="text-sm">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</span>
+                  <span className="flex items-center gap-1 text-sm">
+                    <Eye className="w-4 h-4" />
+                    {formatNumber(item.views)}
                   </span>
                 </div>
               </div>
