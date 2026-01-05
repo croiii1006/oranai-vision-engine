@@ -121,10 +121,10 @@ const ScrollSolutionPage: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen relative overflow-hidden"
+      className="min-h-[calc(100vh-64px)] relative overflow-hidden"
     >
-      {/* Progress bar */}
-      <div className="fixed top-16 left-0 right-0 h-1 bg-muted/30 z-40">
+      {/* Progress bar - full width at top */}
+      <div className="fixed top-16 left-0 right-0 h-0.5 bg-muted/20 z-40">
         <motion.div 
           className="h-full bg-foreground"
           initial={{ width: 0 }}
@@ -133,8 +133,8 @@ const ScrollSolutionPage: React.FC = () => {
         />
       </div>
 
-      {/* Left sidebar navigation */}
-      <div className="fixed left-8 top-1/2 -translate-y-1/2 z-30 hidden lg:flex flex-col items-center gap-6">
+      {/* Left sidebar navigation - full height */}
+      <div className="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 z-30 hidden lg:flex flex-col justify-between items-center py-12">
         {sections.map((section, index) => (
           <button
             key={section.id}
@@ -143,20 +143,20 @@ const ScrollSolutionPage: React.FC = () => {
               setCurrentTab(0);
               setShowDetail(false);
             }}
-            className="group flex items-center gap-3"
+            className="group flex flex-col items-center gap-3"
           >
             <div 
               className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
                 currentSection === index 
-                  ? 'bg-foreground border-foreground scale-125' 
-                  : 'border-muted-foreground/40 hover:border-foreground'
+                  ? 'bg-foreground border-foreground' 
+                  : 'border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60'
               }`}
             />
             <span 
-              className={`text-xs font-medium uppercase tracking-wider transition-all duration-300 ${
+              className={`text-[10px] font-medium uppercase tracking-widest transition-all duration-300 ${
                 currentSection === index 
-                  ? 'text-foreground opacity-100' 
-                  : 'text-muted-foreground/50 group-hover:text-muted-foreground'
+                  ? 'text-foreground' 
+                  : 'text-muted-foreground/40 group-hover:text-muted-foreground/60'
               }`}
               style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
@@ -166,7 +166,7 @@ const ScrollSolutionPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Main content */}
+      {/* Main content area - centered with left padding */}
       <AnimatePresence mode="wait">
         {!showDetail ? (
           // Title screen - KNOW/BUILD/MANAGE/SCALE big title
@@ -176,9 +176,9 @@ const ScrollSolutionPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="min-h-screen flex items-center justify-center px-8 lg:px-24"
+            className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-40 pr-8 lg:pr-16"
           >
-            <div className="max-w-6xl w-full flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
+            <div className="w-full max-w-[1320px] mx-auto flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
               <h1 className="text-[80px] md:text-[120px] lg:text-[160px] font-bold tracking-tighter leading-none">
                 {t(currentSectionData.titleKey)}
               </h1>
@@ -193,45 +193,45 @@ const ScrollSolutionPage: React.FC = () => {
             </div>
           </motion.div>
         ) : (
-          // Detail screen with tabs
+          // Detail screen with tabs - centered layout matching reference
           <motion.div
             key={`detail-${currentSection}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="min-h-screen pt-24 pb-12 px-8 lg:pl-32 lg:pr-8"
+            className="min-h-[calc(100vh-64px)] flex items-center pl-24 lg:pl-40 pr-8 lg:pr-16"
           >
-            <div className="max-w-7xl mx-auto h-full flex flex-col lg:flex-row gap-8 lg:gap-16">
+            <div className="w-full max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center">
               {/* Left content */}
-              <div className="flex-1 flex flex-col justify-center">
-                {/* Section title */}
-                <div className="flex items-baseline gap-4 mb-12">
-                  <h2 className="text-[60px] md:text-[80px] font-bold tracking-tighter leading-none">
+              <div className="flex flex-col">
+                {/* Section title - KNOW + your brand */}
+                <div className="flex items-baseline gap-6 mb-16">
+                  <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
                     {t(currentSectionData.titleKey)}
                   </h2>
-                  <span className="text-2xl md:text-3xl font-light text-muted-foreground">
+                  <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground">
                     {t('solution.yourBrand')}
                   </span>
                 </div>
 
-                {/* Tabs */}
-                <div className="space-y-4 mb-8">
+                {/* Tabs with separator lines */}
+                <div className="space-y-0 mb-10">
                   {currentSectionData.tabs.map((tab, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentTab(index)}
-                      className={`flex items-center gap-4 w-full text-left transition-all duration-300 ${
+                      className={`flex items-center justify-between w-full text-left py-3 border-b border-border/30 transition-all duration-300 ${
                         currentTab === index ? '' : 'opacity-40 hover:opacity-60'
                       }`}
                     >
-                      <span className={`text-xl md:text-2xl font-medium ${
+                      <span className={`text-lg md:text-xl lg:text-2xl font-medium ${
                         currentTab === index ? 'text-foreground' : 'text-muted-foreground'
                       }`}>
                         {t(tab.labelKey)}
                       </span>
-                      <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        currentTab === index ? 'bg-foreground' : 'bg-muted-foreground/30'
+                      <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                        currentTab === index ? 'bg-foreground' : 'bg-muted-foreground/20'
                       }`} />
                     </button>
                   ))}
@@ -245,29 +245,29 @@ const ScrollSolutionPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg"
+                    className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-md"
                   >
                     {t(currentSectionData.tabs[currentTab].contentKey)}
                   </motion.p>
                 </AnimatePresence>
               </div>
 
-              {/* Right - Image area */}
-              <div className="flex-1 flex items-center justify-center">
-                <div className="relative w-full aspect-[4/3] bg-muted/20 rounded-2xl overflow-hidden">
+              {/* Right - Image area with indicators */}
+              <div className="relative flex items-center justify-center">
+                <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
                   {/* Image placeholder */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-muted/10" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
                   
-                  {/* Image indicators (right side) */}
+                  {/* Image indicators (right side inside card) */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
                     {[0, 1, 2].map((i) => (
                       <button
                         key={i}
                         onClick={() => setImageIndex(i)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           imageIndex === i 
-                            ? 'bg-foreground scale-110' 
-                            : 'bg-foreground/30 hover:bg-foreground/50'
+                            ? 'bg-foreground' 
+                            : 'bg-foreground/20 hover:bg-foreground/40'
                         }`}
                       />
                     ))}
