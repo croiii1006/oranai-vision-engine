@@ -12,7 +12,11 @@ interface SectionData {
   }[];
 }
 
-const ScrollSolutionPage: React.FC = () => {
+interface ScrollSolutionPageProps {
+  onScrollToTop?: () => void;
+}
+
+const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }) => {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentSection, setCurrentSection] = useState(0);
@@ -101,6 +105,9 @@ const ScrollSolutionPage: React.FC = () => {
           setCurrentSection((prev) => prev - 1);
           setCurrentTab(sections[currentSection - 1].tabs.length - 1);
           setShowDetail(true);
+        } else if (!showDetail && currentSection === 0 && onScrollToTop) {
+          // At the very top, scroll back to hero
+          onScrollToTop();
         }
       }
     };

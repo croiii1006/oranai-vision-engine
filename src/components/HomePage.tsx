@@ -16,6 +16,16 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
 
+  const handleScrollToHero = () => {
+    if (scrollLock.current) return;
+    scrollLock.current = true;
+    setCurrentView('hero');
+    setActiveTab('home');
+    setTimeout(() => {
+      scrollLock.current = false;
+    }, 800);
+  };
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (scrollLock.current) return;
@@ -114,10 +124,10 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
             key="solution"
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, y: 100 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <ScrollSolutionPage />
+            <ScrollSolutionPage onScrollToTop={handleScrollToHero} />
           </motion.div>
         )}
       </AnimatePresence>
