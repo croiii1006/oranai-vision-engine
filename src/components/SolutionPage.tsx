@@ -2,6 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+// Import solution images
+import solutionKnow from '@/assets/solutions/solution-know.png';
+import solutionBuild from '@/assets/solutions/solution-build.png';
+import solutionManage from '@/assets/solutions/solution-manage.png';
+import solutionScale from '@/assets/solutions/solution-scale.png';
+
+const solutionImages: Record<string, string> = {
+  know: solutionKnow,
+  build: solutionBuild,
+  manage: solutionManage,
+  scale: solutionScale,
+};
+
 interface SolutionSection {
   id: string;
   titleKey: string;
@@ -151,13 +164,17 @@ const SolutionPage: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Right - Visual Placeholder */}
-                <div className="aspect-[4/3] bg-muted/20 rounded-2xl relative overflow-hidden">
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                    {[1, 2, 3].map((_, i) => (
-                      <div key={i} className="w-2 h-2 rounded-full bg-muted-foreground/30" />
-                    ))}
-                  </div>
+                {/* Right - Visual */}
+                <div className="aspect-[4/3] rounded-2xl relative overflow-hidden">
+                  <motion.img
+                    key={activeSection}
+                    src={solutionImages[activeSection]}
+                    alt={t(currentSection.titleKey)}
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  />
                 </div>
               </div>
             </motion.div>
