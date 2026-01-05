@@ -105,6 +105,22 @@ const ProductsPage: React.FC = () => {
           ))}
         </div>
 
+        {/* Search Bar */}
+        <div className="flex items-center gap-4 max-w-3xl mx-auto mb-8">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder={t('common.search')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-6 py-4 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+            />
+          </div>
+          <button className="p-4 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
+            <ArrowUp className="w-5 h-5" />
+          </button>
+        </div>
+
         {/* Sub Tab Navigation */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && (
           <div className="flex items-center justify-center gap-3 mb-12">
@@ -124,22 +140,6 @@ const ProductsPage: React.FC = () => {
             ))}
           </div>
         )}
-
-        {/* Search Bar */}
-        <div className="flex items-center gap-4 max-w-3xl mx-auto mb-12">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              placeholder={t('common.search')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-6 py-4 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
-            />
-          </div>
-          <button className="p-4 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
-            <ArrowUp className="w-5 h-5" />
-          </button>
-        </div>
       </div>
     </div>
   );
