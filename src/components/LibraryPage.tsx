@@ -56,10 +56,21 @@ const LibraryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter Bars */}
-        <div className="space-y-3 mb-8">
-          <div className="h-10 bg-muted/20 rounded-lg" />
-          <div className="h-10 bg-muted/20 rounded-lg" />
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-3 mb-8">
+          {filters.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id)}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                activeFilter === filter.id
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
 
         {/* Library Grid */}
