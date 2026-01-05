@@ -73,7 +73,7 @@ const SolutionPage: React.FC = () => {
   const currentSection = sections.find(s => s.id === activeSection) || sections[0];
 
   return (
-    <div className="min-h-screen flex flex-col pt-32 pb-20">
+    <div className="min-h-screen flex flex-col pt-40 pb-20">
       <div className="w-full px-6 sm:px-10 lg:px-16">
         <div className="flex gap-8">
           {/* Left Sidebar Navigation */}
