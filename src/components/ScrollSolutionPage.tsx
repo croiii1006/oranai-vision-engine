@@ -133,37 +133,39 @@ const ScrollSolutionPage: React.FC = () => {
         />
       </div>
 
-      {/* Left sidebar navigation - full height */}
-      <div className="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 z-30 hidden lg:flex flex-col justify-between items-center py-12">
-        {sections.map((section, index) => (
-          <button
-            key={section.id}
-            onClick={() => {
-              setCurrentSection(index);
-              setCurrentTab(0);
-              setShowDetail(false);
-            }}
-            className="group flex flex-col items-center gap-3"
-          >
-            <div 
-              className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${
-                currentSection === index 
-                  ? 'bg-foreground border-foreground' 
-                  : 'border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60'
-              }`}
-            />
-            <span 
-              className={`text-[10px] font-medium uppercase tracking-widest transition-all duration-300 ${
-                currentSection === index 
-                  ? 'text-foreground' 
-                  : 'text-muted-foreground/40 group-hover:text-muted-foreground/60'
-              }`}
-              style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+      {/* Left sidebar navigation - compact centered */}
+      <div className="fixed left-0 top-1/2 -translate-y-1/2 w-16 z-30 hidden lg:flex flex-col items-center">
+        <div className="flex flex-col gap-8">
+          {sections.map((section, index) => (
+            <button
+              key={section.id}
+              onClick={() => {
+                setCurrentSection(index);
+                setCurrentTab(0);
+                setShowDetail(false);
+              }}
+              className="group flex flex-col items-center gap-2"
             >
-              {t(section.titleKey)}
-            </span>
-          </button>
-        ))}
+              <div 
+                className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${
+                  currentSection === index 
+                    ? 'bg-foreground border-foreground' 
+                    : 'border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60'
+                }`}
+              />
+              <span 
+                className={`text-[9px] font-medium uppercase tracking-widest transition-all duration-300 ${
+                  currentSection === index 
+                    ? 'text-foreground' 
+                    : 'text-muted-foreground/40 group-hover:text-muted-foreground/60'
+                }`}
+                style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+              >
+                {t(section.titleKey)}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Main content area - centered with left padding */}
