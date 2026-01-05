@@ -155,30 +155,25 @@ const ModelsPage: React.FC = () => {
               {filteredModels.map((model, index) => (
                 <div
                   key={model.id}
-                  className="group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                  className={`group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative min-h-[420px] ${gradients[index % gradients.length]}`}
                 >
-                  {/* Gradient background area */}
-                  <div className={`h-48 ${gradients[index % gradients.length]} relative`}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20" />
-                  </div>
-                  
-                  {/* Content area with gradient continuation */}
-                  <div className={`p-6 ${gradients[index % gradients.length]} bg-opacity-30`} style={{ background: 'linear-gradient(to bottom, rgba(200, 230, 255, 0.9), rgba(255, 220, 230, 0.7))' }}>
-                    <h3 className="text-2xl font-serif font-normal text-foreground mb-4">
+                  {/* Content floating on gradient */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-gray-800">
+                    <h3 className="text-3xl font-sans font-light tracking-tight mb-4">
                       {model.name} {model.version}
                     </h3>
                     
-                    <div className="space-y-1 text-sm text-foreground/80">
+                    <div className="space-y-0.5 text-sm font-light">
                       <p>Input: {model.inputPrice} per 1M tokens</p>
                       <p>Output: {model.outputPrice} per 1M tokens</p>
                     </div>
                     
-                    <div className="mt-4 space-y-1 text-sm text-foreground/70">
+                    <div className="mt-4 space-y-0.5 text-sm font-light">
                       <p>{model.contextLength} context length</p>
                       <p>{model.maxOutput} max output tokens</p>
                     </div>
                     
-                    <p className="mt-4 text-sm text-foreground/70">
+                    <p className="mt-4 text-sm font-light">
                       Knowledge cut-off: {model.cutoff}
                     </p>
                   </div>
