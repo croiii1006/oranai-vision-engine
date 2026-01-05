@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // Import model category images
 import modelNlp from '@/assets/models/model-nlp.png';
@@ -17,11 +23,24 @@ const categoryImages: Record<string, string> = {
   audio: modelAudio,
 };
 
+interface Model {
+  id: number;
+  name: string;
+  version: string;
+  category: string;
+  inputPrice: string;
+  outputPrice: string;
+  contextLength: string;
+  maxOutput: string;
+  cutoff: string;
+}
+
 const ModelsPage: React.FC = () => {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [sidebarFilter, setSidebarFilter] = useState('all');
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
   const filterCategories = [
     { id: 'all', label: t('common.all') },
@@ -155,10 +174,19 @@ const ModelsPage: React.FC = () => {
               {filteredModels.map((model, index) => (
                 <div
                   key={model.id}
+                  onClick={() => setSelectedModel(model)}
                   className={`group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative min-h-[420px] ${gradients[index % gradients.length]}`}
                 >
+                  {/* Hover overlay with Learn more */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="flex items-center gap-2 text-white font-light text-lg">
+                      <span>Learn more</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </div>
+                  </div>
+
                   {/* Content floating on gradient */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-gray-800">
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-gray-800 group-hover:opacity-0 transition-opacity duration-300">
                     <h3 className="text-3xl font-sans font-light tracking-tight mb-4">
                       {model.name} {model.version}
                     </h3>
@@ -183,6 +211,71 @@ const ModelsPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Model Detail Dialog */}
+      <Dialog open={!!selectedModel} onOpenChange={() => setSelectedModel(null)}>
+        <DialogContent className="max-w-2xl">
+          {selectedModel && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-3xl font-light">
+                  {selectedModel.name} {selectedModel.version}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="mt-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Pricing</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Input</span>
+                        <span className="font-medium">{selectedModel.inputPrice} / 1M tokens</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Output</span>
+                        <span className="font-medium">{selectedModel.outputPrice} / 1M tokens</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Specifications</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Context Length</span>
+                        <span className="font-medium">{selectedModel.contextLength}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Max Output</span>
+                        <span className="font-medium">{selectedModel.maxOutput}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t border-border">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Category</span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-sm capitalize">{selectedModel.category}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-3">
+                    <span className="text-muted-foreground">Knowledge Cut-off</span>
+                    <span className="font-medium">{selectedModel.cutoff}</span>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <button className="w-full py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                    <span>Try this model</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
