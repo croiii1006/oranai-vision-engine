@@ -111,6 +111,7 @@ const translations: Record<Language, Record<string, string>> = {
     'library.audio': 'Audio',
     'library.template': 'Template',
     'library.download': 'Download',
+    'library.replicate': 'Replicate Viral',
     
     // Footer
     'footer.copyright': '© 2024 OranAI. All rights reserved.',
@@ -217,6 +218,7 @@ const translations: Record<Language, Record<string, string>> = {
     'library.audio': '音频',
     'library.template': '模板',
     'library.download': '下载',
+    'library.replicate': '复刻爆款',
     
     // Footer
     'footer.copyright': '© 2024 OranAI. 保留所有权利。',
