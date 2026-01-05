@@ -202,75 +202,78 @@ const ScrollSolutionPage: React.FC = () => {
             transition={{ duration: 0.4 }}
             className="min-h-[calc(100vh-64px)] flex items-center pl-24 lg:pl-40 pr-8 lg:pr-16"
           >
-            <div className="w-full max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center">
-              {/* Left content */}
-              <div className="flex flex-col">
-                {/* Section title - KNOW + your brand */}
-                <div className="flex items-baseline gap-6 mb-16">
-                  <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
-                    {t(currentSectionData.titleKey)}
-                  </h2>
-                  <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground">
-                    {t('solution.yourBrand')}
-                  </span>
-                </div>
-
-                {/* Tabs with separator lines */}
-                <div className="space-y-0 mb-10">
-                  {currentSectionData.tabs.map((tab, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentTab(index)}
-                      className={`flex items-center justify-between w-full text-left py-3 border-b border-border/30 transition-all duration-300 ${
-                        currentTab === index ? '' : 'opacity-40 hover:opacity-60'
-                      }`}
-                    >
-                      <span className={`text-lg md:text-xl lg:text-2xl font-medium ${
-                        currentTab === index ? 'text-foreground' : 'text-muted-foreground'
-                      }`}>
-                        {t(tab.labelKey)}
-                      </span>
-                      <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                        currentTab === index ? 'bg-foreground' : 'bg-muted-foreground/20'
-                      }`} />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Description */}
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={currentTab}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-md"
-                  >
-                    {t(currentSectionData.tabs[currentTab].contentKey)}
-                  </motion.p>
-                </AnimatePresence>
+            <div className="w-full max-w-[1320px] mx-auto">
+              {/* Section title - MANAGE + your brand on the same line */}
+              <div className="flex items-baseline gap-4 mb-12">
+                <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
+                  {t(currentSectionData.titleKey)}
+                </h2>
+                <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
+                  {t('solution.yourBrand')}
+                </span>
               </div>
 
-              {/* Right - Image area with indicators */}
-              <div className="relative flex items-center justify-center">
-                <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
-                  {/* Image placeholder */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
-                  
-                  {/* Image indicators (right side inside card) */}
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-                    {[0, 1, 2].map((i) => (
+              {/* Content grid - tabs on left, image on right */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-start">
+                {/* Left content */}
+                <div className="flex flex-col">
+                  {/* Tabs with separator lines */}
+                  <div className="space-y-0 mb-10">
+                    {currentSectionData.tabs.map((tab, index) => (
                       <button
-                        key={i}
-                        onClick={() => setImageIndex(i)}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          imageIndex === i 
-                            ? 'bg-foreground' 
-                            : 'bg-foreground/20 hover:bg-foreground/40'
+                        key={index}
+                        onClick={() => setCurrentTab(index)}
+                        className={`flex items-center justify-between w-full text-left py-3 border-b border-border/30 transition-all duration-300 ${
+                          currentTab === index ? '' : 'opacity-40 hover:opacity-60'
                         }`}
-                      />
+                      >
+                        <span className={`text-lg md:text-xl lg:text-2xl font-medium ${
+                          currentTab === index ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {t(tab.labelKey)}
+                        </span>
+                        <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                          currentTab === index ? 'bg-foreground' : 'bg-muted-foreground/20'
+                        }`} />
+                      </button>
                     ))}
+                  </div>
+
+                  {/* Description */}
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={currentTab}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-md"
+                    >
+                      {t(currentSectionData.tabs[currentTab].contentKey)}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
+
+                {/* Right - Image area with indicators, aligned with text content */}
+                <div className="relative flex items-start justify-center">
+                  <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
+                    {/* Image placeholder */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
+                    
+                    {/* Image indicators (right side inside card) */}
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+                      {[0, 1, 2].map((i) => (
+                        <button
+                          key={i}
+                          onClick={() => setImageIndex(i)}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            imageIndex === i 
+                              ? 'bg-foreground' 
+                              : 'bg-foreground/20 hover:bg-foreground/40'
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
