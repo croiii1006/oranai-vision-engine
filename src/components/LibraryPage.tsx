@@ -30,13 +30,13 @@ const mockLibraryItems: LibraryItem[] = [
     publishDate: '3 days ago',
     publishDateFull: 'Jan 12, 2025',
     description: 'This video demonstrates how ORANAI analyzes real-time social media signals to identify emerging market trends, competitive movements, and consumer sentiment shifts in the beauty industry.',
-    duration: '02:36',
+    duration: '00:36',
     views: 12482,
     likes: 328,
     comments: 42,
     shares: 19,
     tags: ['MarketInsight', 'BeautyTrends', 'AIAnalytics'],
-    thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=700&fit=crop',
   },
   {
     id: 2,
@@ -47,30 +47,30 @@ const mockLibraryItems: LibraryItem[] = [
     publishDate: '1 week ago',
     publishDateFull: 'Jan 8, 2025',
     description: 'Explore how our AI models process consumer feedback data to generate actionable insights for brand positioning and product development strategies.',
-    duration: '05:12',
+    duration: '00:58',
     views: 8934,
     likes: 256,
     comments: 31,
     shares: 14,
     tags: ['ConsumerBehavior', 'AIInsights', 'DataAnalysis'],
-    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=700&fit=crop',
   },
   {
     id: 3,
-    title: 'Real-time Dashboard Demo: Market Signals',
+    title: 'Real-time Dashboard Demo',
     type: 'video',
-    publisher: 'ORANAI Product Team',
+    publisher: 'ORANAI Product',
     publisherRole: 'Product Demo',
     publishDate: '2 weeks ago',
     publishDateFull: 'Jan 2, 2025',
     description: 'A walkthrough of our real-time market signal dashboard, showcasing trend detection, competitor monitoring, and sentiment analysis features.',
-    duration: '03:48',
+    duration: '01:24',
     views: 6721,
     likes: 189,
     comments: 28,
     shares: 11,
     tags: ['ProductDemo', 'Dashboard', 'MarketSignals'],
-    thumbnail: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=700&fit=crop',
   },
   {
     id: 4,
@@ -81,13 +81,13 @@ const mockLibraryItems: LibraryItem[] = [
     publishDate: '3 weeks ago',
     publishDateFull: 'Dec 26, 2024',
     description: 'Understanding the key metrics that define brand health: reputation score, sentiment trends, share of voice, and crisis early warning indicators.',
-    duration: '04:15',
+    duration: '00:45',
     views: 5432,
     likes: 167,
     comments: 23,
     shares: 8,
     tags: ['BrandHealth', 'Metrics', 'Analytics'],
-    thumbnail: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=700&fit=crop',
   },
   {
     id: 5,
@@ -98,30 +98,30 @@ const mockLibraryItems: LibraryItem[] = [
     publishDate: '1 month ago',
     publishDateFull: 'Dec 15, 2024',
     description: 'Learn how to leverage AI-powered competitive intelligence to stay ahead of market movements and identify strategic opportunities.',
-    duration: '06:22',
+    duration: '01:02',
     views: 4218,
     likes: 134,
     comments: 19,
     shares: 7,
     tags: ['CompetitiveIntel', 'Strategy', 'MarketAnalysis'],
-    thumbnail: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=700&fit=crop',
   },
   {
     id: 6,
-    title: 'Content Generation Workflow Tutorial',
+    title: 'Content Generation Tutorial',
     type: 'video',
-    publisher: 'ORANAI Product Team',
+    publisher: 'ORANAI Product',
     publisherRole: 'Creative Tools',
     publishDate: '1 month ago',
     publishDateFull: 'Dec 10, 2024',
     description: 'Step-by-step guide to using ORANAI content generation tools for creating on-brand marketing materials across multiple formats.',
-    duration: '07:45',
+    duration: '01:15',
     views: 3156,
     likes: 98,
     comments: 15,
     shares: 5,
     tags: ['ContentGen', 'Tutorial', 'CreativeAI'],
-    thumbnail: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=700&fit=crop',
   },
 ];
 
@@ -194,58 +194,65 @@ const LibraryPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Library Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Library Grid - TikTok style vertical cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredItems.map((item) => (
             <div
               key={item.id}
               onClick={() => setSelectedItem(item)}
-              className="group relative bg-muted/20 rounded-2xl overflow-hidden cursor-pointer hover:bg-muted/30 transition-all border border-border/10"
+              className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
             >
               {/* Thumbnail */}
-              <div className="relative aspect-video overflow-hidden">
-                <img 
-                  src={item.thumbnail} 
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {item.type === 'video' && (
-                  <>
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-14 h-14 rounded-full bg-background/90 flex items-center justify-center">
-                        <Play className="w-6 h-6 text-foreground ml-1" />
-                      </div>
-                    </div>
-                    {item.duration && (
-                      <span className="absolute bottom-2 right-2 px-2 py-1 bg-background/80 text-foreground text-xs font-medium rounded">
-                        {item.duration}
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
+              <img 
+                src={item.thumbnail} 
+                alt={item.title}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
               
-              {/* Card Content */}
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-foreground mb-2 line-clamp-2">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              
+              {/* Play button */}
+              {item.type === 'video' && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Play className="w-5 h-5 text-white ml-0.5" />
+                  </div>
+                </div>
+              )}
+
+              {/* Duration badge */}
+              {item.duration && (
+                <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded">
+                  {item.duration}
+                </span>
+              )}
+              
+              {/* Content overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                {/* Title */}
+                <h3 className="text-white text-sm font-semibold mb-1 line-clamp-2 drop-shadow-lg">
                   {item.title}
                 </h3>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                  <span>{item.publisher}</span>
-                  <span>{item.publishDate}</span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground/70">
+                
+                {/* Publisher */}
+                <p className="text-white/70 text-xs mb-2">
+                  @{item.publisher.replace(/\s+/g, '').toLowerCase()}
+                </p>
+                
+                {/* Stats - prominent display */}
+                <div className="flex items-center gap-3 text-white">
                   <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" />
-                    {formatNumber(item.views)}
+                    <Heart className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold">{formatNumber(item.likes)}</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <Heart className="w-3 h-3" />
-                    {formatNumber(item.likes)}
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold">{item.comments}</span>
                   </span>
                   <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3 h-3" />
-                    {item.comments}
+                    <Eye className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold">{formatNumber(item.views)}</span>
                   </span>
                 </div>
               </div>
@@ -273,21 +280,21 @@ const LibraryPage: React.FC = () => {
             </button>
 
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Media Preview */}
-              <div className="flex-1 relative">
-                <div className="relative aspect-video bg-muted/30 rounded-2xl overflow-hidden">
+              {/* Media Preview - Phone style */}
+              <div className="lg:w-[280px] flex-shrink-0">
+                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30">
                   <img 
                     src={selectedItem.thumbnail} 
                     alt={selectedItem.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-background/90 flex items-center justify-center cursor-pointer hover:bg-background transition-colors">
-                      <Play className="w-7 h-7 text-foreground ml-1" />
+                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
+                      <Play className="w-7 h-7 text-white ml-1" />
                     </div>
                   </div>
                   {selectedItem.duration && (
-                    <span className="absolute bottom-3 right-3 px-2.5 py-1 bg-background/80 text-foreground text-sm font-medium rounded">
+                    <span className="absolute bottom-4 right-4 px-2.5 py-1 bg-black/60 text-white text-sm font-medium rounded">
                       {selectedItem.duration}
                     </span>
                   )}
