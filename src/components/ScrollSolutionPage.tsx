@@ -211,7 +211,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
             transition={{ duration: 0.4 }}
             className="min-h-[calc(100vh-64px)] flex items-center pl-24 lg:pl-40 pr-8 lg:pr-16"
           >
-            <div className="w-full max-w-[1320px] mx-auto">
+            <div className="w-full max-w-[1320px] mx-auto pt-24">
               {/* Section title - MANAGE + your brand on the same line */}
               <div className="flex items-baseline gap-4 mb-12">
                 <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
