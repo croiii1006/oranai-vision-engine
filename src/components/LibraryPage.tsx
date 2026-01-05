@@ -303,58 +303,59 @@ const LibraryPage: React.FC = () => {
               
               {/* Details */}
               <div className="flex-1 flex flex-col">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">{selectedItem.title}</h2>
+                {/* Primary: Title */}
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-4">{selectedItem.title}</h2>
                 
-                {/* Publisher Info */}
-                <div className="space-y-1 mb-4">
-                  <p className="text-sm text-foreground">
+                {/* Secondary: Publisher Info */}
+                <div className="space-y-1.5 mb-5">
+                  <p className="text-base">
                     <span className="text-muted-foreground">Publisher: </span>
-                    {selectedItem.publisher}
+                    <span className="text-foreground font-medium">{selectedItem.publisher}</span>
                   </p>
-                  <p className="text-sm text-foreground">
+                  <p className="text-base">
                     <span className="text-muted-foreground">Role: </span>
-                    {selectedItem.publisherRole}
+                    <span className="text-foreground font-medium">{selectedItem.publisherRole}</span>
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Published on {selectedItem.publishDateFull}
                   </p>
                 </div>
 
-                {/* Description */}
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                {/* Tertiary: Description */}
+                <p className="text-base text-muted-foreground leading-relaxed mb-8">
                   {selectedItem.description}
                 </p>
 
-                {/* Stats */}
-                <div className="flex items-center gap-6 mb-6 py-4 border-y border-border/20">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground font-medium">{selectedItem.views.toLocaleString()}</span>
-                    <span className="text-muted-foreground">Views</span>
+                {/* Stats - Large numbers with labels */}
+                <div className="flex items-center gap-8 mb-8 py-5 border-y border-border/30">
+                  <div className="flex items-center gap-2.5">
+                    <Eye className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xl font-bold text-foreground">{selectedItem.views.toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground">Views</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Heart className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground font-medium">{selectedItem.likes}</span>
-                    <span className="text-muted-foreground">Likes</span>
+                  <div className="flex items-center gap-2.5">
+                    <Heart className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xl font-bold text-foreground">{selectedItem.likes}</span>
+                    <span className="text-sm text-muted-foreground">Likes</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground font-medium">{selectedItem.comments}</span>
-                    <span className="text-muted-foreground">Comments</span>
+                  <div className="flex items-center gap-2.5">
+                    <MessageCircle className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xl font-bold text-foreground">{selectedItem.comments}</span>
+                    <span className="text-sm text-muted-foreground">Comments</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Share2 className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground font-medium">{selectedItem.shares}</span>
-                    <span className="text-muted-foreground">Shares</span>
+                  <div className="flex items-center gap-2.5">
+                    <Share2 className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xl font-bold text-foreground">{selectedItem.shares}</span>
+                    <span className="text-sm text-muted-foreground">Shares</span>
                   </div>
                 </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2.5 mb-8">
                   {selectedItem.tags.map((tag, index) => (
                     <span 
                       key={index}
-                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-xs font-medium rounded-full"
+                      className="px-4 py-2 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20"
                     >
                       #{tag}
                     </span>
