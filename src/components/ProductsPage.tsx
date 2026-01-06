@@ -30,17 +30,17 @@ const ProductsPage: React.FC = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
   const searchSources = [{
-    id: 'xiaohongshu',
-    label: '小红书'
+    id: 'redbook',
+    label: 'Redbook'
   }, {
-    id: 'douyin',
-    label: '抖音'
+    id: 'youtube',
+    label: 'Youtube'
   }, {
     id: 'tiktok',
     label: 'TikTok'
   }, {
     id: 'amazon',
-    label: '亚马逊'
+    label: 'Amazon'
   }];
   const tabsConfig: TabConfig[] = [{
     id: 'insight',
