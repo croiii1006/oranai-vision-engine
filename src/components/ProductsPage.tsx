@@ -102,7 +102,7 @@ const ProductsPage: React.FC = () => {
   return <div className="min-h-screen pt-24 pb-16">
       <div className="w-full px-6 sm:px-10 lg:px-16 py-[61px]">
         {/* Product Title */}
-        <h1 className="text-3xl font-bold tracking-tight mb-12 md:text-base">
+        <h1 className="text-3xl tracking-tight mb-12 md:text-base py-0 font-extralight">
           {t('products.title')}
         </h1>
 
