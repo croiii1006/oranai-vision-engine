@@ -129,12 +129,12 @@ const ProductsPage: React.FC = () => {
         </div>
 
         {/* Search Dialog Box */}
-        <div className="max-w-3xl mx-auto mb-8 rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm p-4">
+        <div className="max-w-3xl mx-auto mb-8 rounded-2xl border-2 border-border bg-background/50 backdrop-blur-sm p-4">
           {/* Input Area */}
           <div className="mb-4">
             <input
               type="text"
-              placeholder="分配一个任务或提问任何问题"
+              placeholder={t('products.chatPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-lg"
@@ -153,7 +153,7 @@ const ProductsPage: React.FC = () => {
                       : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}>
                     <Globe className="w-4 h-4" />
-                    <span>{selectedSearchSource ? searchSources.find(s => s.id === selectedSearchSource)?.label : '联网搜索'}</span>
+                    <span>{selectedSearchSource ? searchSources.find(s => s.id === selectedSearchSource)?.label : t('products.webSearch')}</span>
                     <ChevronDown className="w-3 h-3" />
                   </button>
                 </DropdownMenuTrigger>
@@ -180,7 +180,7 @@ const ProductsPage: React.FC = () => {
                 }`}
               >
                 <Sparkles className={`w-4 h-4 ${isThinking ? 'animate-pulse' : ''}`} />
-                <span>Thinking</span>
+                <span>{t('products.thinking')}</span>
               </button>
             </div>
 

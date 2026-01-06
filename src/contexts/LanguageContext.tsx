@@ -102,6 +102,9 @@ const translations: Record<Language, Record<string, string>> = {
     'products.geoMonitor': 'GEO Monitor',
     'products.brandHealth': 'Brand Health',
     'products.brandStrategy': 'Brand Strategy',
+    'products.chatPlaceholder': 'Assign a task or ask any question',
+    'products.webSearch': 'Web Search',
+    'products.thinking': 'Thinking',
     
     // Library Page
     'library.title': 'LIBRARY',
@@ -209,6 +212,9 @@ const translations: Record<Language, Record<string, string>> = {
     'products.geoMonitor': 'GEO监控平台',
     'products.brandHealth': '品牌健康度',
     'products.brandStrategy': '品牌策略',
+    'products.chatPlaceholder': '分配一个任务或提问任何问题',
+    'products.webSearch': '联网搜索',
+    'products.thinking': '深度思考',
     
     // Library Page
     'library.title': '素材广场',
