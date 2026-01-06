@@ -111,7 +111,7 @@ const ProductsPage: React.FC = () => {
           <h2 className="text-2xl md:text-3xl mb-3 font-extralight">
             {t('products.headline')}
           </h2>
-          <p className="text-lg md:text-xl font-semibold text-foreground">
+          <p className="text-lg text-foreground font-extralight md:text-2xl">
             {t('products.subheadline')}
           </p>
         </div>
