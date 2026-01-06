@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Globe, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Import thumbnail images
 import imageGenThumb from '@/assets/products/image-gen-thumb.png';
@@ -27,6 +33,15 @@ const ProductsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('material');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
+  const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
+
+  const searchSources = [
+    { id: 'xiaohongshu', label: '小红书' },
+    { id: 'douyin', label: '抖音' },
+    { id: 'tiktok', label: 'TikTok' },
+    { id: 'amazon', label: '亚马逊' },
+  ];
 
   const tabsConfig: TabConfig[] = [
     {
@@ -113,20 +128,67 @@ const ProductsPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Search Bar */}
-        <div className="flex items-center gap-4 max-w-3xl mx-auto mb-8">
-          <div className="flex-1 relative">
+        {/* Search Dialog Box */}
+        <div className="max-w-3xl mx-auto mb-8 rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm p-4">
+          {/* Input Area */}
+          <div className="mb-4">
             <input
               type="text"
-              placeholder={t('common.search')}
+              placeholder="分配一个任务或提问任何问题"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-6 py-4 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+              className="w-full px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-lg"
             />
           </div>
-          <button className="p-4 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
-            <ArrowUp className="w-5 h-5" />
-          </button>
+
+          {/* Bottom Action Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {/* Web Search Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedSearchSource 
+                      ? 'bg-primary/10 text-primary border border-primary/30' 
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}>
+                    <Globe className="w-4 h-4" />
+                    <span>{selectedSearchSource ? searchSources.find(s => s.id === selectedSearchSource)?.label : '联网搜索'}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[140px]">
+                  {searchSources.map((source) => (
+                    <DropdownMenuItem
+                      key={source.id}
+                      onClick={() => setSelectedSearchSource(selectedSearchSource === source.id ? null : source.id)}
+                      className={selectedSearchSource === source.id ? 'bg-primary/10 text-primary' : ''}
+                    >
+                      {source.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Thinking Button */}
+              <button
+                onClick={() => setIsThinking(!isThinking)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  isThinking 
+                    ? 'bg-primary/10 text-primary border border-primary/30' 
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <Sparkles className={`w-4 h-4 ${isThinking ? 'animate-pulse' : ''}`} />
+                <span>Thinking</span>
+              </button>
+            </div>
+
+            {/* Send Button */}
+            <button className="p-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
+              <ArrowUp className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Sub Tab Navigation with Images */}
