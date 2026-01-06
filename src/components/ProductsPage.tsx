@@ -108,7 +108,7 @@ const ProductsPage: React.FC = () => {
 
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl mb-3 font-extralight">
+          <h2 className="text-2xl mb-3 font-medium font-sans text-current md:text-3xl">
             {t('products.headline')}
           </h2>
           <p className="text-lg text-foreground font-extralight md:text-2xl">
