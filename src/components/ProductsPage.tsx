@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUp, Globe, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 // Import thumbnail images
 import imageGenThumb from '@/assets/products/image-gen-thumb.png';
@@ -15,70 +10,82 @@ import digitalHumanThumb from '@/assets/products/digital-human-thumb.png';
 import geoMonitorThumb from '@/assets/products/geo-monitor-thumb.png';
 import brandHealthThumb from '@/assets/products/brand-health-thumb.png';
 import brandStrategyThumb from '@/assets/products/brand-strategy-thumb.png';
-
 interface SubTab {
   id: string;
   labelKey: string;
   image: string;
 }
-
 interface TabConfig {
   id: string;
   labelKey: string;
   subTabs?: SubTab[];
 }
-
 const ProductsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const {
+    t
+  } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('material');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
-
-  const searchSources = [
-    { id: 'xiaohongshu', label: '小红书' },
-    { id: 'douyin', label: '抖音' },
-    { id: 'tiktok', label: 'TikTok' },
-    { id: 'amazon', label: '亚马逊' },
-  ];
-
-  const tabsConfig: TabConfig[] = [
-    {
-      id: 'insight',
-      labelKey: 'products.insight',
-      subTabs: [
-        { id: 'geoMonitor', labelKey: 'products.geoMonitor', image: geoMonitorThumb },
-        { id: 'brandHealth', labelKey: 'products.brandHealth', image: brandHealthThumb },
-      ],
-    },
-    {
-      id: 'strategy',
-      labelKey: 'products.strategy',
-      subTabs: [
-        { id: 'brandStrategy', labelKey: 'products.brandStrategy', image: brandStrategyThumb },
-      ],
-    },
-    {
-      id: 'material',
-      labelKey: 'products.material',
-      subTabs: [
-        { id: 'imageGen', labelKey: 'products.imageGen', image: imageGenThumb },
-        { id: 'videoGen', labelKey: 'products.videoGen', image: videoGenThumb },
-        { id: 'digitalHuman', labelKey: 'products.digitalHuman', image: digitalHumanThumb },
-      ],
-    },
-    {
-      id: 'operation',
-      labelKey: 'products.operation',
-    },
-  ];
-
-  const currentTabConfig = tabsConfig.find((tab) => tab.id === activeTab);
-
+  const searchSources = [{
+    id: 'xiaohongshu',
+    label: '小红书'
+  }, {
+    id: 'douyin',
+    label: '抖音'
+  }, {
+    id: 'tiktok',
+    label: 'TikTok'
+  }, {
+    id: 'amazon',
+    label: '亚马逊'
+  }];
+  const tabsConfig: TabConfig[] = [{
+    id: 'insight',
+    labelKey: 'products.insight',
+    subTabs: [{
+      id: 'geoMonitor',
+      labelKey: 'products.geoMonitor',
+      image: geoMonitorThumb
+    }, {
+      id: 'brandHealth',
+      labelKey: 'products.brandHealth',
+      image: brandHealthThumb
+    }]
+  }, {
+    id: 'strategy',
+    labelKey: 'products.strategy',
+    subTabs: [{
+      id: 'brandStrategy',
+      labelKey: 'products.brandStrategy',
+      image: brandStrategyThumb
+    }]
+  }, {
+    id: 'material',
+    labelKey: 'products.material',
+    subTabs: [{
+      id: 'imageGen',
+      labelKey: 'products.imageGen',
+      image: imageGenThumb
+    }, {
+      id: 'videoGen',
+      labelKey: 'products.videoGen',
+      image: videoGenThumb
+    }, {
+      id: 'digitalHuman',
+      labelKey: 'products.digitalHuman',
+      image: digitalHumanThumb
+    }]
+  }, {
+    id: 'operation',
+    labelKey: 'products.operation'
+  }];
+  const currentTabConfig = tabsConfig.find(tab => tab.id === activeTab);
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    const tab = tabsConfig.find((t) => t.id === tabId);
+    const tab = tabsConfig.find(t => t.id === tabId);
     if (tab?.subTabs && tab.subTabs.length > 0) {
       setActiveSubTab(tab.subTabs[0].id);
     } else {
@@ -92,12 +99,10 @@ const ProductsPage: React.FC = () => {
       setActiveSubTab(currentTabConfig.subTabs[0].id);
     }
   }, [currentTabConfig, activeSubTab]);
-
-  return (
-    <div className="min-h-screen pt-32 pb-20">
+  return <div className="min-h-screen pt-32 pb-20">
       <div className="w-full px-6 sm:px-10 lg:px-16">
         {/* Product Title */}
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-16">
+        <h1 className="text-4xl font-bold tracking-tight mb-16 md:text-lg">
           {t('products.title')}
         </h1>
 
@@ -113,32 +118,16 @@ const ProductsPage: React.FC = () => {
 
         {/* Tab Navigation */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          {tabsConfig.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`px-8 py-3 rounded-full text-lg font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-foreground text-background'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
+          {tabsConfig.map(tab => <button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`px-8 py-3 rounded-full text-lg font-medium transition-all ${activeTab === tab.id ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground'}`}>
               {t(tab.labelKey)}
-            </button>
-          ))}
+            </button>)}
         </div>
 
         {/* Search Dialog Box */}
         <div className="max-w-3xl mx-auto mb-8 rounded-2xl border-2 border-border bg-background/50 backdrop-blur-sm p-4">
           {/* Input Area */}
           <div className="mb-4">
-            <input
-              type="text"
-              placeholder={t('products.chatPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-lg"
-            />
+            <input type="text" placeholder={t('products.chatPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-lg" />
           </div>
 
           {/* Bottom Action Bar */}
@@ -147,38 +136,21 @@ const ProductsPage: React.FC = () => {
               {/* Web Search Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedSearchSource 
-                      ? 'bg-primary/10 text-primary border border-primary/30' 
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                  }`}>
+                  <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedSearchSource ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
                     <Globe className="w-4 h-4" />
                     <span>{selectedSearchSource ? searchSources.find(s => s.id === selectedSearchSource)?.label : t('products.webSearch')}</span>
                     <ChevronDown className="w-3 h-3" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-[140px]">
-                  {searchSources.map((source) => (
-                    <DropdownMenuItem
-                      key={source.id}
-                      onClick={() => setSelectedSearchSource(selectedSearchSource === source.id ? null : source.id)}
-                      className={selectedSearchSource === source.id ? 'bg-primary/10 text-primary' : ''}
-                    >
+                  {searchSources.map(source => <DropdownMenuItem key={source.id} onClick={() => setSelectedSearchSource(selectedSearchSource === source.id ? null : source.id)} className={selectedSearchSource === source.id ? 'bg-primary/10 text-primary' : ''}>
                       {source.label}
-                    </DropdownMenuItem>
-                  ))}
+                    </DropdownMenuItem>)}
                 </DropdownMenuContent>
               </DropdownMenu>
 
               {/* Thinking Button */}
-              <button
-                onClick={() => setIsThinking(!isThinking)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  isThinking 
-                    ? 'bg-primary/10 text-primary border border-primary/30' 
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
+              <button onClick={() => setIsThinking(!isThinking)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${isThinking ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
                 <Sparkles className={`w-4 h-4 ${isThinking ? 'animate-pulse' : ''}`} />
                 <span>{t('products.thinking')}</span>
               </button>
@@ -192,38 +164,20 @@ const ProductsPage: React.FC = () => {
         </div>
 
         {/* Sub Tab Navigation with Images */}
-        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && (
-          <div className="flex items-center justify-center gap-6 mb-12">
-            {currentTabConfig.subTabs.map((subTab) => (
-              <button
-                key={subTab.id}
-                onClick={() => setActiveSubTab(subTab.id)}
-                className={`group relative flex items-center gap-3 pl-6 pr-4 py-3 rounded-2xl text-base font-medium transition-all duration-300 overflow-hidden min-w-[180px] ${
-                  activeSubTab === subTab.id
-                    ? 'glass-tab-active shadow-lg'
-                    : 'glass-tab text-muted-foreground hover:text-foreground hover:shadow-md'
-                }`}
-              >
+        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="flex items-center justify-center gap-6 mb-12">
+            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => setActiveSubTab(subTab.id)} className={`group relative flex items-center gap-3 pl-6 pr-4 py-3 rounded-2xl text-base font-medium transition-all duration-300 overflow-hidden min-w-[180px] ${activeSubTab === subTab.id ? 'glass-tab-active shadow-lg' : 'glass-tab text-muted-foreground hover:text-foreground hover:shadow-md'}`}>
                 {/* Text content */}
                 <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
                 
                 {/* Tilted thumbnail image */}
                 <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
                   <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-xl overflow-hidden shadow-lg">
-                    <img 
-                      src={subTab.image} 
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={subTab.image} alt="" className="w-full h-full object-cover" />
                   </div>
                 </div>
-              </button>
-            ))}
-          </div>
-        )}
+              </button>)}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ProductsPage;
