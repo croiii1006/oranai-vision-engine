@@ -136,6 +136,23 @@ const translations: Record<Language, Record<string, string>> = {
     'library.template': 'Template',
     'library.download': 'Download',
     'library.replicate': 'Replicate Viral',
+    'library.videoType': 'Type',
+    'library.purpose': 'Purpose',
+    'library.audience': 'Target Audience',
+    'library.aiAnalysis': 'AI Technology',
+    'library.watchVideo': 'Watch Video',
+    // Coca-Cola
+    'library.cocacola.title': 'Coca-Cola: The Holiday Magic is Coming',
+    'library.cocacola.type': 'Holiday Emotional Marketing',
+    'library.cocacola.purpose': 'Strengthen brand-holiday association, stimulate seasonal consumption',
+    'library.cocacola.audience': 'Family consumers, holiday gift buyers',
+    'library.cocacola.aiAnalysis': 'AI animation generation (e.g., Santa Claus dynamic design)',
+    // McDonald's
+    'library.mcdonalds.title': "McDonald's: A Taste of Tomorrow",
+    'library.mcdonalds.type': 'Futuristic Tech Ad',
+    'library.mcdonalds.purpose': 'Shape brand innovation image, attract digital generation',
+    'library.mcdonalds.audience': 'Tech enthusiasts, young fast-food consumers',
+    'library.mcdonalds.aiAnalysis': 'AI predictive generation (e.g., future restaurant scene simulation)',
     
     // Footer
     'footer.copyright': '© 2024 OranAI. All rights reserved.',
@@ -267,6 +284,23 @@ const translations: Record<Language, Record<string, string>> = {
     'library.template': '模板',
     'library.download': '下载',
     'library.replicate': '复刻爆款',
+    'library.videoType': '类型',
+    'library.purpose': '发布目的',
+    'library.audience': '目标受众',
+    'library.aiAnalysis': 'AI技术点',
+    'library.watchVideo': '观看视频',
+    // Coca-Cola
+    'library.cocacola.title': '可口可乐：《The Holiday Magic is Coming》',
+    'library.cocacola.type': '节日情感营销',
+    'library.cocacola.purpose': '强化品牌节日关联，刺激季节性消费',
+    'library.cocacola.audience': '家庭消费者、节日礼品购买者',
+    'library.cocacola.aiAnalysis': 'AI动画生成（如圣诞老人动态设计）',
+    // McDonald's
+    'library.mcdonalds.title': '麦当劳：《A Taste of Tomorrow》',
+    'library.mcdonalds.type': '未来科技感广告',
+    'library.mcdonalds.purpose': '塑造品牌创新形象，吸引数字化一代',
+    'library.mcdonalds.audience': '科技爱好者、年轻快餐消费者',
+    'library.mcdonalds.aiAnalysis': 'AI预测生成（如未来餐厅场景模拟）',
     
     // Footer
     'footer.copyright': '© 2024 OranAI. 保留所有权利。',
