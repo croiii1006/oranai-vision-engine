@@ -14,6 +14,7 @@ interface SubTab {
   id: string;
   labelKey: string;
   image: string;
+  url?: string; // URL to navigate to when clicked
 }
 interface TabConfig {
   id: string;
@@ -48,11 +49,13 @@ const ProductsPage: React.FC = () => {
     subTabs: [{
       id: 'geoMonitor',
       labelKey: 'products.geoMonitor',
-      image: geoMonitorThumb
+      image: geoMonitorThumb,
+      url: '' // TODO: Add GEO Monitor URL
     }, {
       id: 'brandHealth',
       labelKey: 'products.brandHealth',
-      image: brandHealthThumb
+      image: brandHealthThumb,
+      url: '' // TODO: Add Brand Health URL
     }]
   }, {
     id: 'strategy',
@@ -60,7 +63,8 @@ const ProductsPage: React.FC = () => {
     subTabs: [{
       id: 'brandStrategy',
       labelKey: 'products.brandStrategy',
-      image: brandStrategyThumb
+      image: brandStrategyThumb,
+      url: '' // TODO: Add Brand Strategy URL
     }]
   }, {
     id: 'material',
@@ -68,15 +72,18 @@ const ProductsPage: React.FC = () => {
     subTabs: [{
       id: 'imageGen',
       labelKey: 'products.imageGen',
-      image: imageGenThumb
+      image: imageGenThumb,
+      url: '' // TODO: Add Image Gen URL
     }, {
       id: 'videoGen',
       labelKey: 'products.videoGen',
-      image: videoGenThumb
+      image: videoGenThumb,
+      url: '' // TODO: Add Video Gen URL
     }, {
       id: 'digitalHuman',
       labelKey: 'products.digitalHuman',
-      image: digitalHumanThumb
+      image: digitalHumanThumb,
+      url: '' // TODO: Add Digital Human URL
     }]
   }, {
     id: 'operation',
@@ -165,7 +172,12 @@ const ProductsPage: React.FC = () => {
 
         {/* Sub Tab Navigation with Images */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
-            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => setActiveSubTab(subTab.id)} className="group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md">
+            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => {
+                setActiveSubTab(subTab.id);
+                if (subTab.url) {
+                  window.open(subTab.url, '_blank');
+                }
+              }} className="group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md">
                 {/* Text content */}
                 <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
                 
