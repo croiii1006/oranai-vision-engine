@@ -249,7 +249,8 @@ const LibraryPage: React.FC = () => {
           onClick={() => setSelectedItem(null)}
         >
           <div 
-            className="bg-background rounded-3xl p-6 md:p-8 max-w-5xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
+            className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto overflow-x-hidden"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -260,10 +261,10 @@ const LibraryPage: React.FC = () => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               {/* Media Preview - Phone style */}
-              <div className="lg:w-[280px] flex-shrink-0">
-                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30">
+              <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
                   <img 
                     src={selectedItem.thumbnail} 
                     alt={t(selectedItem.titleKey)}
@@ -275,12 +276,12 @@ const LibraryPage: React.FC = () => {
                     rel="noopener noreferrer"
                     className="absolute inset-0 flex items-center justify-center"
                   >
-                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                      <Play className="w-7 h-7 text-white ml-1" />
+                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
+                      <Play className="w-6 h-6 text-white ml-1" />
                     </div>
                   </a>
                   {selectedItem.duration && (
-                    <span className="absolute bottom-4 right-4 px-2.5 py-1 bg-black/60 text-white text-sm font-medium rounded">
+                    <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-black/60 text-white text-xs font-medium rounded">
                       {selectedItem.duration}
                     </span>
                   )}
@@ -288,85 +289,85 @@ const LibraryPage: React.FC = () => {
               </div>
               
               {/* Details */}
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-w-0">
                 {/* Primary: Title */}
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4 break-words">{t(selectedItem.titleKey)}</h2>
                 
                 {/* Secondary: Publisher Info */}
-                <div className="space-y-2.5 mb-6">
-                  <p className="text-base">
+                <div className="space-y-2 mb-5">
+                  <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">Publisher: </span>
                     <span className="text-foreground font-medium">{selectedItem.publisher}</span>
                   </p>
-                  <p className="text-base">
+                  <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.videoType')}: </span>
                     <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
                   </p>
-                  <p className="text-base">
+                  <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
+                    <span className="text-foreground font-medium break-words">{t(selectedItem.purposeKey)}</span>
                   </p>
-                  <p className="text-base">
+                  <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.audience')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
+                    <span className="text-foreground font-medium break-words">{t(selectedItem.audienceKey)}</span>
                   </p>
-                  <p className="text-base">
+                  <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
+                    <span className="text-foreground font-medium break-words">{t(selectedItem.aiAnalysisKey)}</span>
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Published: {selectedItem.publishDateFull}
                   </p>
                 </div>
 
-                {/* Stats - Large numbers with labels */}
-                <div className="flex items-center gap-8 mb-8 py-5 border-y border-border/30">
-                  <div className="flex items-center gap-2.5">
-                    <Eye className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-xl font-bold text-foreground">{selectedItem.views.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground">Views</span>
+                {/* Stats - 2x2 Grid */}
+                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.views.toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground">Views</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <Heart className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-xl font-bold text-foreground">{selectedItem.likes.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground">Likes</span>
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.likes.toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground">Likes</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <MessageCircle className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-xl font-bold text-foreground">{selectedItem.comments.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground">Comments</span>
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.comments.toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground">Comments</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <Share2 className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-xl font-bold text-foreground">{selectedItem.shares.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground">Shares</span>
+                  <div className="flex items-center gap-2">
+                    <Share2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.shares.toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground">Shares</span>
                   </div>
                 </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2.5 mb-8">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {selectedItem.tags.map((tag, index) => (
                     <span 
                       key={index}
-                      className="px-4 py-2 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20"
+                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-xs md:text-sm font-medium rounded-full border border-border/20"
                     >
                       #{tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="mt-auto flex gap-3">
+                <div className="flex gap-3">
                   <a 
                     href={selectedItem.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
                   >
-                    <Play className="w-5 h-5" />
+                    <Play className="w-4 h-4 md:w-5 md:h-5" />
                     {t('library.watchVideo')}
                   </a>
-                  <button className="flex-1 py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" />
+                  <button className="flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                     {t('library.replicate')}
                   </button>
                 </div>
