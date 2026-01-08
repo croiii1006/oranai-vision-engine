@@ -326,7 +326,7 @@ const ModelsPage: React.FC = () => {
 
               {/* 端点类型 Section */}
               <div className="border-t border-border/30 pt-4">
-                <h4 className="text-sm font-medium mb-3 text-center">端点类型</h4>
+                <h4 className="text-sm font-medium mb-3 text-left">端点类型</h4>
                 <div className="flex flex-col gap-2">
                   {(endpointExpanded ? endpointOptions : endpointOptions.slice(0, 4)).map(option => <button key={option.id} onClick={() => setEndpointFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${endpointFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
                       {option.label}
