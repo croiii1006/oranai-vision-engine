@@ -284,7 +284,7 @@ const ModelsPage: React.FC = () => {
         <div className="flex gap-8">
           {/* Left Sidebar */}
           <aside className="hidden lg:block w-52 flex-shrink-0">
-            <div className="sticky top-32">
+            <div className="sticky top-32 max-h-[calc(100vh-10rem)] overflow-y-auto">
               {/* Header with title and reset */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-base font-medium">筛选</h3>
