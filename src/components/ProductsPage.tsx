@@ -165,12 +165,12 @@ const ProductsPage: React.FC = () => {
 
         {/* Sub Tab Navigation with Images */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="flex items-center justify-center gap-4 mb-10">
-            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => setActiveSubTab(subTab.id)} className={`group relative flex items-center gap-2 pl-4 pr-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[150px] ${activeSubTab === subTab.id ? 'glass-tab-active shadow-lg' : 'glass-tab text-muted-foreground hover:text-foreground hover:shadow-md'}`}>
+            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => setActiveSubTab(subTab.id)} className="group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md">
                 {/* Text content */}
                 <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
                 
                 {/* Tilted thumbnail image */}
-                <div className="relative w-11 h-11 flex-shrink-0 ml-auto">
+                <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
                   <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-lg overflow-hidden shadow-lg">
                     <img src={subTab.image} alt="" className="w-full h-full object-cover" />
                   </div>
