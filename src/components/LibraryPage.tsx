@@ -177,68 +177,90 @@ const LibraryPage: React.FC = () => {
 
         {/* Library Grid - TikTok style vertical cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
-            >
-              {/* Thumbnail */}
-              <img 
-                src={item.thumbnail} 
-                alt={t(item.titleKey)}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              
-              {/* Play button */}
-              {item.type === 'video' && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Play className="w-5 h-5 text-white ml-0.5" />
+          {filteredItems.map((item) => {
+            const isMp4 = item.videoUrl.endsWith('.mp4');
+            return (
+              <div
+                key={item.id}
+                onClick={() => setSelectedItem(item)}
+                className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
+              >
+                {/* Video preview for mp4 - shows on hover */}
+                {isMp4 && (
+                  <video 
+                    src={item.videoUrl}
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+                    onMouseEnter={(e) => {
+                      const video = e.currentTarget;
+                      video.currentTime = 0;
+                      video.play().catch(() => {});
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause();
+                    }}
+                  />
+                )}
+                
+                {/* Thumbnail - use video poster for mp4 or image */}
+                <img 
+                  src={item.thumbnail} 
+                  alt={t(item.titleKey)}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 pointer-events-none" />
+                
+                {/* Play button - hide for mp4 on hover since video plays */}
+                {item.type === 'video' && (
+                  <div className={`absolute inset-0 flex items-center justify-center transition-opacity z-20 pointer-events-none ${isMp4 ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Play className="w-5 h-5 text-white ml-0.5" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Duration badge */}
+                {item.duration && (
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded z-20">
+                    {item.duration}
+                  </span>
+                )}
+                
+                {/* Content overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
+                  {/* Stats - prominent display at top */}
+                  <div className="flex items-center gap-4 text-white mb-3">
+                    <span className="flex items-center gap-1.5">
+                      <Heart className="w-5 h-5" />
+                      <span className="text-base font-bold">{formatNumber(item.likes)}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MessageCircle className="w-5 h-5" />
+                      <span className="text-base font-bold">{item.comments}</span>
+                    </span>
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
+                    {t(item.titleKey)}
+                  </h3>
+                  
+                  {/* Publisher & Views */}
+                  <div className="flex items-center justify-between text-white/80">
+                    <span className="text-sm">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</span>
+                    <span className="flex items-center gap-1 text-sm">
+                      <Eye className="w-4 h-4" />
+                      {formatNumber(item.views)}
+                    </span>
                   </div>
                 </div>
-              )}
-
-              {/* Duration badge */}
-              {item.duration && (
-                <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded">
-                  {item.duration}
-                </span>
-              )}
-              
-              {/* Content overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                {/* Stats - prominent display at top */}
-                <div className="flex items-center gap-4 text-white mb-3">
-                  <span className="flex items-center gap-1.5">
-                    <Heart className="w-5 h-5" />
-                    <span className="text-base font-bold">{formatNumber(item.likes)}</span>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <MessageCircle className="w-5 h-5" />
-                    <span className="text-base font-bold">{item.comments}</span>
-                  </span>
-                </div>
-                
-                {/* Title */}
-                <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
-                  {t(item.titleKey)}
-                </h3>
-                
-                {/* Publisher & Views */}
-                <div className="flex items-center justify-between text-white/80">
-                  <span className="text-sm">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</span>
-                  <span className="flex items-center gap-1 text-sm">
-                    <Eye className="w-4 h-4" />
-                    {formatNumber(item.views)}
-                  </span>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
