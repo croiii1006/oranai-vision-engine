@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUp, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUp, ArrowRight, ChevronDown, ChevronUp, Sparkles, Brain, Diamond, Layers, Wind, Moon, Zap, Play, Video, Grid3X3, MessageCircle, ShoppingBag, Bot, HelpCircle, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
@@ -60,23 +60,23 @@ const ModelsPage: React.FC = () => {
   const [supplierExpanded, setSupplierExpanded] = useState(false);
   const [endpointExpanded, setEndpointExpanded] = useState(false);
 
-  const supplierOptions = [
-    { id: 'all', label: '全部供应商' },
-    { id: 'anthropic', label: 'Anthropic' },
-    { id: 'deepseek', label: 'DeepSeek' },
-    { id: 'google', label: 'Google' },
-    { id: 'meta', label: 'Meta' },
-    { id: 'mistral', label: 'Mistral' },
-    { id: 'moonshot', label: 'Moonshot' },
-    { id: 'openai', label: 'OpenAI' },
-    { id: 'xai', label: 'xAI' },
-    { id: 'bytedance', label: '字节跳动' },
-    { id: 'kuaishou', label: '快手' },
-    { id: 'zhipu', label: '智谱' },
-    { id: 'tencent', label: '腾讯' },
-    { id: 'alibaba', label: '阿里巴巴' },
-    { id: 'lingyiwanwu', label: '零一万物' },
-    { id: 'unknown', label: '未知供应商' },
+  const supplierOptions: { id: string; label: string; icon: LucideIcon }[] = [
+    { id: 'all', label: '全部供应商', icon: Grid3X3 },
+    { id: 'anthropic', label: 'Anthropic', icon: Sparkles },
+    { id: 'deepseek', label: 'DeepSeek', icon: Brain },
+    { id: 'google', label: 'Google', icon: Diamond },
+    { id: 'meta', label: 'Meta', icon: Layers },
+    { id: 'mistral', label: 'Mistral', icon: Wind },
+    { id: 'moonshot', label: 'Moonshot', icon: Moon },
+    { id: 'openai', label: 'OpenAI', icon: Sparkles },
+    { id: 'xai', label: 'xAI', icon: Zap },
+    { id: 'bytedance', label: '字节跳动', icon: Play },
+    { id: 'kuaishou', label: '快手', icon: Video },
+    { id: 'zhipu', label: '智谱', icon: Grid3X3 },
+    { id: 'tencent', label: '腾讯', icon: MessageCircle },
+    { id: 'alibaba', label: '阿里巴巴', icon: ShoppingBag },
+    { id: 'lingyiwanwu', label: '零一万物', icon: Bot },
+    { id: 'unknown', label: '未知供应商', icon: HelpCircle },
   ];
 
   const billingOptions = [
@@ -169,19 +169,23 @@ const ModelsPage: React.FC = () => {
               <div className="mb-6 border-t border-border/30 pt-4">
                 <h4 className="text-sm font-medium mb-3 text-center">供应商</h4>
                 <div className="flex flex-col gap-2">
-                  {(supplierExpanded ? supplierOptions : supplierOptions.slice(0, 4)).map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setSupplierFilter(option.id)}
-                      className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${
-                        supplierFilter === option.id
-                          ? 'bg-foreground/20 text-foreground'
-                          : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+                  {(supplierExpanded ? supplierOptions : supplierOptions.slice(0, 4)).map((option) => {
+                    const IconComponent = option.icon;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => setSupplierFilter(option.id)}
+                        className={`px-3 py-2 rounded-lg text-xs flex items-center gap-2 transition-colors ${
+                          supplierFilter === option.id
+                            ? 'bg-foreground/20 text-foreground'
+                            : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                        }`}
+                      >
+                        <IconComponent className="w-4 h-4 flex-shrink-0" />
+                        <span>{option.label}</span>
+                      </button>
+                    );
+                  })}
                   {supplierOptions.length > 4 && (
                     <button
                       onClick={() => setSupplierExpanded(!supplierExpanded)}
