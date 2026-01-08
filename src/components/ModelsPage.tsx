@@ -434,7 +434,10 @@ const ModelsPage: React.FC = () => {
                 </div>
                 
                 <div className="pt-4">
-                  <button className="w-full py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => window.open('http://119.12.161.54:3000/login', '_blank')}
+                    className="w-full py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2"
+                  >
                     <span>Try this model</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
