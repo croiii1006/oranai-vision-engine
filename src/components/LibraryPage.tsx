@@ -36,7 +36,7 @@ const mockLibraryItems: LibraryItem[] = [
     purposeKey: 'library.cocacola.purpose',
     audienceKey: 'library.cocacola.audience',
     aiAnalysisKey: 'library.cocacola.aiAnalysis',
-    videoUrl: 'https://www.youtube.com/watch?v=4RSTupbfGog',
+    videoUrl: 'https://photog.art/api/oss/BVCOGW.mp4',
     duration: '01:00',
     views: 2850000,
     likes: 48200,
