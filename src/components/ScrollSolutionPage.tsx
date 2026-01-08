@@ -7,6 +7,21 @@ import knowMarketInsight from "@/assets/solutions/know-market-insight.png";
 import knowConsumerInsight from "@/assets/solutions/know-consumer-insight.png";
 import knowHealthInsight from "@/assets/solutions/know-health-insight.png";
 
+// BUILD section images
+import buildBrandPositioning from "@/assets/solutions/build-brand-positioning.png";
+import buildBrandStory from "@/assets/solutions/build-brand-story.png";
+import buildContentGeneration from "@/assets/solutions/build-content-generation.png";
+
+// MANAGE section images
+import manageSocialMedia from "@/assets/solutions/manage-social-media.png";
+import manageDam from "@/assets/solutions/manage-dam.png";
+import manageSentiment from "@/assets/solutions/manage-sentiment.png";
+
+// SCALE section images
+import scaleSeo from "@/assets/solutions/scale-seo.png";
+import scaleAds from "@/assets/solutions/scale-ads.png";
+import scaleGrowth from "@/assets/solutions/scale-growth.png";
+
 interface SectionData {
   id: string;
   titleKey: string;
@@ -46,6 +61,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       id: "build",
       titleKey: "solution.build",
       descKey: "solution.buildDesc",
+      images: [buildBrandPositioning, buildBrandStory, buildContentGeneration],
       tabs: [
         { labelKey: "solution.brandPositioning", contentKey: "solution.brandPositioningDesc" },
         { labelKey: "solution.brandStory", contentKey: "solution.brandStoryDesc" },
@@ -56,6 +72,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       id: "manage",
       titleKey: "solution.manage",
       descKey: "solution.manageDesc",
+      images: [manageSocialMedia, manageDam, manageSentiment],
       tabs: [
         { labelKey: "solution.socialMedia", contentKey: "solution.socialMediaDesc" },
         { labelKey: "solution.dam", contentKey: "solution.damDesc" },
@@ -66,6 +83,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       id: "scale",
       titleKey: "solution.scale",
       descKey: "solution.scaleDesc",
+      images: [scaleSeo, scaleAds, scaleGrowth],
       tabs: [
         { labelKey: "solution.seo", contentKey: "solution.seoDesc" },
         { labelKey: "solution.ads", contentKey: "solution.adsDesc" },
