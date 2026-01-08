@@ -146,6 +146,7 @@ const translations: Record<Language, Record<string, string>> = {
     'library.audience': 'Target Audience',
     'library.aiAnalysis': 'AI Technology',
     'library.watchVideo': 'Watch Video',
+    'library.downloadVideo': 'Download Video',
     // Coca-Cola
     'library.cocacola.title': 'Coca-Cola: The Holiday Magic is Coming',
     'library.cocacola.type': 'Holiday Emotional Marketing',
@@ -299,6 +300,7 @@ const translations: Record<Language, Record<string, string>> = {
     'library.audience': '目标受众',
     'library.aiAnalysis': 'AI技术点',
     'library.watchVideo': '观看视频',
+    'library.downloadVideo': '下载视频',
     // Coca-Cola
     'library.cocacola.title': '可口可乐：《The Holiday Magic is Coming》',
     'library.cocacola.type': '节日情感营销',

@@ -265,22 +265,34 @@ const LibraryPage: React.FC = () => {
               {/* Media Preview - Phone style */}
               <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
                 <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                  <img 
-                    src={selectedItem.thumbnail} 
-                    alt={t(selectedItem.titleKey)}
-                    className="w-full h-full object-cover"
-                  />
-                  <a 
-                    href={selectedItem.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                      <Play className="w-6 h-6 text-white ml-1" />
-                    </div>
-                  </a>
-                  {selectedItem.duration && (
+                  {selectedItem.videoUrl.endsWith('.mp4') ? (
+                    <video 
+                      src={selectedItem.videoUrl}
+                      controls
+                      autoPlay
+                      className="w-full h-full object-cover"
+                      poster={selectedItem.thumbnail}
+                    />
+                  ) : (
+                    <>
+                      <img 
+                        src={selectedItem.thumbnail} 
+                        alt={t(selectedItem.titleKey)}
+                        className="w-full h-full object-cover"
+                      />
+                      <a 
+                        href={selectedItem.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
+                          <Play className="w-6 h-6 text-white ml-1" />
+                        </div>
+                      </a>
+                    </>
+                  )}
+                  {selectedItem.duration && !selectedItem.videoUrl.endsWith('.mp4') && (
                     <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-black/60 text-white text-xs font-medium rounded">
                       {selectedItem.duration}
                     </span>
@@ -357,15 +369,26 @@ const LibraryPage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  <a 
-                    href={selectedItem.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
-                  >
-                    <Play className="w-4 h-4 md:w-5 md:h-5" />
-                    {t('library.watchVideo')}
-                  </a>
+                  {selectedItem.videoUrl.endsWith('.mp4') ? (
+                    <a 
+                      href={selectedItem.videoUrl}
+                      download
+                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                    >
+                      <Download className="w-4 h-4 md:w-5 md:h-5" />
+                      {t('library.downloadVideo')}
+                    </a>
+                  ) : (
+                    <a 
+                      href={selectedItem.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                    >
+                      <Play className="w-4 h-4 md:w-5 md:h-5" />
+                      {t('library.watchVideo')}
+                    </a>
+                  )}
                   <button className="flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
                     <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                     {t('library.replicate')}
