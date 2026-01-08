@@ -305,7 +305,7 @@ const ModelsPage: React.FC = () => {
                   const IconComponent = option.icon;
                   return <button key={option.id} onClick={() => setSupplierFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs flex items-center gap-2 transition-colors ${supplierFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
                         <IconComponent className="w-4 h-4 flex-shrink-0" />
-                        <span>{option.label}</span>
+                        <span className="text-center">{option.label}</span>
                       </button>;
                 })}
                   {supplierOptions.length > 4 && <button onClick={() => setSupplierExpanded(!supplierExpanded)} className="gap-1 text-xs text-muted-foreground hover:text-foreground py-1 flex items-center justify-end">
