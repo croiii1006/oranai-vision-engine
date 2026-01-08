@@ -164,7 +164,7 @@ const ProductsPage: React.FC = () => {
         </div>
 
         {/* Sub Tab Navigation with Images */}
-        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="flex items-center justify-center gap-4 mb-10">
+        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
             {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => setActiveSubTab(subTab.id)} className="group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md">
                 {/* Text content */}
                 <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
