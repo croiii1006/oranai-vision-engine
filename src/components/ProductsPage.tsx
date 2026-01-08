@@ -50,7 +50,7 @@ const ProductsPage: React.FC = () => {
       id: 'geoMonitor',
       labelKey: 'products.geoMonitor',
       image: geoMonitorThumb,
-      url: '' // TODO: Add GEO Monitor URL
+      url: 'https://geo.photog.art/ai'
     }, {
       id: 'brandHealth',
       labelKey: 'products.brandHealth',
