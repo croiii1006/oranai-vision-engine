@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
             {/* Center - Main Navigation Tabs with enhanced glassmorphism */}
             <nav className="hidden md:flex items-center space-x-1">
-              <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border border-foreground/15 dark:border-border/30 shadow-lg bg-background/70 dark:bg-background/40 backdrop-blur-md">
+              <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-lg bg-background/70 dark:bg-background/40 backdrop-blur-md">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
