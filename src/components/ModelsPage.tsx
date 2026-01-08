@@ -64,95 +64,95 @@ const ModelsPage: React.FC = () => {
   const [endpointExpanded, setEndpointExpanded] = useState(false);
   const supplierOptions: {
     id: string;
-    label: string;
+    labelKey: string;
     icon: LucideIcon;
   }[] = [{
     id: 'all',
-    label: '全部供应商',
+    labelKey: 'models.allSuppliers',
     icon: Grid3X3
   }, {
     id: 'anthropic',
-    label: 'Anthropic',
+    labelKey: 'Anthropic',
     icon: Sparkles
   }, {
     id: 'deepseek',
-    label: 'DeepSeek',
+    labelKey: 'DeepSeek',
     icon: Brain
   }, {
     id: 'google',
-    label: 'Google',
+    labelKey: 'Google',
     icon: Diamond
   }, {
     id: 'meta',
-    label: 'Meta',
+    labelKey: 'Meta',
     icon: Layers
   }, {
     id: 'mistral',
-    label: 'Mistral',
+    labelKey: 'Mistral',
     icon: Wind
   }, {
     id: 'moonshot',
-    label: 'Moonshot',
+    labelKey: 'Moonshot',
     icon: Moon
   }, {
     id: 'openai',
-    label: 'OpenAI',
+    labelKey: 'OpenAI',
     icon: Sparkles
   }, {
     id: 'xai',
-    label: 'xAI',
+    labelKey: 'xAI',
     icon: Zap
   }, {
     id: 'bytedance',
-    label: '字节跳动',
+    labelKey: '字节跳动',
     icon: Play
   }, {
     id: 'kuaishou',
-    label: '快手',
+    labelKey: '快手',
     icon: Video
   }, {
     id: 'zhipu',
-    label: '智谱',
+    labelKey: '智谱',
     icon: Grid3X3
   }, {
     id: 'tencent',
-    label: '腾讯',
+    labelKey: '腾讯',
     icon: MessageCircle
   }, {
     id: 'alibaba',
-    label: '阿里巴巴',
+    labelKey: '阿里巴巴',
     icon: ShoppingBag
   }, {
     id: 'lingyiwanwu',
-    label: '零一万物',
+    labelKey: '零一万物',
     icon: Bot
   }, {
     id: 'unknown',
-    label: '未知供应商',
+    labelKey: 'models.unknownSupplier',
     icon: HelpCircle
   }];
   const billingOptions = [{
     id: 'all',
-    label: '全部类型'
+    labelKey: 'models.allTypes'
   }, {
     id: 'usage',
-    label: '按量计费'
+    labelKey: 'models.usageBilling'
   }, {
     id: 'times',
-    label: '按次计费'
+    labelKey: 'models.timesBilling'
   }];
   const endpointOptions = [{
     id: 'all',
-    label: '全部端点'
+    labelKey: 'models.allEndpoints'
   }, {
     id: 'image-generation',
-    label: 'image-generation'
+    labelKey: 'image-generation'
   }, {
     id: 'openai',
-    label: 'openai'
+    labelKey: 'openai'
   }, {
     id: 'openai-response',
-    label: 'openai-response'
+    labelKey: 'openai-response'
   }];
 
   // Gradient styles for cards
@@ -287,52 +287,56 @@ const ModelsPage: React.FC = () => {
             <div className="sticky top-32 max-h-[calc(100vh-10rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Header with title and reset */}
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-medium">筛选</h3>
+                <h3 className="text-base font-medium">{t('models.filter')}</h3>
                 <button onClick={() => {
                 setSupplierFilter('all');
                 setBillingFilter('all');
                 setEndpointFilter('all');
               }} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  重置
+                  {t('models.reset')}
                 </button>
               </div>
 
               {/* 供应商 Section */}
               <div className="mb-6 border-t border-border/30 pt-4">
-                <h4 className="text-sm font-medium mb-3 text-left">供应商</h4>
+                <h4 className="text-sm font-medium mb-3 text-left">{t('models.supplier')}</h4>
                 <div className="flex flex-col gap-2">
                   {(supplierExpanded ? supplierOptions : supplierOptions.slice(0, 4)).map(option => {
                   const IconComponent = option.icon;
+                  const label = option.labelKey.startsWith('models.') ? t(option.labelKey) : option.labelKey;
                   return <button key={option.id} onClick={() => setSupplierFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition-colors ${supplierFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
                         <IconComponent className="w-4 h-4 flex-shrink-0" />
-                        <span>{option.label}</span>
+                        <span>{label}</span>
                       </button>;
                 })}
                   {supplierOptions.length > 4 && <button onClick={() => setSupplierExpanded(!supplierExpanded)} className="gap-1 text-xs text-muted-foreground hover:text-foreground py-1 flex items-center justify-end">
-                      {supplierExpanded ? <>收起 <ChevronUp className="w-3 h-3" /></> : <>展开更多 <ChevronDown className="w-3 h-3" /></>}
+                      {supplierExpanded ? <>{t('models.collapse')} <ChevronUp className="w-3 h-3" /></> : <>{t('models.expand')} <ChevronDown className="w-3 h-3" /></>}
                     </button>}
                 </div>
               </div>
 
               {/* 计费类型 Section */}
               <div className="mb-6 border-t border-border/30 pt-4">
-                <h4 className="text-sm font-medium mb-3 text-left">计费类型</h4>
+                <h4 className="text-sm font-medium mb-3 text-left">{t('models.billingType')}</h4>
                 <div className="flex flex-col gap-2">
                   {billingOptions.map(option => <button key={option.id} onClick={() => setBillingFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${billingFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
-                      {option.label}
+                      {t(option.labelKey)}
                     </button>)}
                 </div>
               </div>
 
               {/* 端点类型 Section */}
               <div className="border-t border-border/30 pt-4">
-                <h4 className="text-sm font-medium mb-3 text-left">端点类型</h4>
+                <h4 className="text-sm font-medium mb-3 text-left">{t('models.endpointType')}</h4>
                 <div className="flex flex-col gap-2">
-                  {(endpointExpanded ? endpointOptions : endpointOptions.slice(0, 4)).map(option => <button key={option.id} onClick={() => setEndpointFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${endpointFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
-                      {option.label}
-                    </button>)}
+                  {(endpointExpanded ? endpointOptions : endpointOptions.slice(0, 4)).map(option => {
+                    const label = option.labelKey.startsWith('models.') ? t(option.labelKey) : option.labelKey;
+                    return <button key={option.id} onClick={() => setEndpointFilter(option.id)} className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${endpointFilter === option.id ? 'bg-foreground/20 text-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>
+                      {label}
+                    </button>;
+                  })}
                   {endpointOptions.length > 4 && <button onClick={() => setEndpointExpanded(!endpointExpanded)} className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground py-1">
-                      {endpointExpanded ? <>收起 <ChevronUp className="w-3 h-3" /></> : <>展开更多 <ChevronDown className="w-3 h-3" /></>}
+                      {endpointExpanded ? <>{t('models.collapse')} <ChevronUp className="w-3 h-3" /></> : <>{t('models.expand')} <ChevronDown className="w-3 h-3" /></>}
                     </button>}
                 </div>
               </div>

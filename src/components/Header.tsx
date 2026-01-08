@@ -79,9 +79,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
             {/* Right - Actions */}
             <div className="flex items-center space-x-4">
-              <button
+            <button
                 onClick={toggleTheme}
-                className="flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors duration-200"
+                className="flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
                 aria-label="Toggle theme"
               >
                 {theme === 'dark' ? (
@@ -92,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               </button>
               <button
                 onClick={toggleLanguage}
-                className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground transition-colors duration-200"
               >
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">{language === 'en' ? 'EN' : '中文'}</span>
