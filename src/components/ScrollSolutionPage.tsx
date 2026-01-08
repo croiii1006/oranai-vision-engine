@@ -2,10 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// KNOW section images
+import knowMarketInsight from "@/assets/solutions/know-market-insight.png";
+import knowConsumerInsight from "@/assets/solutions/know-consumer-insight.png";
+import knowHealthInsight from "@/assets/solutions/know-health-insight.png";
+
 interface SectionData {
   id: string;
   titleKey: string;
   descKey: string;
+  images?: string[];
   tabs: {
     labelKey: string;
     contentKey: string;
@@ -29,6 +35,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       id: "know",
       titleKey: "solution.know",
       descKey: "solution.knowDesc",
+      images: [knowMarketInsight, knowConsumerInsight, knowHealthInsight],
       tabs: [
         { labelKey: "solution.marketInsight", contentKey: "solution.marketInsightDesc" },
         { labelKey: "solution.consumerInsight", contentKey: "solution.consumerInsightDesc" },
@@ -270,21 +277,38 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
                 {/* Right - Image area with indicators, aligned with text content */}
                 <div className="relative flex items-start justify-center">
                   <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
-                    {/* Image placeholder */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
-
-                    {/* Image indicators (right side inside card) */}
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-                      {[0, 1, 2].map((i) => (
-                        <button
-                          key={i}
-                          onClick={() => setImageIndex(i)}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                            imageIndex === i ? "bg-foreground" : "bg-foreground/20 hover:bg-foreground/40"
-                          }`}
+                    {/* Section images - show current tab image if available */}
+                    {currentSectionData.images && currentSectionData.images.length > 0 ? (
+                      <AnimatePresence mode="wait">
+                        <motion.img
+                          key={currentTab}
+                          src={currentSectionData.images[currentTab] || currentSectionData.images[0]}
+                          alt=""
+                          initial={{ opacity: 0, scale: 1.05 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.4 }}
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
-                      ))}
-                    </div>
+                      </AnimatePresence>
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
+                    )}
+
+                    {/* Image indicators (right side inside card) - only show if images exist */}
+                    {currentSectionData.images && currentSectionData.images.length > 1 && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
+                        {currentSectionData.images.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentTab(i)}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                              currentTab === i ? "bg-foreground" : "bg-foreground/20 hover:bg-foreground/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
