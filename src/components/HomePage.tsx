@@ -67,10 +67,10 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative min-h-screen flex items-center justify-center overflow-hidden"
+            className="dark relative min-h-screen flex items-center justify-center overflow-hidden"
           >
-            {/* Dark background base */}
-            <div className="absolute inset-0 bg-background" />
+            {/* Dark background base - forced dark */}
+            <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
             
             {/* Interactive particles with mouse glow */}
             <InteractiveParticles />
