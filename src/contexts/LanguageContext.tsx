@@ -114,9 +114,14 @@ const translations: Record<Language, Record<string, string>> = {
     'products.geoMonitor': 'GEO Monitor',
     'products.brandHealth': 'Brand Health',
     'products.brandStrategy': 'Brand Strategy',
-    'products.chatPlaceholder': 'Assign a task or ask any question',
+    'products.chatPlaceholder': 'Generate a Xiaohongshu post',
     'products.webSearch': 'Web Search',
     'products.thinking': 'Thinking',
+    'products.redbook': 'Xiaohongshu',
+    'products.youtube': 'Youtube',
+    'products.tiktok': 'TikTok',
+    'products.amazon': 'Amazon',
+    'products.semrush': 'Semrush',
     
     // Library Page
     'library.title': 'LIBRARY',
@@ -262,9 +267,14 @@ const translations: Record<Language, Record<string, string>> = {
     'products.geoMonitor': 'GEO监控平台',
     'products.brandHealth': '品牌健康度',
     'products.brandStrategy': '品牌策略',
-    'products.chatPlaceholder': '分配一个任务或提问任何问题',
+    'products.chatPlaceholder': '生成一个小红书帖子',
     'products.webSearch': '联网搜索',
     'products.thinking': '深度思考',
+    'products.redbook': '小红书',
+    'products.youtube': 'Youtube',
+    'products.tiktok': 'TikTok',
+    'products.amazon': 'Amazon',
+    'products.semrush': 'Semrush',
     
     // Library Page
     'library.title': '素材广场',

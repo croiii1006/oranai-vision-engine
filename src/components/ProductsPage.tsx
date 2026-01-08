@@ -32,16 +32,24 @@ const ProductsPage: React.FC = () => {
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
   const searchSources = [{
     id: 'redbook',
-    label: 'Redbook'
+    labelKey: 'products.redbook',
+    enabled: true
   }, {
     id: 'youtube',
-    label: 'Youtube'
+    labelKey: 'products.youtube',
+    enabled: false
   }, {
     id: 'tiktok',
-    label: 'TikTok'
+    labelKey: 'products.tiktok',
+    enabled: false
   }, {
     id: 'amazon',
-    label: 'Amazon'
+    labelKey: 'products.amazon',
+    enabled: false
+  }, {
+    id: 'semrush',
+    labelKey: 'products.semrush',
+    enabled: false
   }];
   const tabsConfig: TabConfig[] = [{
     id: 'insight',
@@ -145,14 +153,21 @@ const ProductsPage: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedSearchSource ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
                     <Globe className="w-3.5 h-3.5" />
-                    <span>{selectedSearchSource ? searchSources.find(s => s.id === selectedSearchSource)?.label : t('products.webSearch')}</span>
+                    <span>{selectedSearchSource ? t(searchSources.find(s => s.id === selectedSearchSource)?.labelKey || '') : t('products.webSearch')}</span>
                     <ChevronDown className="w-2.5 h-2.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-[120px]">
-                  {searchSources.map(source => <DropdownMenuItem key={source.id} onClick={() => setSelectedSearchSource(selectedSearchSource === source.id ? null : source.id)} className={selectedSearchSource === source.id ? 'bg-primary/10 text-primary' : ''}>
-                      {source.label}
-                    </DropdownMenuItem>)}
+                  {searchSources.map(source => (
+                    <DropdownMenuItem 
+                      key={source.id} 
+                      onClick={() => source.enabled && setSelectedSearchSource(selectedSearchSource === source.id ? null : source.id)}
+                      disabled={!source.enabled}
+                      className={`${selectedSearchSource === source.id ? 'bg-primary/10 text-primary' : ''} ${!source.enabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    >
+                      {t(source.labelKey)}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
