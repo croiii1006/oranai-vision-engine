@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type Language = 'en' | 'zh';
+type Language = "en" | "zh";
 
 interface LanguageContextType {
   language: Language;
@@ -11,318 +11,921 @@ interface LanguageContextType {
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
-    'nav.solution': 'Solution',
-    'nav.models': 'Models',
-    'nav.products': 'Products',
-    'nav.library': 'Library',
-    'nav.signIn': 'Sign In',
-    'nav.contactUs': 'Contact Us',
-    
+    "nav.solution": "Solution",
+    "nav.models": "Models",
+    "nav.products": "Products",
+    "nav.library": "Library",
+    "nav.signIn": "Sign In",
+    "nav.contactUs": "Contact Us",
+
     // Sidebar
-    'sidebar.resources': 'Resources',
-    'sidebar.aboutUs': 'About Us',
-    'sidebar.blog': 'Blog',
-    'sidebar.careers': 'Careers',
-    'sidebar.docs': 'Docs',
-    'sidebar.privacy': 'Privacy & Terms',
-    
+    "sidebar.resources": "Resources",
+    "sidebar.aboutUs": "About Us",
+    "sidebar.blog": "Blog",
+    "sidebar.careers": "Careers",
+    "sidebar.docs": "Docs",
+    "sidebar.privacy": "Privacy & Terms",
+
     // Hero
-    'hero.title': 'OranAI',
-    'hero.subtitle': 'AI for Integrated Marketing Intelligence',
-    'hero.description': 'From brand insight to global execution, powered by multimodal AI',
-    'hero.exploreSolution': 'Explore Solution',
-    'hero.viewModels': 'View Models',
-    
+    "hero.title": "OranAI",
+    "hero.subtitle": "AI for Integrated Marketing Intelligence",
+    "hero.description":
+      "From brand insight to global execution, powered by multimodal AI",
+    "hero.exploreSolution": "Explore Solution",
+    "hero.viewModels": "View Models",
+
     // Common
-    'common.search': 'Search',
-    'common.filter': 'Filter',
-    'common.all': 'All',
-    'common.submit': 'Submit',
-    
+    "common.search": "Search",
+    "common.filter": "Filter",
+    "common.all": "All",
+    "common.submit": "Submit",
+
     // Solution Page
-    'solution.know': 'KNOW',
-    'solution.build': 'BUILD',
-    'solution.manage': 'MANAGE',
-    'solution.scale': 'SCALE',
-    'solution.yourBrand': 'your brand',
-    'solution.marketInsight': 'Market Insight',
-    'solution.consumerInsight': 'Consumer Insight',
-    'solution.healthInsight': 'Health Insight',
-    'solution.marketInsightDesc': 'Real-time social media insights — trend tracking, analysis, competitor monitoring',
-    'solution.consumerInsightDesc': 'Deep mining based on user behavior and feedback — demand pain point identification, user persona profiling, consumption preference prediction',
-    'solution.healthInsightDesc': 'Brand health monitoring — reputation analysis, sentiment tracking, crisis early warning',
-    'solution.brandPositioning': 'Brand Positioning',
-    'solution.brandStory': 'Brand Story',
-    'solution.contentGeneration': 'Content Generation',
-    'solution.brandPositioningDesc': 'AI-powered brand positioning strategy — market analysis, differentiation, value proposition',
-    'solution.brandStoryDesc': 'Compelling brand narrative creation — storytelling, emotional connection, brand voice',
-    'solution.contentGenerationDesc': 'Multi-format content generation — text, images, videos, creative assets',
-    'solution.socialMedia': 'Social Media',
-    'solution.community': 'Community',
-    'solution.dam': 'Digital Assets',
-    'solution.sentiment': 'Sentiment Analysis',
-    'solution.compliance': 'Compliance',
-    'solution.customerService': 'Customer Service',
-    'solution.socialMediaDesc': 'Unified social media management — content scheduling, performance analytics, engagement',
-    'solution.damDesc': 'Digital asset management — content library, version control, brand consistency',
-    'solution.sentimentDesc': 'Real-time sentiment monitoring — public opinion analysis, crisis response',
-    'solution.seo': 'GEO / SEO',
-    'solution.ads': 'Ads',
-    'solution.predictiveGrowth': 'Predictive Growth',
-    'solution.seoDesc': 'Search optimization strategy — keyword analysis, content optimization, ranking improvement',
-    'solution.adsDesc': 'Intelligent advertising — audience targeting, creative optimization, ROI maximization',
-    'solution.predictiveGrowthDesc': 'Data-driven growth prediction — market trends, user behavior, business forecasting',
-    'solution.knowDesc': 'Market, Consumer & Competitive Intelligence',
-    'solution.buildDesc': 'AI-generated Content & Storytelling',
-    'solution.manageDesc': 'Assets, Campaigns & Performance Control',
-    'solution.scaleDesc': 'GEO / SEO / Ads / Predictive Growth',
-    
+    "solution.know": "KNOW",
+    "solution.build": "BUILD",
+    "solution.manage": "MANAGE",
+    "solution.scale": "SCALE",
+    "solution.yourBrand": "your brand",
+    "solution.marketInsight": "Market Insight",
+    "solution.consumerInsight": "Consumer Insight",
+    "solution.healthInsight": "Health Insight",
+    "solution.marketInsightDesc":
+      "Real-time social media insights — trend tracking, analysis, competitor monitoring",
+    "solution.consumerInsightDesc":
+      "Deep mining of user behavior and feedback — pain points, personas, preference prediction",
+    "solution.healthInsightDesc":
+      "Brand health monitoring — reputation analysis, sentiment tracking, crisis early warning",
+    "solution.brandPositioning": "Brand Positioning",
+    "solution.brandStory": "Brand Story",
+    "solution.contentGeneration": "Content Generation",
+    "solution.brandPositioningDesc":
+      "AI-powered positioning — market analysis, differentiation, value proposition",
+    "solution.brandStoryDesc":
+      "Compelling narratives — storytelling, emotional connection, brand voice",
+    "solution.contentGenerationDesc":
+      "Multi-format generation — text, images, videos, creative assets",
+    "solution.socialMedia": "Social Media",
+    "solution.community": "Community",
+    "solution.dam": "Digital Assets",
+    "solution.sentiment": "Sentiment Analysis",
+    "solution.compliance": "Compliance",
+    "solution.customerService": "Customer Service",
+    "solution.socialMediaDesc":
+      "Unified social media management — scheduling, analytics, engagement",
+    "solution.damDesc":
+      "Digital asset management — content library, version control, brand consistency",
+    "solution.sentimentDesc":
+      "Real-time sentiment monitoring — public opinion analysis, crisis response",
+    "solution.seo": "GEO / SEO",
+    "solution.ads": "Ads",
+    "solution.predictiveGrowth": "Predictive Growth",
+    "solution.seoDesc":
+      "Search optimization — keywords, content optimization, ranking improvement",
+    "solution.adsDesc":
+      "Intelligent advertising — audience targeting, creative optimization, ROI maximization",
+    "solution.predictiveGrowthDesc":
+      "Data-driven growth prediction — trends, behavior, forecasting",
+    "solution.knowDesc": "Market, Consumer & Competitive Intelligence",
+    "solution.buildDesc": "AI-generated Content & Storytelling",
+    "solution.manageDesc": "Assets, Campaigns & Performance Control",
+    "solution.scaleDesc": "GEO / SEO / Ads / Predictive Growth",
+
     // Models Page
-    'models.title': 'MODELS',
-    'models.filter': 'Filter',
-    'models.reset': 'Reset',
-    'models.nlp': 'NLP',
-    'models.multimodal': 'Multimodal',
-    'models.generation': 'Generation',
-    'models.vision': 'Vision',
-    'models.audio': 'Audio',
-    'models.enterprise': 'Enterprise',
-    'models.supplier': 'Supplier',
-    'models.allSuppliers': 'All Suppliers',
-    'models.billingType': 'Billing Type',
-    'models.allTypes': 'All Types',
-    'models.usageBilling': 'Usage-based',
-    'models.timesBilling': 'Per-call',
-    'models.endpointType': 'Endpoint Type',
-    'models.allEndpoints': 'All Endpoints',
-    'models.expand': 'Show more',
-    'models.collapse': 'Collapse',
-    'models.unknownSupplier': 'Unknown',
-    
+    "models.title": "MODELS",
+    "models.filter": "Filter",
+    "models.reset": "Reset",
+    "models.nlp": "NLP",
+    "models.multimodal": "Multimodal",
+    "models.generation": "Generation",
+    "models.vision": "Vision",
+    "models.audio": "Audio",
+    "models.enterprise": "Enterprise",
+    "models.supplier": "Supplier",
+    "models.allSuppliers": "All Suppliers",
+    "models.billingType": "Billing Type",
+    "models.allTypes": "All Types",
+    "models.usageBilling": "Usage-based",
+    "models.timesBilling": "Per-call",
+    "models.endpointType": "Endpoint Type",
+    "models.allEndpoints": "All Endpoints",
+    "models.expand": "Show more",
+    "models.collapse": "Collapse",
+    "models.unknownSupplier": "Unknown",
+
     // Products Page
-    'products.title': 'PHOTOG',
-    'products.headline': 'Your Smartest AI-Marketing Team',
-    'products.subheadline': 'Always online, Always professional',
-    'products.insight': 'Insight',
-    'products.strategy': 'Strategy',
-    'products.material': 'Content',
-    'products.operation': 'Operation',
-    'products.imageGen': 'Image Generation',
-    'products.videoGen': 'Video Generation',
-    'products.digitalHuman': 'Digital Human',
-    'products.requestDemo': 'Request Demo',
-    'products.geoMonitor': 'GEO Monitor',
-    'products.brandHealth': 'Brand Health',
-    'products.brandStrategy': 'Brand Strategy',
-    'products.chatPlaceholder': 'Generate a Xiaohongshu post',
-    'products.webSearch': 'Web Search',
-    'products.thinking': 'Thinking',
-    'products.redbook': 'Xiaohongshu',
-    'products.youtube': 'Youtube',
-    'products.tiktok': 'TikTok',
-    'products.amazon': 'Amazon',
-    'products.semrush': 'Semrush',
-    
-    // Library Page
-    'library.title': 'LIBRARY',
-    'library.all': 'All',
-    'library.food': 'Food & Beverage',
-    'library.auto': 'Automotive',
-    'library.fashion': 'Fashion & Beauty',
-    'library.digital': '3C Digital',
-    'library.finance': 'Financial Services',
-    'library.personal': 'Personal Care',
-    'library.culture': 'Culture & Creative',
-    'library.platform': 'Platform Marketing',
-    'library.diy': 'Handmade DIY',
-    'library.image': 'Image',
-    'library.video': 'Video',
-    'library.audio': 'Audio',
-    'library.template': 'Template',
-    'library.download': 'Download',
-    'library.replicate': 'Replicate Viral',
-    'library.videoType': 'Type',
-    'library.purpose': 'Purpose',
-    'library.audience': 'Target Audience',
-    'library.aiAnalysis': 'AI Technology',
-    'library.watchVideo': 'Watch Video',
-    'library.downloadVideo': 'Download Video',
-    // Coca-Cola
-    'library.cocacola.title': 'Coca-Cola: The Holiday Magic is Coming',
-    'library.cocacola.type': 'Holiday Emotional Marketing',
-    'library.cocacola.purpose': 'Strengthen brand-holiday association, stimulate seasonal consumption',
-    'library.cocacola.audience': 'Family consumers, holiday gift buyers',
-    'library.cocacola.aiAnalysis': 'AI animation generation (e.g., Santa Claus dynamic design)',
-    // McDonald's
-    'library.mcdonalds.title': "McDonald's: A Taste of Tomorrow",
-    'library.mcdonalds.type': 'Futuristic Tech Ad',
-    'library.mcdonalds.purpose': 'Shape brand innovation image, attract digital generation',
-    'library.mcdonalds.audience': 'Tech enthusiasts, young fast-food consumers',
-    'library.mcdonalds.aiAnalysis': 'AI predictive generation (e.g., future restaurant scene simulation)',
-    
-    // Footer
-    'footer.copyright': '© 2024 OranAI. All rights reserved.',
+    "products.title": "PHOTOG",
+    "products.headline": "Your Smartest AI-Marketing Team",
+    "products.subheadline": "Always online, Always professional",
+    "products.insight": "Insight",
+    "products.strategy": "Strategy",
+    "products.material": "Content",
+    "products.operation": "Operation",
+    "products.imageGen": "Image Generation",
+    "products.videoGen": "Video Generation",
+    "products.digitalHuman": "Digital Human",
+    "products.requestDemo": "Request Demo",
+    "products.geoMonitor": "GEO Monitor",
+    "products.brandHealth": "Brand Health",
+    "products.brandStrategy": "Brand Strategy",
+    "products.chatPlaceholder": "Generate a Xiaohongshu post",
+    "products.webSearch": "Web Search",
+    "products.thinking": "Thinking",
+    "products.redbook": "Xiaohongshu",
+    "products.youtube": "Youtube",
+    "products.tiktok": "TikTok",
+    "products.amazon": "Amazon",
+    "products.semrush": "Semrush",
+
+    // Library - labels
+    "library.title": "LIBRARY",
+    "library.all": "All",
+    "library.food": "Food & Beverage",
+    "library.auto": "Automotive",
+    "library.fashion": "Fashion & Beauty",
+    "library.digital": "3C Digital",
+    "library.finance": "Financial Services",
+    "library.personal": "Personal Care",
+    "library.culture": "Culture & Creative",
+    "library.platform": "Platform Marketing",
+    "library.diy": "Handmade DIY",
+    "library.image": "Image",
+    "library.video": "Video",
+    "library.audio": "Audio",
+    "library.template": "Template",
+    "library.download": "Download",
+    "library.replicate": "Replicate Viral",
+    "library.videoType": "Type",
+    "library.purpose": "Purpose",
+    "library.audience": "Target Audience",
+    "library.aiAnalysis": "AI Technology",
+    "library.watchVideo": "Watch Video",
+    "library.downloadVideo": "Download Video",
+
+    // Library items (EN)
+    "library.cocacola.title": "Coca-Cola: The Holiday Magic is Coming",
+    "library.cocacola.type": "Holiday emotional marketing",
+    "library.cocacola.purpose":
+      "Strengthen brand-holiday association, stimulate seasonal consumption",
+    "library.cocacola.audience": "Family consumers, holiday gift buyers",
+    "library.cocacola.aiAnalysis":
+      "AI animation generation (e.g., Santa Claus dynamic design)",
+
+    "library.mcdonalds.title": "McDonald's: A Taste of Tomorrow",
+    "library.mcdonalds.type": "Futuristic tech ad",
+    "library.mcdonalds.purpose":
+      "Shape brand innovation image, attract digital generation",
+    "library.mcdonalds.audience": "Tech enthusiasts, young fast-food consumers",
+    "library.mcdonalds.aiAnalysis":
+      "AI predictive generation (e.g., future restaurant scene simulation)",
+
+    "library.nike.title": "Audiovisual con IA: Nike's AI-Powered Commercial",
+    "library.nike.type": "AI sports dynamic ad",
+    "library.nike.purpose":
+      "Highlight product performance with AI motion capture detail",
+    "library.nike.audience": "Athletes, fitness communities",
+    "library.nike.aiAnalysis":
+      "Motion trajectory AI analysis with slow-motion synthesis",
+
+    "library.jeremyRazors.title": "Jeremy's Razors Commercial",
+    "library.jeremyRazors.type": "AI razor brand creative ad",
+    "library.jeremyRazors.purpose":
+      "Highlight sharpness and comfort to attract male consumers",
+    "library.jeremyRazors.audience":
+      "Male consumers, personal-care marketers, AI commercial creators",
+    "library.jeremyRazors.aiAnalysis":
+      "Stable Diffusion or Blender metal polish; Adobe Firefly style lock",
+
+    "library.zaraDor.title": "The Dor Brothers: Zara Concept Remix",
+    "library.zaraDor.type": "Brand concept ad",
+    "library.zaraDor.purpose":
+      "Portfolio or AI ad experiment to attract brands/platforms",
+    "library.zaraDor.audience": "Zara fans, AI video tech lovers, digital artists",
+    "library.zaraDor.aiAnalysis":
+      "Runway Gen-2 or Veo 3 plus Stable Diffusion style consistency",
+
+    "library.hiamiHooch.title": "The Dor Brothers: Hiami Hooch",
+    "library.hiamiHooch.type": "Fictional beverage concept ad",
+    "library.hiamiHooch.purpose": "Test AI potential in beverage marketing",
+    "library.hiamiHooch.audience":
+      "Cocktail lovers, AIGC experimenters, beverage marketers",
+    "library.hiamiHooch.aiAnalysis":
+      "AI liquid simulation; 3D modeling and rendering; AI voiceover",
+
+    "library.dorSoda.title": "The Dor Brothers: Soda Water Ad",
+    "library.dorSoda.type": "AI-generated concept ad",
+    "library.dorSoda.purpose":
+      "Show AI video capability to attract brands and peers",
+    "library.dorSoda.audience":
+      "AI practitioners, digital marketers, soda water consumers",
+    "library.dorSoda.aiAnalysis":
+      "Midjourney/SD stills plus Runway animation; Veo 3 for consistency",
+
+    "library.roguePerfume.title": "The Dor Brothers: Rogue Perfume",
+    "library.roguePerfume.type": "AI perfume concept ad",
+    "library.roguePerfume.purpose":
+      "Show luxury fragrance aesthetics and attract brands",
+    "library.roguePerfume.audience": "AI fans, marketers, perfume consumers",
+    "library.roguePerfume.aiAnalysis":
+      "Midjourney, Gen-3, Magnific AI, Veo 3 video generation",
+
+    "library.kfcRemix.title": "Krishna Pasi: KFC Remix",
+    "library.kfcRemix.type": "Food ad (UGC)",
+    "library.kfcRemix.purpose":
+      "Show how AI reshapes fast-food ads and personal creativity",
+    "library.kfcRemix.audience":
+      "KFC consumers, AI food creators, fast-food marketers",
+    "library.kfcRemix.aiAnalysis":
+      "Food rendering boost; multi-angle motion shots; AI voice clone",
+
+    "library.volvoLife.title": 'Laszlo Gaal: Volvo "For Life"',
+    "library.volvoLife.type": "Automotive concept ad",
+    "library.volvoLife.purpose": "Explore AI storytelling for safety and future tech",
+    "library.volvoLife.audience":
+      "Volvo owners, car tech enthusiasts, AI video experimenters",
+    "library.volvoLife.aiAnalysis":
+      "Future city/weather simulation; vehicle tracking; AI narration",
+
+    "library.adidasFloral.title": "RabbitHole: Adidas Floral",
+    "library.adidasFloral.type": "AI sports-fashion ad",
+    "library.adidasFloral.purpose":
+      "Test AI creative use in floral sports visuals",
+    "library.adidasFloral.audience":
+      "Adidas fans, AI digital artists, apparel designers",
+    "library.adidasFloral.aiAnalysis":
+      "Style transfer fusion with dynamic lighting and shading",
+
+    "library.chinguCafe.title": "RabbitHole: Chingu Cafe",
+    "library.chinguCafe.type": "AI cafe brand concept ad",
+    "library.chinguCafe.purpose":
+      "Explore emotional storytelling for beverage marketing",
+    "library.chinguCafe.audience":
+      "Coffee lovers, K-culture fans, AI creative experimenters",
+    "library.chinguCafe.aiAnalysis":
+      "Face animation detail; coffee liquid and steam simulation",
+
+    "library.invideoSpark.title": 'RabbitHole: InVideo "The Spark"',
+    "library.invideoSpark.type": "AI creative concept ad",
+    "library.invideoSpark.purpose":
+      "Show InVideo visual expression in AI ad creation",
+    "library.invideoSpark.audience":
+      "AI ad creators, inspiration-focused viewers",
+    "library.invideoSpark.aiAnalysis":
+      "Topaz Gigapixel/Video AI; Pika Labs color and light grading",
+
+    "library.netflixBite.title": 'RabbitHole: Netflix "The Sacred Bite"',
+    "library.netflixBite.type": "AI streaming promo ad",
+    "library.netflixBite.purpose":
+      "Reinforce Netflix sensory experience with cross-scene creativity",
+    "library.netflixBite.audience":
+      "Netflix users, film lovers, streaming consumers, ad creatives",
+    "library.netflixBite.aiAnalysis":
+      "RunwayML grading; Midjourney scenes; Adobe suite; Topaz detail",
+
+    "library.gotMilk.title": "Niccyan: Got Milk Remix",
+    "library.gotMilk.type": "AI cookie brand concept ad",
+    "library.gotMilk.purpose": "Reinforce healthy-essential brand perception",
+    "library.gotMilk.audience":
+      "Got Milk audience, families, dairy marketers, remix fans",
+    "library.gotMilk.aiAnalysis":
+      "Stable Diffusion or Adobe Firefly for refined visuals",
+
+    "library.durex.title": "Haggar Shoval: Durex AI Spot",
+    "library.durex.type": "AI product promotion",
+    "library.durex.purpose":
+      "Balance functional and emotional expression in sensitive category",
+    "library.durex.audience":
+      "Durex consumers, FMCG marketers, AI ad creators",
+    "library.durex.aiAnalysis":
+      "Midjourney/SD mood; Runway Gen-2 low-saturation style",
+
+    "library.adidasBlue.title": "Billy Boman: Beyond The Blue (Adidas)",
+    "library.adidasBlue.type": "AI sports concept ad",
+    "library.adidasBlue.purpose":
+      "Show AI creative potential for sports brand spirit",
+    "library.adidasBlue.audience":
+      "Adidas fans, sports brand marketers, AI ad creators, art lovers",
+    "library.adidasBlue.aiAnalysis":
+      "Midjourney + RunwayML + Topaz; still-to-motion workflow",
+
+    "library.porscheDream.title": "Laszlo Gaal: Porsche Concept",
+    "library.porscheDream.type": "AI luxury automotive ad",
+    "library.porscheDream.purpose":
+      "Show AI visual expression for high-end cars",
+    "library.porscheDream.audience":
+      "Porsche fans, luxury car lovers, auto marketers, AI creators",
+    "library.porscheDream.aiAnalysis":
+      "Veo2; SD + car LoRA; Adobe Firefly lighting",
+
+    "library.lincoln.title": "Jeremy Haccoun: LINCOLN Concept",
+    "library.lincoln.type": "AI luxury automotive ad",
+    "library.lincoln.purpose": "Show design aesthetics and luxury attributes",
+    "library.lincoln.audience":
+      "Lincoln fans, premium buyers, auto marketers, AI ad creators",
+    "library.lincoln.aiAnalysis":
+      "Runway Gen-3 driving dynamics; SD/Blender refinement",
+
+    "library.realThing.title": 'Anima Studios TV: Coca-Cola "The Real Thing"',
+    "library.realThing.type": "AI carbonated drink concept ad",
+    "library.realThing.purpose":
+      "Blend classic theme with AI innovation to spark resonance",
+    "library.realThing.audience":
+      "Coca-Cola consumers, FMCG marketers, AI ad creators, classic fans",
+    "library.realThing.aiAnalysis":
+      "Runway Gen-3 dynamics; Canva/PS AI red tone control; Topaz detail",
+
+    "library.flowerTea.title": 'Bi Yao: Flower Tea "Four Seasons Zen White"',
+    "library.flowerTea.type": "AI cultural aesthetic ad",
+    "library.flowerTea.purpose":
+      "Promote tea culture with seasonal wellness concept",
+    "library.flowerTea.audience": "Tea lovers, guofeng culture audience",
+    "library.flowerTea.aiAnalysis":
+      "AI guofeng rendering with TCM knowledge graph",
+
+    "library.warmFurball.title": "Wang Tianwang: Warm Furball for Winter",
+    "library.warmFurball.type": "Emotional marketing + product showcase",
+    "library.warmFurball.purpose":
+      "Use seasonal topic to boost views and stickiness",
+    "library.warmFurball.audience":
+      "DIY lovers, Gen Z consumers, AI enthusiasts",
+    "library.warmFurball.aiAnalysis":
+      "AI script generation (assumed); Veo 3 dynamic rendering/style",
+
+    "library.lenovoYouth.title": "N_S600: Lenovo Youth Day Concept",
+    "library.lenovoYouth.type": "Theme TVC-level AI ad",
+    "library.lenovoYouth.purpose":
+      "Iterate shots to attract AI and advertising attention",
+    "library.lenovoYouth.audience":
+      "Youth Day audience, Lenovo fans, AI/TVC creators, content makers",
+    "library.lenovoYouth.aiAnalysis":
+      "MJ/SD assets plus Runway motion; heavy shot selection; unified tone",
+
+    "library.pocari.title": "Lu Qile: Pocari Sweat Remix",
+    "library.pocari.type": "AI sports drink ad",
+    "library.pocari.purpose":
+      "Explore AI MV workflow and solve high-dynamic pain points",
+    "library.pocari.audience":
+      "Pocari fans, AI video creators, AIGC enthusiasts",
+    "library.pocari.aiAnalysis":
+      "Pseudo-TVC texture; AI music; workflow for consistency",
+
+    "library.xiaomiBuds.title": "Hongri AIGC: Xiaomi Buds 5 Pro Remix",
+    "library.xiaomiBuds.type": "AI earbud concept ad",
+    "library.xiaomiBuds.purpose":
+      "Explore AI commercial possibilities for earbuds",
+    "library.xiaomiBuds.audience":
+      "Xiaomi fans, AI ad creators, earbud enthusiasts, AIGC practitioners",
+    "library.xiaomiBuds.aiAnalysis":
+      "99% AI; fantasy scenes and poetic visuals; sound-theme imagery",
+
+    "library.ysl.title": "Mashang AIGC: Saint Laurent Remix",
+    "library.ysl.type": "AIGC artistic fashion ad",
+    "library.ysl.purpose":
+      "Attract fashion and AIGC audiences, grow influence",
+    "library.ysl.audience":
+      "Fashion lovers, Saint Laurent fans, AIGC enthusiasts",
+    "library.ysl.aiAnalysis":
+      "GAN/diffusion style transfer aligning brand style",
+
+    "library.heytea.title": "Mashang AIGC: HeyTea Guava Grape Remix",
+    "library.heytea.type": "AI milk-tea concept ad",
+    "library.heytea.purpose":
+      "Show beverage visuals and highlight key selling points",
+    "library.heytea.audience":
+      "HeyTea consumers, milk tea lovers, beverage marketers, AIGC creators",
+    "library.heytea.aiAnalysis":
+      "Fruit texture rendering; brand visual alignment; summer ambience",
+
+    "library.guming.title": "Mashang AIGC: GuMing Milk Tea Remix",
+    "library.guming.type": "AI guofeng milk tea concept ad",
+    "library.guming.purpose":
+      "Show beverage visuals with guofeng highlights",
+    "library.guming.audience":
+      "GuMing consumers, milk tea lovers, beverage marketers, AIGC creators",
+    "library.guming.aiAnalysis":
+      "Guofeng character and scene; detailed color/texture rendering",
+
+    "library.taobao.title": 'Taobao: Maker Festival "Chat About the Future?"',
+    "library.taobao.type": "AI interactive marketing ad",
+    "library.taobao.purpose":
+      "Promote Maker Festival tech vibe, attract young users",
+    "library.taobao.audience":
+      "Gen Z, tech geeks, ecommerce professionals",
+    "library.taobao.aiAnalysis":
+      "AI dialogue generation; virtual host/digital human (assumed)",
+
+    "library.oreoCosmos.title": "Oreo: Cosmic Oreo",
+    "library.oreoCosmos.type": "Sci-fi food ad",
+    "library.oreoCosmos.purpose": "Space theme to attract kids and families",
+    "library.oreoCosmos.audience": "Kids, sci-fi fans, short-video users",
+    "library.oreoCosmos.aiAnalysis":
+      "Space scene generation; zero-gravity floating display",
+
+    "library.snickers.title": "Billy Boman: Snickers Remix",
+    "library.snickers.type": "AI food concept ad",
+    "library.snickers.purpose":
+      "Show AI food ad creativity to attract brands",
+    "library.snickers.audience":
+      "Snickers consumers, snack marketers, AI ad creators, AIGC lovers",
+    "library.snickers.aiAnalysis":
+      "95% Veo 3, 5% Seedance; ElevenLabs; AE + Topaz upscaling",
+
+    "library.felix.title": "Billy Boman: Felix Series Remix",
+    "library.felix.type": "AI food concept ad",
+    "library.felix.purpose": "Build portfolio to attract food brands",
+    "library.felix.audience":
+      "Felix consumers, food marketers, AI ad creators, AIGC fans",
+    "library.felix.aiAnalysis":
+      "OpenAI Sora 2; material detail rendering; dynamic scenes",
+
+    "library.redbull.title": "Billy Boman: Red Bull Remix",
+    "library.redbull.type": "AI energy drink ad",
+    "library.redbull.purpose":
+      "Show high-dynamic stylized beverage work to attract brands",
+    "library.redbull.audience":
+      "Red Bull consumers, extreme sports fans, FMCG marketers, AI creators",
+    "library.redbull.aiAnalysis":
+      "95% Flow by Google; 5% Seedance; AE color and transitions",
+
+    "library.benefit.title": 'Billy Boman: Benefit "Bad Girl Bounce"',
+    "library.benefit.type": "AI beauty booster ad",
+    "library.benefit.purpose":
+      "Show cosmetic visuals and highlight product",
+    "library.benefit.audience":
+      "Benefit users, beauty lovers, cosmetic marketers, AI ad creators",
+    "library.benefit.aiAnalysis":
+      "LumaLabsAI; texture rendering; makeup simulation; sweet style",
+
+    "library.kalshi.title": "PJ Ace: Kalshi Ad",
+    "library.kalshi.type": "AI finance/prediction platform ad",
+    "library.kalshi.purpose": "Show platform advantages and attract new users",
+    "library.kalshi.audience":
+      "Investors, prediction platform users, finance marketers, AI creators",
+    "library.kalshi.aiAnalysis":
+      "Stable Diffusion LoRA trained on finance scenes for consistency",
+
+    "library.im8.title": "PJ Ace: Beckham's IM8 Wellness Drink",
+    "library.im8.type": "Health beverage commercial ad",
+    "library.im8.purpose":
+      "Promote IM8 and show AI visuals in co-branded marketing",
+    "library.im8.audience":
+      "Beckham fans, IM8 target audience, marketers, AI creators",
+    "library.im8.aiAnalysis":
+      "Possible digital human; MJ/SD scenes; Runway Gen-2 motion",
+
+    "library.wistiaLenny.title":
+      "Billy Woodward: Lenny's Big Delivery (Wistia)",
+    "library.wistiaLenny.type": "AI narrative platform promo",
+    "library.wistiaLenny.purpose":
+      "Show Wistia capability and AI storytelling",
+    "library.wistiaLenny.audience":
+      "Marketers, content creators, fun ad lovers, AI storytellers",
+    "library.wistiaLenny.aiAnalysis":
+      "nano banana + Midjourney + Seedance + Kling 2.5 + Suno + ElevenLabs (mock)",
+
+    "library.guerlain.title":
+      'Guerlain: Bee Bottle "Born in 1853. Made for the future"',
+    "library.guerlain.type": "AI + heritage luxury ad",
+    "library.guerlain.purpose":
+      "Blend heritage with AI to reinforce innovative luxury image",
+    "library.guerlain.audience":
+      "Luxury consumers, beauty collectors, AI art enthusiasts",
+    "library.guerlain.aiAnalysis":
+      "Material rendering (metal sheen); 3D + AI animation for bee path",
+
+    "library.bosie.title": "bosie: THE ERA OF bosie",
+    "library.bosie.type": "AI fashion brand ad",
+    "library.bosie.purpose":
+      "Fuse sci-fi and myth to shape bold, diverse brand image",
+    "library.bosie.audience":
+      "Young individualists, new-brand watchers, ad creatives, sci-fi/myth fans",
+    "library.bosie.aiAnalysis":
+      "Traditional creative + production; sci-fi sets with myth visual design",
   },
   zh: {
     // Navigation
-    'nav.solution': '解决方案',
-    'nav.models': '模型',
-    'nav.products': '产品',
-    'nav.library': '素材广场',
-    'nav.signIn': '登录',
-    'nav.contactUs': '联系我们',
-    
+    "nav.solution": "解决方案",
+    "nav.models": "模型",
+    "nav.products": "产品",
+    "nav.library": "素材广场",
+    "nav.signIn": "登录",
+    "nav.contactUs": "联系我们",
+
     // Sidebar
-    'sidebar.resources': '资源中心',
-    'sidebar.aboutUs': '关于我们',
-    'sidebar.blog': '博客',
-    'sidebar.careers': '招贤纳士',
-    'sidebar.docs': '文档',
-    'sidebar.privacy': '隐私与条款',
-    
+    "sidebar.resources": "资源中心",
+    "sidebar.aboutUs": "关于我们",
+    "sidebar.blog": "博客",
+    "sidebar.careers": "招贤纳士",
+    "sidebar.docs": "文档",
+    "sidebar.privacy": "隐私与条款",
+
     // Hero
-    'hero.title': 'OranAI',
-    'hero.subtitle': '整合营销智能AI',
-    'hero.description': '从品牌洞察到全球执行，由多模态AI驱动',
-    'hero.exploreSolution': '探索解决方案',
-    'hero.viewModels': '查看模型',
-    
+    "hero.title": "OranAI",
+    "hero.subtitle": "整合营销智能 AI",
+    "hero.description": "从品牌洞察到全球执行，由多模态 AI 驱动",
+    "hero.exploreSolution": "探索解决方案",
+    "hero.viewModels": "查看模型",
+
     // Common
-    'common.search': '搜索',
-    'common.filter': '筛选',
-    'common.all': '全部',
-    'common.submit': '提交',
-    
+    "common.search": "搜索",
+    "common.filter": "筛选",
+    "common.all": "全部",
+    "common.submit": "提交",
+
     // Solution Page
-    'solution.know': 'KNOW',
-    'solution.build': 'BUILD',
-    'solution.manage': 'MANAGE',
-    'solution.scale': 'SCALE',
-    'solution.yourBrand': 'your brand',
-    'solution.marketInsight': '市场洞察',
-    'solution.consumerInsight': '消费者洞察',
-    'solution.healthInsight': '健康洞察',
-    'solution.marketInsightDesc': '基于社媒全域内容的实时洞察——热点追踪，趋势分析，竞品监测',
-    'solution.consumerInsightDesc': '基于用户行为与反馈的深度挖掘——需求痛点识别，用户画像描摹，消费偏好预测',
-    'solution.healthInsightDesc': '品牌健康监测——口碑分析，情感追踪，危机预警',
-    'solution.brandPositioning': '品牌定位',
-    'solution.brandStory': '品牌故事',
-    'solution.contentGeneration': '内容生成',
-    'solution.brandPositioningDesc': 'AI驱动的品牌定位策略——市场分析，差异化，价值主张',
-    'solution.brandStoryDesc': '引人入胜的品牌叙事创作——故事讲述，情感连接，品牌声音',
-    'solution.contentGenerationDesc': '多格式内容生成——文本，图片，视频，创意素材',
-    'solution.socialMedia': '社交媒体',
-    'solution.community': '社区管理',
-    'solution.dam': '数字资产',
-    'solution.sentiment': '舆情分析',
-    'solution.compliance': '合规管理',
-    'solution.customerService': '客户服务',
-    'solution.socialMediaDesc': '统一社交媒体管理——内容排期，绩效分析，互动管理',
-    'solution.damDesc': '数字资产管理——内容库，版本控制，品牌一致性',
-    'solution.sentimentDesc': '实时舆情监测——公众舆论分析，危机响应',
-    'solution.seo': 'GEO / SEO',
-    'solution.ads': '广告投放',
-    'solution.predictiveGrowth': '预测增长',
-    'solution.seoDesc': '搜索优化策略——关键词分析，内容优化，排名提升',
-    'solution.adsDesc': '智能广告投放——受众定向，创意优化，ROI最大化',
-    'solution.predictiveGrowthDesc': '数据驱动的增长预测——市场趋势，用户行为，业务预测',
-    'solution.knowDesc': '市场、消费者与竞争情报',
-    'solution.buildDesc': 'AI生成内容与品牌故事',
-    'solution.manageDesc': '资产、营销活动与绩效控制',
-    'solution.scaleDesc': 'GEO / SEO / 广告 / 预测增长',
-    
+    "solution.know": "KNOW",
+    "solution.build": "BUILD",
+    "solution.manage": "MANAGE",
+    "solution.scale": "SCALE",
+    "solution.yourBrand": "your brand",
+    "solution.marketInsight": "市场洞察",
+    "solution.consumerInsight": "消费者洞察",
+    "solution.healthInsight": "健康洞察",
+    "solution.marketInsightDesc": "基于社媒全域内容的实时洞察——热点、趋势、竞品监测",
+    "solution.consumerInsightDesc": "基于用户行为与反馈的深挖——痛点识别、画像、偏好预测",
+    "solution.healthInsightDesc": "品牌健康监测——口碑分析、情感追踪、危机预警",
+    "solution.brandPositioning": "品牌定位",
+    "solution.brandStory": "品牌故事",
+    "solution.contentGeneration": "内容生成",
+    "solution.brandPositioningDesc": "AI 驱动的定位策略——市场分析、差异化、价值主张",
+    "solution.brandStoryDesc": "动人的品牌叙事——故事、情感连接、品牌声音",
+    "solution.contentGenerationDesc": "多格式生成——文本、图片、视频、创意资产",
+    "solution.socialMedia": "社交媒体",
+    "solution.community": "社区管理",
+    "solution.dam": "数字资产",
+    "solution.sentiment": "舆情分析",
+    "solution.compliance": "合规管理",
+    "solution.customerService": "客户服务",
+    "solution.socialMediaDesc": "统一社媒管理——排期、分析、互动",
+    "solution.damDesc": "数字资产管理——内容库、版本控制、品牌一致性",
+    "solution.sentimentDesc": "实时舆情监测——舆论分析、危机响应",
+    "solution.seo": "GEO / SEO",
+    "solution.ads": "广告",
+    "solution.predictiveGrowth": "预测增长",
+    "solution.seoDesc": "搜索优化策略——关键词、内容优化、排名提升",
+    "solution.adsDesc": "智能投放——人群定向、创意优化、ROI 最大化",
+    "solution.predictiveGrowthDesc": "数据驱动的增长预测——趋势、行为、业务预测",
+    "solution.knowDesc": "市场、消费者与竞争情报",
+    "solution.buildDesc": "AI 生成内容与品牌故事",
+    "solution.manageDesc": "资产、活动与效果管控",
+    "solution.scaleDesc": "GEO / SEO / 广告 / 预测增长",
+
     // Models Page
-    'models.title': '模型',
-    'models.filter': '筛选',
-    'models.reset': '重置',
-    'models.nlp': '自然语言',
-    'models.multimodal': '多模态',
-    'models.generation': '生成',
-    'models.vision': '视觉',
-    'models.audio': '音频',
-    'models.enterprise': '企业级',
-    'models.supplier': '供应商',
-    'models.allSuppliers': '全部供应商',
-    'models.billingType': '计费类型',
-    'models.allTypes': '全部类型',
-    'models.usageBilling': '按量计费',
-    'models.timesBilling': '按次计费',
-    'models.endpointType': '端点类型',
-    'models.allEndpoints': '全部端点',
-    'models.expand': '展开更多',
-    'models.collapse': '收起',
-    'models.unknownSupplier': '未知供应商',
-    
+    "models.title": "模型",
+    "models.filter": "筛选",
+    "models.reset": "重置",
+    "models.nlp": "自然语言",
+    "models.multimodal": "多模态",
+    "models.generation": "生成",
+    "models.vision": "视觉",
+    "models.audio": "音频",
+    "models.enterprise": "企业级",
+    "models.supplier": "供应商",
+    "models.allSuppliers": "全部供应商",
+    "models.billingType": "计费类型",
+    "models.allTypes": "全部类型",
+    "models.usageBilling": "按量计费",
+    "models.timesBilling": "按次计费",
+    "models.endpointType": "端点类型",
+    "models.allEndpoints": "全部端点",
+    "models.expand": "展开更多",
+    "models.collapse": "收起",
+    "models.unknownSupplier": "未知供应商",
+
     // Products Page
-    'products.title': 'PHOTOG',
-    'products.headline': '你最聪明的AI营销团队',
-    'products.subheadline': '全天在线，始终专业',
-    'products.insight': '洞察',
-    'products.strategy': '策略',
-    'products.material': '素材',
-    'products.operation': '运营',
-    'products.imageGen': '图片生成',
-    'products.videoGen': '视频生成',
-    'products.digitalHuman': '数字人',
-    'products.requestDemo': '申请演示',
-    'products.geoMonitor': 'GEO监控平台',
-    'products.brandHealth': '品牌健康度',
-    'products.brandStrategy': '品牌策略',
-    'products.chatPlaceholder': '生成一个小红书帖子',
-    'products.webSearch': '联网搜索',
-    'products.thinking': '深度思考',
-    'products.redbook': '小红书',
-    'products.youtube': 'Youtube',
-    'products.tiktok': 'TikTok',
-    'products.amazon': 'Amazon',
-    'products.semrush': 'Semrush',
-    
-    // Library Page
-    'library.title': '素材广场',
-    'library.all': '全部',
-    'library.food': '食品饮料',
-    'library.auto': '汽车交通',
-    'library.fashion': '时尚美妆',
-    'library.digital': '3C数码',
-    'library.finance': '金融服务',
-    'library.personal': '个人护理',
-    'library.culture': '文化创意',
-    'library.platform': '平台推广',
-    'library.diy': '手工DIY',
-    'library.image': '图片',
-    'library.video': '视频',
-    'library.audio': '音频',
-    'library.template': '模板',
-    'library.download': '下载',
-    'library.replicate': '复刻爆款',
-    'library.videoType': '类型',
-    'library.purpose': '发布目的',
-    'library.audience': '目标受众',
-    'library.aiAnalysis': 'AI技术点',
-    'library.watchVideo': '观看视频',
-    'library.downloadVideo': '下载视频',
-    // Coca-Cola
-    'library.cocacola.title': '可口可乐：《The Holiday Magic is Coming》',
-    'library.cocacola.type': '节日情感营销',
-    'library.cocacola.purpose': '强化品牌节日关联，刺激季节性消费',
-    'library.cocacola.audience': '家庭消费者、节日礼品购买者',
-    'library.cocacola.aiAnalysis': 'AI动画生成（如圣诞老人动态设计）',
-    // McDonald's
-    'library.mcdonalds.title': '麦当劳：《A Taste of Tomorrow》',
-    'library.mcdonalds.type': '未来科技感广告',
-    'library.mcdonalds.purpose': '塑造品牌创新形象，吸引数字化一代',
-    'library.mcdonalds.audience': '科技爱好者、年轻快餐消费者',
-    'library.mcdonalds.aiAnalysis': 'AI预测生成（如未来餐厅场景模拟）',
-    
-    // Footer
-    'footer.copyright': '© 2024 OranAI. 保留所有权利。',
+    "products.title": "PHOTOG",
+    "products.headline": "你最聪明的 AI 营销团队",
+    "products.subheadline": "全天在线，始终专业",
+    "products.insight": "洞察",
+    "products.strategy": "策略",
+    "products.material": "素材",
+    "products.operation": "运营",
+    "products.imageGen": "图片生成",
+    "products.videoGen": "视频生成",
+    "products.digitalHuman": "数字人",
+    "products.requestDemo": "申请演示",
+    "products.geoMonitor": "GEO 监控平台",
+    "products.brandHealth": "品牌健康度",
+    "products.brandStrategy": "品牌策略",
+    "products.chatPlaceholder": "生成一个小红书帖子",
+    "products.webSearch": "联网搜索",
+    "products.thinking": "深度思考",
+    "products.redbook": "小红书",
+    "products.youtube": "Youtube",
+    "products.tiktok": "TikTok",
+    "products.amazon": "Amazon",
+    "products.semrush": "Semrush",
+
+    // Library - labels
+    "library.title": "素材广场",
+    "library.all": "全部",
+    "library.food": "食品饮料",
+    "library.auto": "汽车交通",
+    "library.fashion": "时尚美妆",
+    "library.digital": "3C 数码",
+    "library.finance": "金融服务",
+    "library.personal": "个人护理",
+    "library.culture": "文化创意",
+    "library.platform": "平台推广",
+    "library.diy": "手工 DIY",
+    "library.image": "图片",
+    "library.video": "视频",
+    "library.audio": "音频",
+    "library.template": "模板",
+    "library.download": "下载",
+    "library.replicate": "复制爆款",
+    "library.videoType": "类型",
+    "library.purpose": "发布目的",
+    "library.audience": "目标受众",
+    "library.aiAnalysis": "AI 技术点",
+    "library.watchVideo": "观看视频",
+    "library.downloadVideo": "下载视频",
+
+    // Library items (ZH)
+    "library.cocacola.title": "Coca-Cola：《The Holiday Magic is Coming》",
+    "library.cocacola.type": "节日情感营销",
+    "library.cocacola.purpose": "强化品牌节日关联，刺激季节性消费",
+    "library.cocacola.audience": "家庭消费者、节日礼品购买者",
+    "library.cocacola.aiAnalysis": "AI 动画生成（如圣诞老人动态设计）",
+
+    "library.mcdonalds.title": "McDonald's：《A Taste of Tomorrow》",
+    "library.mcdonalds.type": "未来科技感广告",
+    "library.mcdonalds.purpose": "塑造品牌创新形象，吸引数字化一代",
+    "library.mcdonalds.audience": "科技爱好者、年轻快餐消费者",
+    "library.mcdonalds.aiAnalysis": "AI 预测生成（如未来餐厅场景模拟）",
+
+    "library.nike.title": "Audiovisual con IA：Nike's AI-Powered Commercial",
+    "library.nike.type": "AI 运动动态广告",
+    "library.nike.purpose": "强调产品性能，通过 AI 捕捉运动员动作细节",
+    "library.nike.audience": "运动员、健身社群",
+    "library.nike.aiAnalysis": "运动轨迹 AI 分析与慢动作合成",
+
+    "library.jeremyRazors.title": "Jeremy's Razors 商业广告",
+    "library.jeremyRazors.type": "AI 剃须刀品牌创意广告",
+    "library.jeremyRazors.purpose": "突出锋利度与舒适度，吸引男性消费者",
+    "library.jeremyRazors.audience":
+      "男性消费者、个护营销人员、AI 商业广告创作者",
+    "library.jeremyRazors.aiAnalysis":
+      "Stable Diffusion/Blender 金属质感优化，Adobe Firefly 锁定硬朗风格",
+
+    "library.zaraDor.title": "The Dor Brothers：Zara 二创",
+    "library.zaraDor.type": "品牌概念广告",
+    "library.zaraDor.purpose": "作品集 / AI 广告实验，吸引品牌或平台关注",
+    "library.zaraDor.audience":
+      "Zara 粉丝、AI 视频技术爱好者、数字艺术创作者",
+    "library.zaraDor.aiAnalysis":
+      "Runway Gen-2 或 Veo 3 + Stable Diffusion 风格一致性",
+
+    "library.hiamiHooch.title": "The Dor Brothers：Hiami Hooch",
+    "library.hiamiHooch.type": "虚构饮料概念广告",
+    "library.hiamiHooch.purpose": "测试 AI 在饮料行业的营销潜力",
+    "library.hiamiHooch.audience": "调酒文化爱好者、AIGC 实验者、饮料营销人员",
+    "library.hiamiHooch.aiAnalysis": "AI 液体模拟，3D 建模与渲染，AI 配音",
+
+    "library.dorSoda.title": "The Dor Brothers：苏打水广告",
+    "library.dorSoda.type": "AI 生成概念广告",
+    "library.dorSoda.purpose": "展示 AI 视频能力，吸引品牌方和同行",
+    "library.dorSoda.audience": "AI 从业者、数字营销人、苏打水潜在消费者",
+    "library.dorSoda.aiAnalysis":
+      "Midjourney/SD 出图 + Runway 动画，Veo 3 保证人物一致性",
+
+    "library.roguePerfume.title": "The Dor Brothers：Rogue 香水",
+    "library.roguePerfume.type": "AI 香水概念广告",
+    "library.roguePerfume.purpose": "展示奢品香氛视觉，吸引品牌关注",
+    "library.roguePerfume.audience": "AI 爱好者、营销从业者、香水消费者",
+    "library.roguePerfume.aiAnalysis":
+      "Midjourney、Gen-3、Magnific AI、Veo 3 视频生成",
+
+    "library.kfcRemix.title": "Krishna Pasi：肯德基二创",
+    "library.kfcRemix.type": "食品广告（UGC）",
+    "library.kfcRemix.purpose": "展示 AI 重塑快餐广告与个人创意",
+    "library.kfcRemix.audience": "肯德基消费者、AI 美食创作者、快餐营销人员",
+    "library.kfcRemix.aiAnalysis":
+      "食物渲染增强，多角度动态运镜，AI 语音合成",
+
+    "library.volvoLife.title": "Laszlo Gaal：Volvo《For Life》",
+    "library.volvoLife.type": "汽车概念广告",
+    "library.volvoLife.purpose": "探索 AI 在安全与未来科技叙事",
+    "library.volvoLife.audience":
+      "沃尔沃车主、汽车科技爱好者、AI 视频实验者",
+    "library.volvoLife.aiAnalysis": "未来城市/天气模拟，车辆追踪稳定，AI 旁白",
+
+    "library.adidasFloral.title": "RabbitHole：Adidas Floral 二创",
+    "library.adidasFloral.type": "AI 运动时尚广告",
+    "library.adidasFloral.purpose": "测试 AI 在花卉运动视觉的创意应用",
+    "library.adidasFloral.audience":
+      "Adidas 潮流粉丝、AI 数字艺术爱好者、服饰设计师",
+    "library.adidasFloral.aiAnalysis": "风格迁移融合，动态光影渲染",
+
+    "library.chinguCafe.title": "RabbitHole：Chingu Cafe",
+    "library.chinguCafe.type": "AI 咖啡品牌概念广告",
+    "library.chinguCafe.purpose": "探索情感化叙事（友情主题）",
+    "library.chinguCafe.audience": "咖啡文化爱好者、韩流粉丝、AI 创意实验者",
+    "library.chinguCafe.aiAnalysis": "人脸动画细节，咖啡液体/蒸汽模拟",
+
+    "library.invideoSpark.title": "RabbitHole：InVideo《The Spark》",
+    "library.invideoSpark.type": "AI 创意概念广告",
+    "library.invideoSpark.purpose": "展示 InVideo 在 AI 广告创作的视觉表达",
+    "library.invideoSpark.audience": "AI 广告创作者、关注灵感的受众",
+    "library.invideoSpark.aiAnalysis": "Topaz Gigapixel/Video AI，Pika Labs 调色与光影",
+
+    "library.netflixBite.title": "RabbitHole：Netflix《The Sacred Bite》",
+    "library.netflixBite.type": "AI 流媒体宣传广告",
+    "library.netflixBite.purpose": "强化 Netflix 感官体验，跨场景创意",
+    "library.netflixBite.audience":
+      "Netflix 用户、电影爱好者、流媒体消费者、广告创意从业者",
+    "library.netflixBite.aiAnalysis":
+      "RunwayML 调色，Midjourney 场景，Adobe 套件，Topaz 纹理细化",
+
+    "library.gotMilk.title": "Niccyan：Got Milk 二创",
+    "library.gotMilk.type": "AI 生成饼干品牌概念广告",
+    "library.gotMilk.purpose": "强化品牌健康必需品认知",
+    "library.gotMilk.audience":
+      "Got Milk 受众、家庭消费者、乳制品营销人员、二创爱好者",
+    "library.gotMilk.aiAnalysis": "Stable Diffusion 或 Adobe Firefly 细化画面",
+
+    "library.durex.title": "Haggar Shoval：Durex 二创",
+    "library.durex.type": "AI 产品推广",
+    "library.durex.purpose": "探索敏感品类的功能与情感平衡",
+    "library.durex.audience": "Durex 消费者、快消营销人员、AI 广告创作者",
+    "library.durex.aiAnalysis":
+      "Midjourney/SD 氛围；Runway Gen-2 低饱和风格统一",
+
+    "library.adidasBlue.title": "Billy Boman：Adidas《Beyond The Blue》",
+    "library.adidasBlue.type": "AI 运动品牌概念广告",
+    "library.adidasBlue.purpose": "展示 AI 在运动品牌广告的创意潜力",
+    "library.adidasBlue.audience":
+      "Adidas 粉丝、运动品牌营销人员、AI 广告创作者、视觉艺术爱好者",
+    "library.adidasBlue.aiAnalysis": "Midjourney + RunwayML + Topaz，静态转动态流程",
+
+    "library.porscheDream.title": "Laszlo Gaal：Porsche 保时捷二创",
+    "library.porscheDream.type": "AI 豪华汽车概念广告",
+    "library.porscheDream.purpose": "展示高端汽车 AI 视觉表达力",
+    "library.porscheDream.audience":
+      "保时捷粉丝、豪车爱好者、汽车营销人员、AI 创作者",
+    "library.porscheDream.aiAnalysis":
+      "Veo2；SD + 汽车 LoRA；Adobe Firefly 调光影",
+
+    "library.lincoln.title": "Jeremy Haccoun：LINCOLN 林肯二创",
+    "library.lincoln.type": "AI 豪华汽车品牌概念广告",
+    "library.lincoln.purpose": "展现设计美学与豪华属性",
+    "library.lincoln.audience":
+      "林肯粉丝、高端车消费者、汽车营销人员、AI 广告创作者",
+    "library.lincoln.aiAnalysis":
+      "Runway Gen-3 行驶动态；SD/Blender 细化（推测）",
+
+    "library.realThing.title": "Anima Studios TV：Coca-Cola《The Real Thing》",
+    "library.realThing.type": "AI 碳酸饮料概念广告",
+    "library.realThing.purpose": "经典主题 + AI 创新，激发共鸣",
+    "library.realThing.audience":
+      "可口可乐消费者、快消营销人员、AI 广告创作者、经典主题爱好者",
+    "library.realThing.aiAnalysis":
+      "Runway Gen-3 动态；Canva/PS AI 控红调；Topaz 纹理",
+
+    "library.flowerTea.title": "比尧：花茶《四季禅白》",
+    "library.flowerTea.type": "AI 文化美学广告",
+    "library.flowerTea.purpose": "推广茶文化，结合季节养生概念",
+    "library.flowerTea.audience": "茶道爱好者、国风文化受众",
+    "library.flowerTea.aiAnalysis": "AI 古风渲染 + 中医知识图谱结合",
+
+    "library.warmFurball.title": "王天王-：《送给冬天的温暖毛球》",
+    "library.warmFurball.type": "情感营销 + 产品展示",
+    "library.warmFurball.purpose": "通过季节话题提升播放量与黏性",
+    "library.warmFurball.audience": "手工 DIY 爱好者、Z 世代消费者、AI 爱好者",
+    "library.warmFurball.aiAnalysis": "AI 脚本生成（推测）；Veo 3 动态渲染/风格统一",
+
+    "library.lenovoYouth.title": "N_S600：国际青年节联想二创",
+    "library.lenovoYouth.type": "主题 TVC 级 AI 广告",
+    "library.lenovoYouth.purpose": "反复优化镜头，吸引 AI 与广告行业关注",
+    "library.lenovoYouth.audience":
+      "国际青年节关注者、联想粉丝、AI/TVC 从业者、内容创作者",
+    "library.lenovoYouth.aiAnalysis":
+      "MJ/SD 素材 + Runway 动态；大量镜头筛选统一色调",
+
+    "library.pocari.title": "鹿柒乐：宝矿力二创",
+    "library.pocari.type": "AI 运动型饮料广告",
+    "library.pocari.purpose": "探索 AIMV 工作流，解决高动态痛点",
+    "library.pocari.audience": "宝矿力粉丝、AI 视频创作者、AIGC 爱好者",
+    "library.pocari.aiAnalysis": "伪 TVC 质感，AI 音乐编曲，流程保证一致性",
+
+    "library.xiaomiBuds.title": "红日映画 AIGC：小米 Buds 5 Pro 二创",
+    "library.xiaomiBuds.type": "AI 耳机概念广告",
+    "library.xiaomiBuds.purpose": "探索耳机 + AI 创意的商业可能",
+    "library.xiaomiBuds.audience":
+      "小米粉丝、AI 广告创作者、耳机爱好者、AIGC 实践者",
+    "library.xiaomiBuds.aiAnalysis": "99% 纯 AI；奇幻场景与诗性视觉；声觉主题画面",
+
+    "library.ysl.title": "马尚 AIGC：Saint Laurent 二创",
+    "library.ysl.type": "AIGC 艺术时尚广告",
+    "library.ysl.purpose": "吸引时尚/AIGC 观众，提升影响力",
+    "library.ysl.audience": "时尚爱好者、Saint Laurent 粉丝、AIGC 爱好者",
+    "library.ysl.aiAnalysis": "GAN/扩散风格迁移，融合品牌风格",
+
+    "library.heytea.title": "马尚 AIGC：喜茶芭乐青提二创",
+    "library.heytea.type": "AI 奶茶概念广告",
+    "library.heytea.purpose": "展示饮品卖点与视觉创作能力",
+    "library.heytea.audience": "喜茶消费者、奶茶爱好者、饮品营销人员、AIGC 从业者",
+    "library.heytea.aiAnalysis": "渲染果肉/色泽，匹配品牌视觉，营造夏日氛围",
+
+    "library.guming.title": "马尚 AIGC：古茗奶茶二创",
+    "library.guming.type": "AI 古风奶茶概念广告",
+    "library.guming.purpose": "展示饮品视觉与古风卖点",
+    "library.guming.audience": "古茗消费者、奶茶爱好者、饮品营销人员、AIGC 从业者",
+    "library.guming.aiAnalysis": "古风角色与场景，细节渲染（色泽、质感）",
+
+    "library.taobao.title": "Taobao：造物节《跟 AI 聊聊未来会怎样？》",
+    "library.taobao.type": "AI 互动营销广告",
+    "library.taobao.purpose": "推广造物节科技感，吸引年轻用户",
+    "library.taobao.audience": "Z 世代、科技极客、电商从业者",
+    "library.taobao.aiAnalysis": "AI 对话生成，虚拟主播/数字人（推测）",
+
+    "library.oreoCosmos.title": "Oreo：《宇宙奥利奥》",
+    "library.oreoCosmos.type": "科幻风格食品广告",
+    "library.oreoCosmos.purpose": "宇宙主题吸引儿童与家庭消费者",
+    "library.oreoCosmos.audience": "儿童、科幻迷、短视频用户",
+    "library.oreoCosmos.aiAnalysis": "太空场景生成，零重力漂浮展示",
+
+    "library.snickers.title": "Billy Boman：士力架二创",
+    "library.snickers.type": "AI 食品创意概念广告",
+    "library.snickers.purpose": "展示 AI 食品广告创意，吸引品牌",
+    "library.snickers.audience":
+      "士力架消费者、零食营销人员、AI 广告创作者、AIGC 爱好者",
+    "library.snickers.aiAnalysis":
+      "95% Veo 3 + 5% Seedance；ElevenLabs；AE 后期；Topaz 放大",
+
+    "library.felix.title": "Billy Boman：Felix 系列食品二创",
+    "library.felix.type": "AI 食品创意概念广告",
+    "library.felix.purpose": "积累案例，吸引食品行业关注",
+    "library.felix.audience":
+      "Felix 消费者、食品营销人员、AI 广告创作者、AIGC 爱好者",
+    "library.felix.aiAnalysis":
+      "OpenAI Sora 2；材质细节渲染；场景化动态生成",
+
+    "library.redbull.title": "Billy Boman：Red Bull 红牛二创",
+    "library.redbull.type": "AI 能量饮料广告",
+    "library.redbull.purpose": "展示高动态风格化饮料广告能力",
+    "library.redbull.audience":
+      "红牛消费者、极限运动爱好者、快消营销人员、AI 广告创作者",
+    "library.redbull.aiAnalysis":
+      "95% Flow by Google + 5% Seedance；AE 调色与过渡",
+
+    "library.benefit.title": "Billy Boman：Benefit《Bad Girl Bounce》",
+    "library.benefit.type": "AI 彩妆助推广告",
+    "library.benefit.purpose": "展示美妆视觉并突出卖点",
+    "library.benefit.audience":
+      "Benefit 用户、美妆爱好者、彩妆营销人员、AI 广告创作者",
+    "library.benefit.aiAnalysis":
+      "LumaLabsAI；质地渲染；妆面模拟；甜美时尚风",
+
+    "library.kalshi.title": "PJ Ace：Kalshi 广告",
+    "library.kalshi.type": "AI 金融/预测平台广告",
+    "library.kalshi.purpose": "展示平台优势并吸引潜在用户",
+    "library.kalshi.audience":
+      "金融投资者、预测平台用户、金融营销人员、AI 广告创作者",
+    "library.kalshi.aiAnalysis":
+      "Stable Diffusion LoRA 训练金融场景风格，强化统一性",
+
+    "library.im8.title": "PJ Ace：IM8 健康饮品商业广告",
+    "library.im8.type": "健康饮品商业广告",
+    "library.im8.purpose": "推广 IM8，展示联名营销中的 AI 视觉",
+    "library.im8.audience":
+      "Beckham 粉丝、IM8 目标客群、营销从业者、AI 创作者",
+    "library.im8.aiAnalysis":
+      "可能数字人；MJ/SD 场景；Runway Gen-2 动态（推测）",
+
+    "library.wistiaLenny.title":
+      "Billy Woodward：《Lenny's Big Delivery》（Wistia）",
+    "library.wistiaLenny.type": "AI 叙事类平台推广",
+    "library.wistiaLenny.purpose": "展示 Wistia 功能与 AI 叙事能力",
+    "library.wistiaLenny.audience":
+      "企业营销/内容创作者、趣味广告爱好者、AI 叙事创作者",
+    "library.wistiaLenny.aiAnalysis":
+      "nano banana + Midjourney + Seedance + Kling 2.5 + Suno + ElevenLabs（mock）",
+
+    "library.guerlain.title":
+      'Guerlain：蜜蜂瓶《Born in 1853. Made for the future》',
+    "library.guerlain.type": "AI + 传统工艺奢品广告",
+    "library.guerlain.purpose": "历史传承结合 AI，强化高端创新形象",
+    "library.guerlain.audience": "奢侈品消费者、美妆收藏家、AI 艺术爱好者",
+    "library.guerlain.aiAnalysis":
+      "材质渲染（金属光泽）；3D 建模 + AI 动画（蜜蜂路径）",
+
+    "library.bosie.title": "bosie：《THE ERA OF bosie》",
+    "library.bosie.type": "AI 服装品牌广告",
+    "library.bosie.purpose": "科幻神话融合，塑造新锐多元品牌形象",
+    "library.bosie.audience":
+      "年轻个性消费群体、新锐品牌关注者、广告创意从业者、科幻/神话爱好者",
+    "library.bosie.aiAnalysis": "以传统创意与拍摄为主；科幻场景与神话元素视觉设计",
   },
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [language, setLanguage] = useState<Language>("en");
 
   const t = (key: string): string => {
     return translations[language][key] || key;
@@ -338,7 +941,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 };
