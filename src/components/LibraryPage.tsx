@@ -139,11 +139,16 @@ const LibraryPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
 
   const filters = [
-    { id: 'all', label: t('library.all') },
-    { id: 'image', label: t('library.image') },
-    { id: 'video', label: t('library.video') },
-    { id: 'audio', label: t('library.audio') },
-    { id: 'template', label: t('library.template') },
+    { id: 'all', labelKey: 'library.all' },
+    { id: 'food', labelKey: 'library.food' },
+    { id: 'auto', labelKey: 'library.auto' },
+    { id: 'fashion', labelKey: 'library.fashion' },
+    { id: 'digital', labelKey: 'library.digital' },
+    { id: 'finance', labelKey: 'library.finance' },
+    { id: 'personal', labelKey: 'library.personal' },
+    { id: 'culture', labelKey: 'library.culture' },
+    { id: 'platform', labelKey: 'library.platform' },
+    { id: 'diy', labelKey: 'library.diy' },
   ];
 
   const filteredItems = mockLibraryItems.filter(item => {
@@ -189,7 +194,7 @@ const LibraryPage: React.FC = () => {
                   : 'glass-tab text-muted-foreground hover:text-foreground'
               }`}
             >
-              {filter.label}
+              {t(filter.labelKey)}
             </button>
           ))}
         </div>
