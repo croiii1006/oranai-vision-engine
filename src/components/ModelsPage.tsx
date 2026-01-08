@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUp, ArrowRight } from 'lucide-react';
+import { ArrowUp, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
@@ -39,7 +39,7 @@ const ModelsPage: React.FC = () => {
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [sidebarFilter, setSidebarFilter] = useState('all');
+  
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
   const filterCategories = [
@@ -51,11 +51,45 @@ const ModelsPage: React.FC = () => {
     { id: 'audio', label: t('models.audio') },
   ];
 
-  const sidebarFilters = [
-    { id: 'all', label: t('common.all') },
-    { id: 'enterprise', label: t('models.enterprise') },
-    { id: 'nlp', label: t('models.nlp') },
-    { id: 'vision', label: t('models.vision') },
+  // Filter states for each category
+  const [supplierFilter, setSupplierFilter] = useState('all');
+  const [billingFilter, setBillingFilter] = useState('all');
+  const [endpointFilter, setEndpointFilter] = useState('all');
+  
+  // Expand states for each filter section
+  const [supplierExpanded, setSupplierExpanded] = useState(false);
+  const [endpointExpanded, setEndpointExpanded] = useState(false);
+
+  const supplierOptions = [
+    { id: 'all', label: '全部供应商' },
+    { id: 'anthropic', label: 'Anthropic' },
+    { id: 'deepseek', label: 'DeepSeek' },
+    { id: 'google', label: 'Google' },
+    { id: 'meta', label: 'Meta' },
+    { id: 'mistral', label: 'Mistral' },
+    { id: 'moonshot', label: 'Moonshot' },
+    { id: 'openai', label: 'OpenAI' },
+    { id: 'xai', label: 'xAI' },
+    { id: 'bytedance', label: '字节跳动' },
+    { id: 'kuaishou', label: '快手' },
+    { id: 'zhipu', label: '智谱' },
+    { id: 'tencent', label: '腾讯' },
+    { id: 'alibaba', label: '阿里巴巴' },
+    { id: 'lingyiwanwu', label: '零一万物' },
+    { id: 'unknown', label: '未知供应商' },
+  ];
+
+  const billingOptions = [
+    { id: 'all', label: '全部类型' },
+    { id: 'usage', label: '按量计费' },
+    { id: 'times', label: '按次计费' },
+  ];
+
+  const endpointOptions = [
+    { id: 'all', label: '全部端点' },
+    { id: 'image-generation', label: 'image-generation' },
+    { id: 'openai', label: 'openai' },
+    { id: 'openai-response', label: 'openai-response' },
   ];
 
   // Gradient styles for cards
@@ -84,8 +118,7 @@ const ModelsPage: React.FC = () => {
   const filteredModels = models.filter(model => {
     const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === 'all' || model.category === activeFilter;
-    const matchesSidebar = sidebarFilter === 'all' || model.category === sidebarFilter;
-    return matchesSearch && matchesFilter && matchesSidebar;
+    return matchesSearch && matchesFilter;
   });
 
   return (
@@ -115,54 +148,104 @@ const ModelsPage: React.FC = () => {
 
         <div className="flex gap-8">
           {/* Left Sidebar */}
-          <aside className="hidden lg:block w-44 flex-shrink-0">
+          <aside className="hidden lg:block w-52 flex-shrink-0">
             <div className="sticky top-32">
-              <h3 className="text-sm font-medium mb-4 text-muted-foreground">
-                {t('models.filter')}
-              </h3>
-              <div className="relative mb-4">
-                <input
-                  type="text"
-                  placeholder={t('common.search')}
-                  className="w-full px-4 py-2 rounded-full border border-border/50 bg-background/50 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
-                />
-              </div>
-              <div className="space-y-2">
-                {sidebarFilters.map((filter) => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setSidebarFilter(filter.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm ${
-                      sidebarFilter === filter.id
-                        ? 'glass-tab-active'
-                        : 'glass-tab text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
+              {/* Header with title and reset */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-base font-medium">筛选</h3>
+                <button 
+                  onClick={() => {
+                    setSupplierFilter('all');
+                    setBillingFilter('all');
+                    setEndpointFilter('all');
+                  }}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  重置
+                </button>
               </div>
 
-              <div className="mt-8">
-                <h3 className="text-sm font-medium mb-4 text-muted-foreground">
-                  {t('models.filter')}
-                </h3>
-                <div className="relative mb-4">
-                  <input
-                    type="text"
-                    placeholder={t('common.search')}
-                    className="w-full px-4 py-2 rounded-full border border-border/50 bg-background/50 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
-                  />
-                </div>
-                <div className="space-y-2">
-                  {sidebarFilters.map((filter) => (
+              {/* 供应商 Section */}
+              <div className="mb-6 border-t border-border/30 pt-4">
+                <h4 className="text-sm font-medium mb-3 text-center">供应商</h4>
+                <div className="flex flex-col gap-2">
+                  {(supplierExpanded ? supplierOptions : supplierOptions.slice(0, 4)).map((option) => (
                     <button
-                      key={filter.id}
-                      className="w-full text-left px-4 py-3 rounded-xl text-sm glass-tab text-muted-foreground hover:text-foreground"
+                      key={option.id}
+                      onClick={() => setSupplierFilter(option.id)}
+                      className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${
+                        supplierFilter === option.id
+                          ? 'bg-foreground/20 text-foreground'
+                          : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      }`}
                     >
-                      {filter.label}
+                      {option.label}
                     </button>
                   ))}
+                  {supplierOptions.length > 4 && (
+                    <button
+                      onClick={() => setSupplierExpanded(!supplierExpanded)}
+                      className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground py-1"
+                    >
+                      {supplierExpanded ? (
+                        <>收起 <ChevronUp className="w-3 h-3" /></>
+                      ) : (
+                        <>展开更多 <ChevronDown className="w-3 h-3" /></>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 计费类型 Section */}
+              <div className="mb-6 border-t border-border/30 pt-4">
+                <h4 className="text-sm font-medium mb-3 text-center">计费类型</h4>
+                <div className="flex flex-col gap-2">
+                  {billingOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setBillingFilter(option.id)}
+                      className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${
+                        billingFilter === option.id
+                          ? 'bg-foreground/20 text-foreground'
+                          : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 端点类型 Section */}
+              <div className="border-t border-border/30 pt-4">
+                <h4 className="text-sm font-medium mb-3 text-center">端点类型</h4>
+                <div className="flex flex-col gap-2">
+                  {(endpointExpanded ? endpointOptions : endpointOptions.slice(0, 4)).map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => setEndpointFilter(option.id)}
+                      className={`px-3 py-2 rounded-lg text-xs text-center transition-colors ${
+                        endpointFilter === option.id
+                          ? 'bg-foreground/20 text-foreground'
+                          : 'bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                  {endpointOptions.length > 4 && (
+                    <button
+                      onClick={() => setEndpointExpanded(!endpointExpanded)}
+                      className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground py-1"
+                    >
+                      {endpointExpanded ? (
+                        <>收起 <ChevronUp className="w-3 h-3" /></>
+                      ) : (
+                        <>展开更多 <ChevronDown className="w-3 h-3" /></>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
