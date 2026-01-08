@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LibraryItem {
@@ -182,21 +182,52 @@ const LibraryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-3 mb-8">
-          {filters.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium ${
-                activeFilter === filter.id
-                  ? 'glass-tab-active'
-                  : 'glass-tab text-muted-foreground hover:text-foreground'
-              }`}
+        {/* Filter Tabs with horizontal scroll */}
+        <div className="relative mb-8">
+          <div className="flex items-center gap-2">
+            {/* Left Arrow */}
+            <button 
+              onClick={() => {
+                const container = document.getElementById('filter-scroll');
+                if (container) container.scrollBy({ left: -200, behavior: 'smooth' });
+              }}
+              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
             >
-              {t(filter.labelKey)}
+              <ChevronLeft className="w-4 h-4" />
             </button>
-          ))}
+
+            {/* Scrollable Filter Container */}
+            <div 
+              id="filter-scroll"
+              className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all ${
+                    activeFilter === filter.id
+                      ? 'bg-foreground text-background'
+                      : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                  }`}
+                >
+                  {t(filter.labelKey)}
+                </button>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <button 
+              onClick={() => {
+                const container = document.getElementById('filter-scroll');
+                if (container) container.scrollBy({ left: 200, behavior: 'smooth' });
+              }}
+              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Library Grid - TikTok style vertical cards */}
