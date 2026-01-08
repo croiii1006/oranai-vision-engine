@@ -185,14 +185,15 @@ const LibraryPage: React.FC = () => {
                 onClick={() => setSelectedItem(item)}
                 className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
               >
-                {/* Video preview for mp4 - shows on hover */}
-                {isMp4 && (
+                {/* Video element for mp4 - shows first frame as thumbnail, plays on hover */}
+                {isMp4 ? (
                   <video 
                     src={item.videoUrl}
                     muted
                     loop
                     playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onMouseEnter={(e) => {
                       const video = e.currentTarget;
                       video.currentTime = 0;
@@ -200,16 +201,19 @@ const LibraryPage: React.FC = () => {
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
                     }}
                   />
-                )}
+                ) : null}
                 
-                {/* Thumbnail - use video poster for mp4 or image */}
-                <img 
-                  src={item.thumbnail} 
-                  alt={t(item.titleKey)}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                {/* Thumbnail - only for non-mp4 */}
+                {!isMp4 && (
+                  <img 
+                    src={item.thumbnail} 
+                    alt={t(item.titleKey)}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                )}
                 
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 pointer-events-none" />
