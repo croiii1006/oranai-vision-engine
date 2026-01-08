@@ -50,11 +50,11 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.consumerInsight": "Consumer Insight",
     "solution.healthInsight": "Health Insight",
     "solution.marketInsightDesc":
-      "Real-time social media insights — trend tracking, analysis, competitor monitoring",
+      "Continuously analyzes global social media, e-commerce, and content platforms to identify real-time hotspots, emerging trends, and competitive movements — enabling faster, more informed strategic decisions.",
     "solution.consumerInsightDesc":
-      "Deep mining of user behavior and feedback — pain points, personas, preference prediction",
+      "Builds deep consumer understanding through AI-powered profiling, content interaction analysis, and interest pattern recognition — helping brands pinpoint audience preferences and behavioral signals with precision.",
     "solution.healthInsightDesc":
-      "Brand health monitoring — reputation analysis, sentiment tracking, crisis early warning",
+      "Monitors brand sentiment, public opinion, and emotional signals across platforms in real time — enabling early risk detection, reputation management, and long-term brand health optimization.",
     "solution.brandPositioning": "Brand Positioning",
     "solution.brandStory": "Brand Story",
     "solution.contentGeneration": "Content Generation",
@@ -540,9 +540,9 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.marketInsight": "市场洞察",
     "solution.consumerInsight": "消费者洞察",
     "solution.healthInsight": "健康洞察",
-    "solution.marketInsightDesc": "基于社媒全域内容的实时洞察——热点、趋势、竞品监测",
-    "solution.consumerInsightDesc": "基于用户行为与反馈的深挖——痛点识别、画像、偏好预测",
-    "solution.healthInsightDesc": "品牌健康监测——口碑分析、情感追踪、危机预警",
+    "solution.marketInsightDesc": "持续分析全球社交媒体、电商及内容平台，实时捕捉热点话题、市场趋势与竞品动态——助力品牌更快、更精准地制定战略决策。",
+    "solution.consumerInsightDesc": "通过 AI 驱动的用户画像构建、内容互动分析与兴趣模式识别，深度洞察消费者——帮助品牌精准锁定受众偏好与行为信号。",
+    "solution.healthInsightDesc": "跨平台实时监测品牌舆情、公众情绪与口碑信号——实现风险预警、声誉管理与长期品牌健康优化。",
     "solution.brandPositioning": "品牌定位",
     "solution.brandStory": "品牌故事",
     "solution.contentGeneration": "内容生成",
