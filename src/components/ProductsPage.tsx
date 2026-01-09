@@ -28,8 +28,17 @@ const ProductsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('material');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
-  const [isThinking, setIsThinking] = useState(false);
+const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
+  
+  const modelOptions = [
+    { id: 'claude', label: 'Claude' },
+    { id: 'chatgpt', label: 'ChatGPT' },
+    { id: 'deepseek', label: 'DeepSeek' },
+    { id: 'gemini', label: 'Gemini' },
+    { id: 'doubao', label: '豆包' },
+  ];
+
   const searchSources = [{
     id: 'redbook',
     labelKey: 'products.redbook',
@@ -177,11 +186,27 @@ const ProductsPage: React.FC = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Thinking Button */}
-              <button onClick={() => setIsThinking(!isThinking)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isThinking ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                <Sparkles className={`w-3.5 h-3.5 ${isThinking ? 'animate-pulse' : ''}`} />
-                <span>{t('products.thinking')}</span>
-              </button>
+              {/* Thinking Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedModel ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                    <Sparkles className={`w-3.5 h-3.5 ${selectedModel ? 'animate-pulse' : ''}`} />
+                    <span>{selectedModel ? modelOptions.find(m => m.id === selectedModel)?.label : t('products.thinking')}</span>
+                    <ChevronDown className="w-2.5 h-2.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[120px]">
+                  {modelOptions.map(model => (
+                    <DropdownMenuItem 
+                      key={model.id} 
+                      onClick={() => setSelectedModel(selectedModel === model.id ? null : model.id)}
+                      className={selectedModel === model.id ? 'bg-primary/10 text-primary' : ''}
+                    >
+                      {model.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Send Button */}
