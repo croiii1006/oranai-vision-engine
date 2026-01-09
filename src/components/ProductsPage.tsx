@@ -190,22 +190,33 @@ const ProductsPage: React.FC = () => {
 
         {/* Sub Tab Navigation with Images */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
-            {currentTabConfig.subTabs.map(subTab => <button key={subTab.id} onClick={() => {
-                setActiveSubTab(subTab.id);
-                if (subTab.url) {
-                  window.open(subTab.url, '_blank');
-                }
-              }} className="group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md">
-                {/* Text content */}
-                <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
-                
-                {/* Tilted thumbnail image */}
-                <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
-                  <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-lg overflow-hidden shadow-lg">
-                    <img src={subTab.image} alt="" className="w-full h-full object-cover" />
-                  </div>
-                </div>
-              </button>)}
+            {currentTabConfig.subTabs.map(subTab => {
+              const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman'].includes(subTab.id);
+              return (
+                <button key={subTab.id} onClick={() => {
+                    setActiveSubTab(subTab.id);
+                    if (subTab.url && !isComingSoon) {
+                      window.open(subTab.url, '_blank');
+                    }
+                  }} className={`group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md ${isComingSoon ? 'cursor-default' : ''}`}>
+                    {/* Coming Soon Overlay */}
+                    {isComingSoon && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">Coming Soon</span>
+                      </div>
+                    )}
+                    {/* Text content */}
+                    <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
+                    
+                    {/* Tilted thumbnail image */}
+                    <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
+                      <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-lg overflow-hidden shadow-lg">
+                        <img src={subTab.image} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                  </button>
+              );
+            })}
           </div>}
       </div>
     </div>;
