@@ -29,9 +29,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 border-b border-foreground/10 dark:border-border/20">
         <div className="w-full px-6 sm:px-10 lg:px-16">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative flex items-center justify-between h-16">
             {/* Left - Logo with glassmorphism */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 z-10">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="p-2 rounded-lg text-foreground/80 hover:text-foreground hover:bg-accent transition-colors duration-200"
@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 <span 
                   className="text-lg font-semibold tracking-tight bg-clip-text text-transparent"
                   style={{
-                    backgroundImage: 'linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%) 30%, hsl(0 0% 60%) 60%, hsl(0 0% 50%))',
+                    backgroundImage: 'linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%) 30%, hsl(0 0% 60%) 50%)',
                   }}
                 >
                   <span className="dark:hidden">OranAI</span>
@@ -66,8 +66,8 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               </div>
             </div>
 
-            {/* Center - Main Navigation Tabs with enhanced glassmorphism */}
-            <nav className="hidden md:flex items-center space-x-1">
+            {/* Center - Main Navigation Tabs - Absolutely positioned for true center */}
+            <nav className="hidden md:flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-none dark:shadow-lg bg-transparent dark:bg-background/40 backdrop-blur-none dark:backdrop-blur-md">
                 {tabs.map((tab) => (
                   <button
@@ -84,7 +84,6 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 ))}
               </div>
             </nav>
-
             {/* Right - Actions */}
             <div className="flex items-center space-x-4">
             <button
