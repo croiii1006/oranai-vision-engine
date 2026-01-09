@@ -81,12 +81,12 @@ const ProductsPage: React.FC = () => {
       id: 'imageGen',
       labelKey: 'products.imageGen',
       image: imageGenThumb,
-      url: '' // TODO: Add Image Gen URL
+      url: 'https://tools.photog.art/'
     }, {
       id: 'videoGen',
       labelKey: 'products.videoGen',
       image: videoGenThumb,
-      url: '' // TODO: Add Video Gen URL
+      url: 'https://tools.photog.art/'
     }, {
       id: 'digitalHuman',
       labelKey: 'products.digitalHuman',
