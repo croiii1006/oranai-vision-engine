@@ -135,6 +135,8 @@ const translations: Record<Language, Record<string, string>> = {
     "products.tiktok": "TikTok",
     "products.amazon": "Amazon",
     "products.semrush": "Semrush",
+    "products.b2bLead": "B2B Lead Generation",
+    "products.comingSoon": "Coming Soon",
 
     // Library - labels
     "library.title": "LIBRARY",
@@ -614,6 +616,8 @@ const translations: Record<Language, Record<string, string>> = {
     "products.tiktok": "TikTok",
     "products.amazon": "Amazon",
     "products.semrush": "Semrush",
+    "products.b2bLead": "B2B线索获客",
+    "products.comingSoon": "即将上线",
 
     // Library - labels
     "library.title": "素材广场",

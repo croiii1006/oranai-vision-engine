@@ -95,7 +95,13 @@ const ProductsPage: React.FC = () => {
     }]
   }, {
     id: 'operation',
-    labelKey: 'products.operation'
+    labelKey: 'products.operation',
+    subTabs: [{
+      id: 'b2bLead',
+      labelKey: 'products.b2bLead',
+      image: brandStrategyThumb,
+      url: ''
+    }]
   }];
   const currentTabConfig = tabsConfig.find(tab => tab.id === activeTab);
   const handleTabChange = (tabId: string) => {
@@ -191,7 +197,7 @@ const ProductsPage: React.FC = () => {
         {/* Sub Tab Navigation with Images */}
         {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
             {currentTabConfig.subTabs.map(subTab => {
-              const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman'].includes(subTab.id);
+              const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
               return (
                 <button key={subTab.id} onClick={() => {
                     setActiveSubTab(subTab.id);
@@ -202,7 +208,7 @@ const ProductsPage: React.FC = () => {
                     {/* Coming Soon Overlay */}
                     {isComingSoon && (
                       <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="text-sm font-medium text-foreground">Coming Soon</span>
+                        <span className="text-sm font-medium text-foreground">{t('products.comingSoon')}</span>
                       </div>
                     )}
                     {/* Text content */}
