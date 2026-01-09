@@ -137,6 +137,11 @@ const translations: Record<Language, Record<string, string>> = {
     "products.semrush": "Semrush",
     "products.b2bLead": "B2B Lead Generation",
     "products.comingSoon": "Coming Soon",
+    "products.modelClaude": "Claude",
+    "products.modelChatGPT": "ChatGPT",
+    "products.modelDeepSeek": "DeepSeek",
+    "products.modelGemini": "Gemini",
+    "products.modelDoubao": "Doubao",
 
     // Library - labels
     "library.title": "LIBRARY",
@@ -618,6 +623,11 @@ const translations: Record<Language, Record<string, string>> = {
     "products.semrush": "Semrush",
     "products.b2bLead": "B2B线索获客",
     "products.comingSoon": "即将上线",
+    "products.modelClaude": "Claude",
+    "products.modelChatGPT": "ChatGPT",
+    "products.modelDeepSeek": "DeepSeek",
+    "products.modelGemini": "Gemini",
+    "products.modelDoubao": "豆包",
 
     // Library - labels
     "library.title": "素材广场",
