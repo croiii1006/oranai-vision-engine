@@ -32,11 +32,11 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
   
   const modelOptions = [
-    { id: 'claude', label: 'Claude' },
-    { id: 'chatgpt', label: 'ChatGPT' },
-    { id: 'deepseek', label: 'DeepSeek' },
-    { id: 'gemini', label: 'Gemini' },
-    { id: 'doubao', label: '豆包' },
+    { id: 'claude', labelKey: 'products.modelClaude' },
+    { id: 'chatgpt', labelKey: 'products.modelChatGPT' },
+    { id: 'deepseek', labelKey: 'products.modelDeepSeek' },
+    { id: 'gemini', labelKey: 'products.modelGemini' },
+    { id: 'doubao', labelKey: 'products.modelDoubao' },
   ];
 
   const searchSources = [{
@@ -191,7 +191,7 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
                 <DropdownMenuTrigger asChild>
                   <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedModel ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
                     <Sparkles className={`w-3.5 h-3.5 ${selectedModel ? 'animate-pulse' : ''}`} />
-                    <span>{selectedModel ? modelOptions.find(m => m.id === selectedModel)?.label : t('products.thinking')}</span>
+                    <span>{selectedModel ? t(modelOptions.find(m => m.id === selectedModel)?.labelKey || '') : t('products.thinking')}</span>
                     <ChevronDown className="w-2.5 h-2.5" />
                   </button>
                 </DropdownMenuTrigger>
@@ -202,7 +202,7 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
                       onClick={() => setSelectedModel(selectedModel === model.id ? null : model.id)}
                       className={selectedModel === model.id ? 'bg-primary/10 text-primary' : ''}
                     >
-                      {model.label}
+                      {t(model.labelKey)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
