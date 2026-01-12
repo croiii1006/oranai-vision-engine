@@ -27,11 +27,8 @@ const Index = () => {
     }
   };
 
-  // Only show footer for non-scroll pages
-  const showFooter = !['home', 'hero', 'solution'].includes(activeTab);
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -41,11 +38,11 @@ const Index = () => {
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="animate-fade-in">
+      <main className="animate-fade-in flex-1">
         {renderContent()}
       </main>
 
-      {showFooter && <Footer setActiveTab={setActiveTab} />}
+      <Footer setActiveTab={setActiveTab} />
     </div>
   );
 };
