@@ -104,9 +104,6 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">{language === 'en' ? 'EN' : '中文'}</span>
               </button>
-              <button className="hidden sm:block text-sm text-foreground/70 hover:text-foreground transition-colors duration-200 link-underline">
-                {t('nav.signIn')}
-              </button>
               <button className="glass px-4 py-2 rounded-full text-sm font-medium text-foreground/80 hover:text-foreground border border-foreground/10 dark:border-transparent hover:bg-accent transition-all duration-200 glow-sm hover:glow">
                 {t('nav.contactUs')}
               </button>
