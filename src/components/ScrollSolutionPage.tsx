@@ -187,8 +187,8 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
         />
       </div>
 
-      {/* Left sidebar navigation - compact centered */}
-      <div className="fixed left-0 top-0 h-screen w-20  z-30  hidden lg:flex  flex-col  justify-evenly  items-center  py-24">
+      {/* Left sidebar navigation - compact centered, hide when at end */}
+      <div className={`fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24 transition-opacity duration-300 ${isAtEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex flex-col gap-20">
           {sections.map((section, index) => (
             <button
