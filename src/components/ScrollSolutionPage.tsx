@@ -152,7 +152,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
   const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative overflow-hidden">
+    <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative">
       {/* Progress bar - full width at top */}
       <div className="fixed top-16 left-0 right-0 h-0.5 bg-muted/20 z-40">
         <motion.div
