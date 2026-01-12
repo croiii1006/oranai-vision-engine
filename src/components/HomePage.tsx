@@ -8,36 +8,64 @@ import ScrollSolutionPage from './ScrollSolutionPage';
 interface HomePageProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onScrollToFooter?: () => void;
+  onHideFooter?: () => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
+const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollToFooter, onHideFooter }) => {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
+  const scrollAccumulator = useRef(0);
+  const lastScrollTime = useRef(0);
+
+  // 滚动配置
+  const SCROLL_THRESHOLD = 10; // 需要累积的滚动量
+  const SCROLL_LOCK_DURATION = 500; // 滚动锁定时长（毫秒）
+  const SCROLL_DEBOUNCE = 50; // 防抖时间（毫秒）
 
   const handleScrollToHero = () => {
     if (scrollLock.current) return;
     scrollLock.current = true;
+    scrollAccumulator.current = 0;
     setCurrentView('hero');
     setActiveTab('home');
     setTimeout(() => {
       scrollLock.current = false;
-    }, 800);
+    }, SCROLL_LOCK_DURATION);
   };
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (scrollLock.current) return;
       
+      const now = Date.now();
+      // 防抖：如果距离上次滚动时间太短，忽略
+      if (now - lastScrollTime.current < SCROLL_DEBOUNCE) {
+        return;
+      }
+      lastScrollTime.current = now;
+      
       if (currentView === 'hero' && e.deltaY > 0) {
         e.preventDefault();
+        
+        // 累积滚动量
+        scrollAccumulator.current += e.deltaY;
+        
+        // 只有累积滚动量超过阈值才触发切换
+        if (scrollAccumulator.current >= SCROLL_THRESHOLD) {
         scrollLock.current = true;
+          scrollAccumulator.current = 0;
         setCurrentView('solution');
         setActiveTab('solution');
         setTimeout(() => {
           scrollLock.current = false;
-        }, 800);
+          }, SCROLL_LOCK_DURATION);
+        }
+      } else if (e.deltaY < 0) {
+        // 向上滚动时重置累积器
+        scrollAccumulator.current = Math.max(0, scrollAccumulator.current + e.deltaY);
       }
     };
 
@@ -127,7 +155,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
             exit={{ opacity: 0, y: 100 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <ScrollSolutionPage onScrollToTop={handleScrollToHero} />
+            <ScrollSolutionPage onScrollToTop={handleScrollToHero} onScrollToFooter={onScrollToFooter} onHideFooter={onHideFooter} />
           </motion.div>
         )}
       </AnimatePresence>

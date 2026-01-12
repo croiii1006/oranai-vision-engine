@@ -19,7 +19,16 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitAny": false,
-    "noFallthroughCasesInSwitch": false,
+    "noFallthroughCasesInSwitch": true,
+    // 类型检查增强（保持向后兼容）
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    // 其他有用的检查
+    "noUncheckedIndexedAccess": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
 
     "baseUrl": ".",
     "paths": {

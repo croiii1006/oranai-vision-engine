@@ -13,7 +13,7 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
     { label: t('nav.models'), action: () => setActiveTab('models') },
     { label: t('nav.products'), action: () => setActiveTab('products') },
     { label: t('sidebar.resources'), action: () => {} },
-    { label: t('sidebar.aboutUs'), action: () => {} },
+    // { label: t('sidebar.aboutUs'), action: () => {} },
   ];
 
   return (

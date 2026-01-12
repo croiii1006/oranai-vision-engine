@@ -35,15 +35,27 @@ interface SectionData {
 
 interface ScrollSolutionPageProps {
   onScrollToTop?: () => void;
+  onScrollToFooter?: () => void;
+  onHideFooter?: () => void;
 }
 
-const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }) => {
+const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, onScrollToFooter, onHideFooter }) => {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [currentTab, setCurrentTab] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+
+  // 滚动控制
+  const scrollLock = useRef(false);
+  const scrollAccumulator = useRef(0);
+  const lastScrollTime = useRef(0);
+  
+  // 滚动配置
+  const SCROLL_THRESHOLD = 120; // 需要累积的滚动量
+  const SCROLL_LOCK_DURATION = 1000; // 滚动锁定时长（毫秒）
+  const SCROLL_DEBOUNCE = 150; // 防抖时间（毫秒）
 
   const sections: SectionData[] = [
     {
@@ -105,9 +117,40 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
   // Handle wheel events for custom scrolling
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      if (scrollLock.current) {
+        e.preventDefault();
+        return;
+      }
+
+      const now = Date.now();
+      // 防抖：如果距离上次滚动时间太短，忽略
+      if (now - lastScrollTime.current < SCROLL_DEBOUNCE) {
       e.preventDefault();
+        return;
+      }
 
       const delta = e.deltaY;
+      
+      // 累积滚动量
+      if (delta > 0) {
+        scrollAccumulator.current += delta;
+      } else {
+        scrollAccumulator.current += delta; // 负数累积
+      }
+
+      // 只有累积滚动量超过阈值才触发切换
+      const shouldTrigger = Math.abs(scrollAccumulator.current) >= SCROLL_THRESHOLD;
+      
+      if (!shouldTrigger) {
+        e.preventDefault();
+        return;
+      }
+
+      e.preventDefault();
+      lastScrollTime.current = now;
+      scrollLock.current = true;
+
+      const currentSectionData = sections[currentSection];
 
       if (delta > 0) {
         // Scrolling down
@@ -135,6 +178,14 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
           onScrollToTop();
         }
       }
+
+      // 重置累积器
+      scrollAccumulator.current = 0;
+      
+      // 解锁滚动
+      setTimeout(() => {
+        scrollLock.current = false;
+      }, SCROLL_LOCK_DURATION);
     };
 
     const container = containerRef.current;
@@ -142,7 +193,21 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       container.addEventListener("wheel", handleWheel, { passive: false });
       return () => container.removeEventListener("wheel", handleWheel);
     }
-  }, [showDetail, currentTab, currentSection, currentSectionData.tabs.length, sections.length]);
+  }, [showDetail, currentTab, currentSection, onScrollToTop, onScrollToFooter]);
+
+  // 检测是否为最后一步，并控制footer显示
+  useEffect(() => {
+    const isLastStep = 
+      currentSection === sections.length - 1 &&
+      showDetail &&
+      currentTab === sections[sections.length - 1].tabs.length - 1;
+    
+    if (isLastStep) {
+      onScrollToFooter?.();
+    } else {
+      onHideFooter?.();
+    }
+  }, [currentSection, currentTab, showDetail, onScrollToFooter, onHideFooter]);
 
   // Calculate progress
   const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0);

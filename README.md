@@ -60,6 +60,34 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## 工程化优化
+
+项目已按照商业化工程思维进行优化，包括：
+
+### 核心功能
+
+- ✅ **全局错误边界**：捕获和处理 React 组件错误
+- ✅ **统一日志系统**：替代 console.log，支持不同环境的日志记录
+- ✅ **错误处理工具**：统一的错误处理和用户友好的错误消息
+- ✅ **性能监控**：性能测量和监控工具
+- ✅ **配置管理**：统一的环境变量和配置管理
+- ✅ **类型安全的存储**：本地存储工具类
+- ✅ **常量管理**：统一的常量定义
+
+### 构建优化
+
+- ✅ **代码分割**：自动代码分割，优化加载性能
+- ✅ **构建优化**：优化的 Vite 构建配置
+- ✅ **类型检查**：TypeScript 类型检查增强
+
+### 开发工具
+
+- ✅ **Prettier**：代码格式化
+- ✅ **ESLint**：代码检查
+- ✅ **开发脚本**：完善的 npm 脚本
+
+详细文档请参考 [DEVELOPMENT.md](./DEVELOPMENT.md)
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.

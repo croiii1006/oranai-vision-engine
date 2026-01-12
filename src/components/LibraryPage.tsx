@@ -1,850 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { 
+  fetchMaterialSquareList, 
+  fetchMaterialSquareDetail,
+  MaterialSquareItem,
+  MaterialSquareDetail as MaterialSquareDetailType
+} from '@/lib/api/library';
 
-interface LibraryItem {
-  id: number;
-  titleKey: string;
-  type: 'video' | 'image' | 'audio' | 'template';
-  publisher: string;
-  publishDate: string;
-  publishDateFull: string;
-  videoTypeKey: string;
-  purposeKey: string;
-  audienceKey: string;
-  aiAnalysisKey: string;
-  videoUrl: string;
-  duration?: string;
-  views: number;
-  likes: number;
-  comments: number;
-  shares: number;
-  tags: string[];
-  thumbnail: string;
-  category: string;
-}
-
-const mockLibraryItems: LibraryItem[] = [
-  {
-    id: 1,
-    titleKey: 'library.cocacola.title',
-    type: 'video',
-    publisher: 'Coca-Cola',
-    publishDate: 'Nov 2024',
-    publishDateFull: 'Nov 19, 2024',
-    videoTypeKey: 'library.cocacola.type',
-    purposeKey: 'library.cocacola.purpose',
-    audienceKey: 'library.cocacola.audience',
-    aiAnalysisKey: 'library.cocacola.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/BVCOGW.mp4',
-    duration: '01:00',
-    views: 2850000,
-    likes: 48200,
-    comments: 3150,
-    shares: 12400,
-    tags: ['Christmas', 'Holiday', 'AI', 'Animation'],
-    thumbnail: 'https://img.youtube.com/vi/4RSTupbfGog/maxresdefault.jpg',
-    category: 'food',
-  },
-  {
-    id: 2,
-    titleKey: 'library.mcdonalds.title',
-    type: 'video',
-    publisher: "McDonald's",
-    publishDate: '2024',
-    publishDateFull: '2024',
-    videoTypeKey: 'library.mcdonalds.type',
-    purposeKey: 'library.mcdonalds.purpose',
-    audienceKey: 'library.mcdonalds.audience',
-    aiAnalysisKey: 'library.mcdonalds.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/4ov76u.mp4',
-    duration: '00:40',
-    views: 1420000,
-    likes: 25600,
-    comments: 1820,
-    shares: 6340,
-    tags: ['Future', 'Tech', 'AI', 'Innovation'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 3,
-    titleKey: 'library.nike.title',
-    type: 'video',
-    publisher: 'Audiovisual con IA',
-    publishDate: 'Apr 2025',
-    publishDateFull: 'Apr 28, 2025',
-    videoTypeKey: 'library.nike.type',
-    purposeKey: 'library.nike.purpose',
-    audienceKey: 'library.nike.audience',
-    aiAnalysisKey: 'library.nike.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/8XDY2f.mp4',
-    duration: '00:30',
-    views: 980000,
-    likes: 18400,
-    comments: 920,
-    shares: 4100,
-    tags: ['Nike', 'AI Sports', 'Slow Motion'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 4,
-    titleKey: 'library.jeremyRazors.title',
-    type: 'video',
-    publisher: "Jeremy's Razors",
-    publishDate: 'Feb 2025',
-    publishDateFull: 'Feb 7, 2025',
-    videoTypeKey: 'library.jeremyRazors.type',
-    purposeKey: 'library.jeremyRazors.purpose',
-    audienceKey: 'library.jeremyRazors.audience',
-    aiAnalysisKey: 'library.jeremyRazors.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/IKqMZ0.mp4',
-    duration: '00:35',
-    views: 520000,
-    likes: 12800,
-    comments: 740,
-    shares: 2900,
-    tags: ['Razor', 'Metal', 'AI Render'],
-    thumbnail: '',
-    category: 'personal',
-  },
-  {
-    id: 5,
-    titleKey: 'library.zaraDor.title',
-    type: 'video',
-    publisher: 'The Dor Brothers',
-    publishDate: 'Aug 2024',
-    publishDateFull: 'Aug 5, 2024',
-    videoTypeKey: 'library.zaraDor.type',
-    purposeKey: 'library.zaraDor.purpose',
-    audienceKey: 'library.zaraDor.audience',
-    aiAnalysisKey: 'library.zaraDor.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/NWfxHT.mp4',
-    duration: '00:32',
-    views: 610000,
-    likes: 14300,
-    comments: 820,
-    shares: 3100,
-    tags: ['Zara', 'Concept', 'AI Fashion'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 6,
-    titleKey: 'library.hiamiHooch.title',
-    type: 'video',
-    publisher: 'The Dor Brothers',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 31, 2024',
-    videoTypeKey: 'library.hiamiHooch.type',
-    purposeKey: 'library.hiamiHooch.purpose',
-    audienceKey: 'library.hiamiHooch.audience',
-    aiAnalysisKey: 'library.hiamiHooch.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/4ABq2l.mp4',
-    duration: '00:28',
-    views: 455000,
-    likes: 11200,
-    comments: 580,
-    shares: 2400,
-    tags: ['Beverage', 'Concept', 'Liquid FX'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 7,
-    titleKey: 'library.dorSoda.title',
-    type: 'video',
-    publisher: 'The Dor Brothers',
-    publishDate: 'Aug 2024',
-    publishDateFull: 'Aug 15, 2024',
-    videoTypeKey: 'library.dorSoda.type',
-    purposeKey: 'library.dorSoda.purpose',
-    audienceKey: 'library.dorSoda.audience',
-    aiAnalysisKey: 'library.dorSoda.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/ENHpkU.mp4',
-    duration: '00:33',
-    views: 388000,
-    likes: 9300,
-    comments: 520,
-    shares: 1800,
-    tags: ['Soda', 'Concept', 'Motion'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 8,
-    titleKey: 'library.roguePerfume.title',
-    type: 'video',
-    publisher: 'The Dor Brothers',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 30, 2024',
-    videoTypeKey: 'library.roguePerfume.type',
-    purposeKey: 'library.roguePerfume.purpose',
-    audienceKey: 'library.roguePerfume.audience',
-    aiAnalysisKey: 'library.roguePerfume.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/adMqvZ.mp4',
-    duration: '00:31',
-    views: 442000,
-    likes: 10100,
-    comments: 610,
-    shares: 2100,
-    tags: ['Perfume', 'Luxury', 'Stylized'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 9,
-    titleKey: 'library.kfcRemix.title',
-    type: 'video',
-    publisher: 'Krishna Pasi',
-    publishDate: 'Apr 2025',
-    publishDateFull: 'Apr 1, 2025',
-    videoTypeKey: 'library.kfcRemix.type',
-    purposeKey: 'library.kfcRemix.purpose',
-    audienceKey: 'library.kfcRemix.audience',
-    aiAnalysisKey: 'library.kfcRemix.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/m9IZpK.mp4',
-    duration: '00:29',
-    views: 612000,
-    likes: 13800,
-    comments: 760,
-    shares: 2500,
-    tags: ['KFC', 'Food', 'AI Voice'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 10,
-    titleKey: 'library.volvoLife.title',
-    type: 'video',
-    publisher: 'Laszlo Gaal',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 4, 2024',
-    videoTypeKey: 'library.volvoLife.type',
-    purposeKey: 'library.volvoLife.purpose',
-    audienceKey: 'library.volvoLife.audience',
-    aiAnalysisKey: 'library.volvoLife.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/5aurPq.mp4',
-    duration: '00:45',
-    views: 720000,
-    likes: 15400,
-    comments: 880,
-    shares: 3300,
-    tags: ['Volvo', 'Safety', 'Cinematic'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 11,
-    titleKey: 'library.adidasFloral.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'May 2025',
-    publishDateFull: 'May 16, 2025',
-    videoTypeKey: 'library.adidasFloral.type',
-    purposeKey: 'library.adidasFloral.purpose',
-    audienceKey: 'library.adidasFloral.audience',
-    aiAnalysisKey: 'library.adidasFloral.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/HBj45Q.mp4',
-    duration: '00:27',
-    views: 540000,
-    likes: 12000,
-    comments: 640,
-    shares: 2200,
-    tags: ['Adidas', 'Floral', 'Style Transfer'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 12,
-    titleKey: 'library.chinguCafe.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Jun 2025',
-    publishDateFull: 'Jun 4, 2025',
-    videoTypeKey: 'library.chinguCafe.type',
-    purposeKey: 'library.chinguCafe.purpose',
-    audienceKey: 'library.chinguCafe.audience',
-    aiAnalysisKey: 'library.chinguCafe.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/4VIf72.mp4',
-    duration: '00:34',
-    views: 402000,
-    likes: 9500,
-    comments: 520,
-    shares: 1800,
-    tags: ['Coffee', 'Emotive', 'Face Animation'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 13,
-    titleKey: 'library.invideoSpark.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 27, 2025',
-    videoTypeKey: 'library.invideoSpark.type',
-    purposeKey: 'library.invideoSpark.purpose',
-    audienceKey: 'library.invideoSpark.audience',
-    aiAnalysisKey: 'library.invideoSpark.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/TDAP1m.mp4',
-    duration: '00:33',
-    views: 368000,
-    likes: 8700,
-    comments: 480,
-    shares: 1700,
-    tags: ['InVideo', 'Creative', 'Polish'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 14,
-    titleKey: 'library.netflixBite.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Nov 2024',
-    publishDateFull: 'Nov 17, 2024',
-    videoTypeKey: 'library.netflixBite.type',
-    purposeKey: 'library.netflixBite.purpose',
-    audienceKey: 'library.netflixBite.audience',
-    aiAnalysisKey: 'library.netflixBite.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/UljSPp.mp4',
-    duration: '00:36',
-    views: 810000,
-    likes: 17600,
-    comments: 940,
-    shares: 3200,
-    tags: ['Netflix', 'Promo', 'Color Grade'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 15,
-    titleKey: 'library.gotMilk.title',
-    type: 'video',
-    publisher: 'Niccyan',
-    publishDate: 'May 2023',
-    publishDateFull: 'May 30, 2023',
-    videoTypeKey: 'library.gotMilk.type',
-    purposeKey: 'library.gotMilk.purpose',
-    audienceKey: 'library.gotMilk.audience',
-    aiAnalysisKey: 'library.gotMilk.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/YEhJ98.mp4',
-    duration: '00:26',
-    views: 295000,
-    likes: 7200,
-    comments: 310,
-    shares: 1400,
-    tags: ['Milk', 'Family', 'AI Render'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 16,
-    titleKey: 'library.durex.title',
-    type: 'video',
-    publisher: 'Haggar shoval',
-    publishDate: 'Jun 2025',
-    publishDateFull: 'Jun 30, 2025',
-    videoTypeKey: 'library.durex.type',
-    purposeKey: 'library.durex.purpose',
-    audienceKey: 'library.durex.audience',
-    aiAnalysisKey: 'library.durex.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/vw8t8O.mp4',
-    duration: '00:30',
-    views: 250000,
-    likes: 6800,
-    comments: 290,
-    shares: 1200,
-    tags: ['Durex', 'Low Saturation', 'Runway'],
-    thumbnail: '',
-    category: 'personal',
-  },
-  {
-    id: 17,
-    titleKey: 'library.adidasBlue.title',
-    type: 'video',
-    publisher: 'Billy Boman AI Productions',
-    publishDate: 'Jan 2024',
-    publishDateFull: 'Jan 10, 2024',
-    videoTypeKey: 'library.adidasBlue.type',
-    purposeKey: 'library.adidasBlue.purpose',
-    audienceKey: 'library.adidasBlue.audience',
-    aiAnalysisKey: 'library.adidasBlue.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/CoufwK.mp4',
-    duration: '00:38',
-    views: 630000,
-    likes: 15200,
-    comments: 780,
-    shares: 2600,
-    tags: ['Adidas', 'Runway', 'Topaz'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 18,
-    titleKey: 'library.porscheDream.title',
-    type: 'video',
-    publisher: 'Laszlo Gaal',
-    publishDate: 'Jan 2025',
-    publishDateFull: 'Jan 21, 2025',
-    videoTypeKey: 'library.porscheDream.type',
-    purposeKey: 'library.porscheDream.purpose',
-    audienceKey: 'library.porscheDream.audience',
-    aiAnalysisKey: 'library.porscheDream.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/Q0RMhR.mp4',
-    duration: '00:42',
-    views: 905000,
-    likes: 19800,
-    comments: 1030,
-    shares: 3600,
-    tags: ['Porsche', 'Luxury', 'Veo2'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 19,
-    titleKey: 'library.lincoln.title',
-    type: 'video',
-    publisher: 'Jeremy Haccoun',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 31, 2024',
-    videoTypeKey: 'library.lincoln.type',
-    purposeKey: 'library.lincoln.purpose',
-    audienceKey: 'library.lincoln.audience',
-    aiAnalysisKey: 'library.lincoln.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/KQuIPR.mp4',
-    duration: '00:37',
-    views: 488000,
-    likes: 10900,
-    comments: 590,
-    shares: 1900,
-    tags: ['Lincoln', 'Luxury', 'Gen-3'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 20,
-    titleKey: 'library.realThing.title',
-    type: 'video',
-    publisher: 'Anima Studios TV',
-    publishDate: 'Aug 2024',
-    publishDateFull: 'Aug 4, 2024',
-    videoTypeKey: 'library.realThing.type',
-    purposeKey: 'library.realThing.purpose',
-    audienceKey: 'library.realThing.audience',
-    aiAnalysisKey: 'library.realThing.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/M0V4cZ.mp4',
-    duration: '00:30',
-    views: 720000,
-    likes: 16000,
-    comments: 840,
-    shares: 3000,
-    tags: ['Coca-Cola', 'Classic', 'AI Color'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 21,
-    titleKey: 'library.flowerTea.title',
-    type: 'video',
-    publisher: '比尧',
-    publishDate: 'May 2025',
-    publishDateFull: 'May 27, 2025',
-    videoTypeKey: 'library.flowerTea.type',
-    purposeKey: 'library.flowerTea.purpose',
-    audienceKey: 'library.flowerTea.audience',
-    aiAnalysisKey: 'library.flowerTea.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/AKq5SY.mp4',
-    duration: '00:40',
-    views: 268000,
-    likes: 7400,
-    comments: 360,
-    shares: 1500,
-    tags: ['Tea', 'Culture', 'Ink Style'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 22,
-    titleKey: 'library.warmFurball.title',
-    type: 'video',
-    publisher: '王天王-',
-    publishDate: 'Nov 2024',
-    publishDateFull: 'Nov 9, 2024',
-    videoTypeKey: 'library.warmFurball.type',
-    purposeKey: 'library.warmFurball.purpose',
-    audienceKey: 'library.warmFurball.audience',
-    aiAnalysisKey: 'library.warmFurball.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/C7jwEF.mp4',
-    duration: '00:25',
-    views: 182000,
-    likes: 5200,
-    comments: 280,
-    shares: 1100,
-    tags: ['DIY', 'Seasonal', 'AIGC'],
-    thumbnail: '',
-    category: 'diy',
-  },
-  {
-    id: 23,
-    titleKey: 'library.lenovoYouth.title',
-    type: 'video',
-    publisher: 'N_S600',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 10, 2025',
-    videoTypeKey: 'library.lenovoYouth.type',
-    purposeKey: 'library.lenovoYouth.purpose',
-    audienceKey: 'library.lenovoYouth.audience',
-    aiAnalysisKey: 'library.lenovoYouth.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/qnxNPp.mp4',
-    duration: '00:38',
-    views: 350000,
-    likes: 9100,
-    comments: 520,
-    shares: 1750,
-    tags: ['Lenovo', 'Youth Day', 'Runway'],
-    thumbnail: '',
-    category: 'digital',
-  },
-  {
-    id: 24,
-    titleKey: 'library.pocari.title',
-    type: 'video',
-    publisher: '鹿柒乐',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 26, 2025',
-    videoTypeKey: 'library.pocari.type',
-    purposeKey: 'library.pocari.purpose',
-    audienceKey: 'library.pocari.audience',
-    aiAnalysisKey: 'library.pocari.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/9FTwsP.mp4',
-    duration: '00:34',
-    views: 410000,
-    likes: 9600,
-    comments: 540,
-    shares: 1800,
-    tags: ['Sports Drink', 'AI MV', 'Workflow'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 25,
-    titleKey: 'library.xiaomiBuds.title',
-    type: 'video',
-    publisher: '红日映画AIGC',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 6, 2025',
-    videoTypeKey: 'library.xiaomiBuds.type',
-    purposeKey: 'library.xiaomiBuds.purpose',
-    audienceKey: 'library.xiaomiBuds.audience',
-    aiAnalysisKey: 'library.xiaomiBuds.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/U4Qvh1.mp4',
-    duration: '00:29',
-    views: 322000,
-    likes: 8500,
-    comments: 410,
-    shares: 1600,
-    tags: ['Xiaomi', 'Earbuds', 'Fantasy'],
-    thumbnail: '',
-    category: 'digital',
-  },
-  {
-    id: 26,
-    titleKey: 'library.ysl.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 19, 2025',
-    videoTypeKey: 'library.ysl.type',
-    purposeKey: 'library.ysl.purpose',
-    audienceKey: 'library.ysl.audience',
-    aiAnalysisKey: 'library.ysl.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/pWjX0j.mp4',
-    duration: '00:31',
-    views: 287000,
-    likes: 7900,
-    comments: 360,
-    shares: 1400,
-    tags: ['YSL', 'Fashion', 'Style Transfer'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 27,
-    titleKey: 'library.heytea.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 8, 2025',
-    videoTypeKey: 'library.heytea.type',
-    purposeKey: 'library.heytea.purpose',
-    audienceKey: 'library.heytea.audience',
-    aiAnalysisKey: 'library.heytea.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/VjPtWE.mp4',
-    duration: '00:26',
-    views: 300000,
-    likes: 7800,
-    comments: 340,
-    shares: 1300,
-    tags: ['Tea', 'Summer', 'Brand Match'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 28,
-    titleKey: 'library.guming.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 5, 2025',
-    videoTypeKey: 'library.guming.type',
-    purposeKey: 'library.guming.purpose',
-    audienceKey: 'library.guming.audience',
-    aiAnalysisKey: 'library.guming.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/jbJJqO.mp4',
-    duration: '00:27',
-    views: 278000,
-    likes: 7300,
-    comments: 320,
-    shares: 1250,
-    tags: ['Milk Tea', 'Guochao', 'Character'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 29,
-    titleKey: 'library.taobao.title',
-    type: 'video',
-    publisher: 'Taobao',
-    publishDate: 'Apr 2023',
-    publishDateFull: 'Apr 19, 2023',
-    videoTypeKey: 'library.taobao.type',
-    purposeKey: 'library.taobao.purpose',
-    audienceKey: 'library.taobao.audience',
-    aiAnalysisKey: 'library.taobao.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/15WMVc.mp4',
-    duration: '00:35',
-    views: 950000,
-    likes: 18800,
-    comments: 1040,
-    shares: 3700,
-    tags: ['Taobao', 'Interactive', 'Digital Human'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 30,
-    titleKey: 'library.oreoCosmos.title',
-    type: 'video',
-    publisher: 'Oreo',
-    publishDate: 'Jun 2023',
-    publishDateFull: 'Jun 30, 2023',
-    videoTypeKey: 'library.oreoCosmos.type',
-    purposeKey: 'library.oreoCosmos.purpose',
-    audienceKey: 'library.oreoCosmos.audience',
-    aiAnalysisKey: 'library.oreoCosmos.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/8x26RE.mp4',
-    duration: '00:30',
-    views: 520000,
-    likes: 11800,
-    comments: 610,
-    shares: 2100,
-    tags: ['Oreo', 'Space', 'Zero Gravity'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 31,
-    titleKey: 'library.snickers.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 18, 2025',
-    videoTypeKey: 'library.snickers.type',
-    purposeKey: 'library.snickers.purpose',
-    audienceKey: 'library.snickers.audience',
-    aiAnalysisKey: 'library.snickers.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/zzaJ70.mp4',
-    duration: '00:28',
-    views: 440000,
-    likes: 10900,
-    comments: 520,
-    shares: 1900,
-    tags: ['Snickers', 'Veo 3', 'Slo-mo'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 32,
-    titleKey: 'library.felix.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 2, 2025',
-    videoTypeKey: 'library.felix.type',
-    purposeKey: 'library.felix.purpose',
-    audienceKey: 'library.felix.audience',
-    aiAnalysisKey: 'library.felix.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/dq5Ola.mp4',
-    duration: '00:32',
-    views: 305000,
-    likes: 8200,
-    comments: 390,
-    shares: 1500,
-    tags: ['Felix', 'Sora', 'Food Detail'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 33,
-    titleKey: 'library.redbull.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 28, 2025',
-    videoTypeKey: 'library.redbull.type',
-    purposeKey: 'library.redbull.purpose',
-    audienceKey: 'library.redbull.audience',
-    aiAnalysisKey: 'library.redbull.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/qU95N8.mp4',
-    duration: '00:29',
-    views: 670000,
-    likes: 15000,
-    comments: 760,
-    shares: 2700,
-    tags: ['Red Bull', 'Extreme', 'Flow'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 34,
-    titleKey: 'library.benefit.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Apr 2025',
-    publishDateFull: 'Apr 11, 2025',
-    videoTypeKey: 'library.benefit.type',
-    purposeKey: 'library.benefit.purpose',
-    audienceKey: 'library.benefit.audience',
-    aiAnalysisKey: 'library.benefit.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/kbLya2.mp4',
-    duration: '00:27',
-    views: 298000,
-    likes: 8700,
-    comments: 430,
-    shares: 1500,
-    tags: ['Benefit', 'Cosmetics', 'Luma'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 35,
-    titleKey: 'library.kalshi.title',
-    type: 'video',
-    publisher: 'PJ Ace',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 11, 2025',
-    videoTypeKey: 'library.kalshi.type',
-    purposeKey: 'library.kalshi.purpose',
-    audienceKey: 'library.kalshi.audience',
-    aiAnalysisKey: 'library.kalshi.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/ODHWX7.mp4',
-    duration: '00:36',
-    views: 210000,
-    likes: 6200,
-    comments: 310,
-    shares: 1100,
-    tags: ['Finance', 'Prediction', 'LoRA'],
-    thumbnail: '',
-    category: 'finance',
-  },
-  {
-    id: 36,
-    titleKey: 'library.im8.title',
-    type: 'video',
-    publisher: 'PJ Ace',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 27, 2025',
-    videoTypeKey: 'library.im8.type',
-    purposeKey: 'library.im8.purpose',
-    audienceKey: 'library.im8.audience',
-    aiAnalysisKey: 'library.im8.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/6WJEf7.mp4',
-    duration: '00:32',
-    views: 240000,
-    likes: 6800,
-    comments: 330,
-    shares: 1200,
-    tags: ['IM8', 'Health Drink', 'Digital Human'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 37,
-    titleKey: 'library.wistiaLenny.title',
-    type: 'video',
-    publisher: 'Billy Woodward',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 1, 2025',
-    videoTypeKey: 'library.wistiaLenny.type',
-    purposeKey: 'library.wistiaLenny.purpose',
-    audienceKey: 'library.wistiaLenny.audience',
-    aiAnalysisKey: 'library.wistiaLenny.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/mock-lenny.mp4',
-    duration: '00:30',
-    views: 190000,
-    likes: 5400,
-    comments: 260,
-    shares: 1000,
-    tags: ['Wistia', 'Narrative', 'Mock'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 38,
-    titleKey: 'library.guerlain.title',
-    type: 'video',
-    publisher: 'Guerlain',
-    publishDate: '2023',
-    publishDateFull: '2023',
-    videoTypeKey: 'library.guerlain.type',
-    purposeKey: 'library.guerlain.purpose',
-    audienceKey: 'library.guerlain.audience',
-    aiAnalysisKey: 'library.guerlain.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/yIpmK5.mp4',
-    duration: '00:40',
-    views: 510000,
-    likes: 12400,
-    comments: 580,
-    shares: 1900,
-    tags: ['Luxury', 'Craft', '3D'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 39,
-    titleKey: 'library.bosie.title',
-    type: 'video',
-    publisher: 'bosie',
-    publishDate: 'Jun 2021',
-    publishDateFull: 'Jun 20, 2021',
-    videoTypeKey: 'library.bosie.type',
-    purposeKey: 'library.bosie.purpose',
-    audienceKey: 'library.bosie.audience',
-    aiAnalysisKey: 'library.bosie.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/liq5Q5.mp4',
-    duration: '00:44',
-    views: 330000,
-    likes: 8900,
-    comments: 430,
-    shares: 1500,
-    tags: ['bosie', 'Sci-fi', 'Myth'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-];
+// 使用API返回的接口类型
+type LibraryItem = MaterialSquareItem;
 
 const formatNumber = (num: number): string => {
   if (num >= 1000) {
@@ -853,31 +20,269 @@ const formatNumber = (num: number): string => {
   return num.toString();
 };
 
+// 格式化日期
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
+  // 搜索输入值（立即更新，用于显示）
+  const [searchInput, setSearchInput] = useState('');
+  // 实际用于查询的搜索关键词（防抖后更新）
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  
+  // 防抖定时器引用
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const filters = [
-    { id: 'all', labelKey: 'library.all' },
-    { id: 'food', labelKey: 'library.food' },
-    { id: 'auto', labelKey: 'library.auto' },
-    { id: 'fashion', labelKey: 'library.fashion' },
-    { id: 'digital', labelKey: 'library.digital' },
-    { id: 'finance', labelKey: 'library.finance' },
-    { id: 'personal', labelKey: 'library.personal' },
-    { id: 'culture', labelKey: 'library.culture' },
-    { id: 'platform', labelKey: 'library.platform' },
-    { id: 'diy', labelKey: 'library.diy' },
-  ];
+  // 分页状态 - 使用累加方式存储所有已加载的数据
+  const [allLoadedItems, setAllLoadedItems] = useState<MaterialSquareItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  
+  // 固定的筛选器列表（初始化后不再变化）
+  const [fixedFilters, setFixedFilters] = useState<Array<{ id: string; label: string }>>([
+    { id: 'all', label: t('library.all') || 'All' }
+  ]);
 
-  const filteredItems = mockLibraryItems.filter(item => {
-    const title = t(item.titleKey);
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
+  // 组件挂载时，重置所有状态并重新获取数据
+  useEffect(() => {
+    // 重置状态
+    setCurrentPage(1);
+    setAllLoadedItems([]);
+    setTotalCount(0);
+    setSearchInput('');
+    setSearchQuery('');
+    setActiveFilter('all');
+    setSelectedItemId(null);
+    // 重置筛选器列表
+    setFixedFilters([{ id: 'all', label: t('library.all') || 'All' }]);
+    
+    // 清除防抖定时器
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    
+    // 清除查询缓存并重新获取数据
+    queryClient.invalidateQueries({ queryKey: ['materialSquareList'] });
+  }, []); // 空依赖数组，只在组件挂载时执行
+
+  // 搜索防抖：用户停止输入500ms后才更新searchQuery
+  useEffect(() => {
+    // 清除之前的定时器
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // 设置新的防抖定时器
+    debounceTimerRef.current = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 500); // 500ms防抖延迟
+    
+    // 清理函数：组件卸载或searchInput变化时清除定时器
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [searchInput]);
+  
+  // 组件卸载时清理防抖定时器
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // 响应式列数（根据屏幕大小）
+  const getColumnCount = (): number => {
+    if (typeof window === 'undefined') return 5;
+    const width = window.innerWidth;
+    if (width >= 1280) return 5; // xl
+    if (width >= 1024) return 4; // lg
+    if (width >= 768) return 3; // md
+    return 2; // sm
+  };
+
+  const [columnCount, setColumnCount] = useState(getColumnCount());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setColumnCount(getColumnCount());
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 获取列表数据
+  const { data: listData, isLoading: listLoading, error: listError } = useQuery({
+    queryKey: ['materialSquareList', searchQuery, activeFilter, currentPage],
+    queryFn: () => {
+      const params: Parameters<typeof fetchMaterialSquareList>[0] = {
+        page: currentPage,
+        size: pageSize,
+      };
+      
+      // 只有当搜索关键词存在时才添加title参数
+      if (searchQuery) {
+        params.title = searchQuery;
+      }
+      
+      // 只有当筛选不是'all'时才添加type参数
+      if (activeFilter && activeFilter !== 'all') {
+        params.type = activeFilter;
+      }
+      
+      return fetchMaterialSquareList(params);
+    },
+  });
+
+  // 当列表数据更新时，累加到allLoadedItems
+  useEffect(() => {
+    if (listData?.data?.list) {
+      if (currentPage === 1) {
+        // 第一页，直接替换
+        setAllLoadedItems(listData.data.list);
+        setTotalCount(listData.data.total);
+        
+        // 只在初始化时（activeFilter为'all'且筛选器列表还未初始化）提取筛选类型
+        if (activeFilter === 'all') {
+          setFixedFilters(prev => {
+            // 如果筛选器列表已经初始化（长度大于1），不再更新
+            if (prev.length > 1) {
+              return prev;
+            }
+            
+            // 从第一页数据中提取所有唯一的category
+            const categories = new Set<string>();
+            listData.data.list.forEach(item => {
+              if (item.category && item.category.trim()) {
+                categories.add(item.category);
+              }
+            });
+            
+            const categoryFilters = Array.from(categories)
+              .sort()
+              .map(cat => ({
+                id: cat,
+                label: cat,
+              }));
+            
+            return [
+              { id: 'all', label: t('library.all') || 'All' },
+              ...categoryFilters,
+            ];
+          });
+        }
+      } else {
+        // 后续页，累加
+        setAllLoadedItems(prev => [...prev, ...listData.data.list]);
+        // 更新总数（如果后端返回的总数有变化）
+        if (listData.data.total !== totalCount) {
+          setTotalCount(listData.data.total);
+        }
+      }
+    }
+  }, [listData, currentPage, activeFilter, t, totalCount]);
+
+  // 当搜索或筛选条件改变时，重置数据
+  useEffect(() => {
+    setCurrentPage(1);
+    setAllLoadedItems([]);
+    setTotalCount(0);
+    // 清除相关查询缓存
+    queryClient.invalidateQueries({ queryKey: ['materialSquareList'] });
+  }, [searchQuery, activeFilter, queryClient]);
+
+  // 获取详情数据
+  const { data: detailData, isLoading: detailLoading } = useQuery({
+    queryKey: ['materialSquareDetail', selectedItemId],
+    queryFn: () => fetchMaterialSquareDetail(selectedItemId!),
+    enabled: selectedItemId !== null,
+  });
+
+  // 筛选项目（客户端筛选，因为API可能不支持所有筛选）
+  const filteredItems = useMemo(() => {
+    return allLoadedItems.filter(item => {
+      const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === 'all' || item.category === activeFilter;
     return matchesSearch && matchesFilter;
   });
+  }, [allLoadedItems, searchQuery, activeFilter]);
+
+  // 使用固定的筛选器列表（初始化后不再变化）
+  const filters = useMemo(() => {
+    return fixedFilters;
+  }, [fixedFilters]);
+
+  // 是否还有更多数据 - 基于已加载的数据量和总数判断
+  const hasMore = useMemo(() => {
+    if (!totalCount || totalCount === 0) {
+      // 如果还没有总数，检查当前查询结果
+      return listData?.data ? (currentPage * pageSize < listData.data.total) : false;
+    }
+    // 基于已加载的数据量和总数判断
+    return allLoadedItems.length < totalCount;
+  }, [allLoadedItems.length, totalCount, listData, currentPage, pageSize]);
+
+  // 滚动加载更多
+  useEffect(() => {
+    if (!hasMore || listLoading) return;
+
+    const currentRef = loadMoreRef.current;
+    if (!currentRef) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !listLoading) {
+          // 确保还有更多数据且不在加载中时才加载下一页
+          setCurrentPage((prev) => {
+            // 计算应该加载的下一页
+            const nextPage = prev + 1;
+            // 检查是否超过总数
+            const maxPage = totalCount > 0 ? Math.ceil(totalCount / pageSize) : nextPage;
+            return nextPage <= maxPage ? nextPage : prev;
+          });
+        }
+      },
+      {
+        rootMargin: '200px', // 提前200px开始加载
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(currentRef);
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasMore, listLoading, totalCount, pageSize]);
+
+  // 判断是否为视频
+  const isVideo = (url: string, mediaType: string): boolean => {
+    return mediaType === 'video' || url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm');
+  };
 
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -893,8 +298,8 @@ const LibraryPage: React.FC = () => {
               <input
                 type="text"
                 placeholder={t('common.search')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full px-6 py-3 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
               />
             </div>
@@ -934,7 +339,7 @@ const LibraryPage: React.FC = () => {
                       : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
                   }`}
                 >
-                  {t(filter.labelKey)}
+                  {filter.label}
                 </button>
               ))}
             </div>
@@ -952,20 +357,49 @@ const LibraryPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {listLoading && filteredItems.length === 0 && (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-muted-foreground">{t('library.loading')}</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {listError && (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-destructive">{t('library.loadFailed')}</div>
+          </div>
+        )}
+
         {/* Library Grid - TikTok style vertical cards */}
+        {filteredItems.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filteredItems.map((item) => {
-            const isMp4 = item.videoUrl.endsWith('.mp4');
+            {filteredItems.map((item, index) => {
+              const isVideoItem = isVideo(item.sourceUrl, item.mediaType);
+              // 计算列索引（瀑布流式：不同列有不同的延迟）
+              const columnIndex = index % columnCount;
+              // 计算行索引
+              const rowIndex = Math.floor(index / columnCount);
+              // 瀑布流式延迟：列索引决定基础延迟，行索引增加额外延迟
+              const delay = columnIndex * 0.1 + rowIndex * 0.05;
+              
             return (
-              <div
+                <motion.div
                 key={item.id}
-                onClick={() => setSelectedItem(item)}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: delay,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  onClick={() => setSelectedItemId(item.id)}
                 className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
               >
-                {/* Video element for mp4 - shows first frame as thumbnail, plays on hover */}
-                {isMp4 ? (
+                  {/* Video element for video - shows first frame as thumbnail, plays on hover */}
+                  {isVideoItem ? (
                   <video 
-                    src={item.videoUrl}
+                      src={item.sourceUrl}
                     muted
                     loop
                     playsInline
@@ -981,34 +415,28 @@ const LibraryPage: React.FC = () => {
                       e.currentTarget.currentTime = 0;
                     }}
                   />
-                ) : null}
-                
-                {/* Thumbnail - only for non-mp4 */}
-                {!isMp4 && (
+                  ) : (
                   <img 
-                    src={item.thumbnail} 
-                    alt={t(item.titleKey)}
+                      src={item.sourceUrl} 
+                      alt={item.title}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        // 如果图片加载失败，显示占位符
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                   />
                 )}
                 
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 pointer-events-none" />
                 
-                {/* Play button - hide for mp4 on hover since video plays */}
-                {item.type === 'video' && (
-                  <div className={`absolute inset-0 flex items-center justify-center transition-opacity z-20 pointer-events-none ${isMp4 ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
+                  {/* Play button - hide for video on hover since video plays */}
+                  {isVideoItem && (
+                    <div className="absolute inset-0 flex items-center justify-center transition-opacity z-20 pointer-events-none opacity-0 group-hover:opacity-100">
                     <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <Play className="w-5 h-5 text-white ml-0.5" />
                     </div>
                   </div>
-                )}
-
-                {/* Duration badge */}
-                {item.duration && (
-                  <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded z-20">
-                    {item.duration}
-                  </span>
                 )}
                 
                 {/* Content overlay */}
@@ -1017,39 +445,54 @@ const LibraryPage: React.FC = () => {
                   <div className="flex items-center gap-4 text-white mb-3">
                     <span className="flex items-center gap-1.5">
                       <Heart className="w-5 h-5" />
-                      <span className="text-base font-bold">{formatNumber(item.likes)}</span>
+                        <span className="text-base font-bold">{formatNumber(item.likeCount)}</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MessageCircle className="w-5 h-5" />
-                      <span className="text-base font-bold">{item.comments}</span>
+                        <span className="text-base font-bold">{item.commentCount}</span>
                     </span>
                   </div>
                   
                   {/* Title */}
                   <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
-                    {t(item.titleKey)}
+                      {item.title}
                   </h3>
                   
                   {/* Publisher & Views */}
                   <div className="flex items-center justify-between text-white/80">
-                    <span className="text-sm">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</span>
+                      <span className="text-sm">@{item.publisher?.replace(/\s+/g, '').toLowerCase() || t('library.unknown').toLowerCase()}</span>
                     <span className="flex items-center gap-1 text-sm">
                       <Eye className="w-4 h-4" />
-                      {formatNumber(item.views)}
+                        {formatNumber(item.viewCount)}
                     </span>
                   </div>
                 </div>
-              </div>
+                </motion.div>
             );
           })}
         </div>
+        )}
+
+        {/* 加载更多触发器 */}
+        {hasMore && (
+          <div ref={loadMoreRef} className="flex justify-center items-center py-8">
+            <div className="text-sm text-muted-foreground">{t('library.loadingMore')}</div>
+          </div>
+        )}
+
+        {/* 空状态 */}
+        {!listLoading && filteredItems.length === 0 && (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-muted-foreground">{t('library.noData')}</div>
+          </div>
+        )}
       </div>
 
       {/* Detail Modal */}
-      {selectedItem && (
+      {selectedItemId && (
         <div 
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedItem(null)}
+          onClick={() => setSelectedItemId(null)}
         >
           <div 
             className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto overflow-x-hidden"
@@ -1058,47 +501,37 @@ const LibraryPage: React.FC = () => {
           >
             {/* Close Button */}
             <button 
-              onClick={() => setSelectedItem(null)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors"
+              onClick={() => setSelectedItemId(null)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors z-10"
             >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
+            {detailLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="text-muted-foreground">{t('library.loading')}</div>
+              </div>
+            ) : detailData?.data ? (
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               {/* Media Preview - Phone style */}
               <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
                 <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                  {selectedItem.videoUrl.endsWith('.mp4') ? (
+                    {isVideo(detailData.data.sourceUrl, detailData.data.mediaType) ? (
                     <video 
-                      src={selectedItem.videoUrl}
+                        src={detailData.data.sourceUrl}
                       controls
                       autoPlay
                       className="w-full h-full object-cover"
-                      poster={selectedItem.thumbnail}
                     />
                   ) : (
-                    <>
                       <img 
-                        src={selectedItem.thumbnail} 
-                        alt={t(selectedItem.titleKey)}
+                        src={detailData.data.sourceUrl} 
+                        alt={detailData.data.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
                       />
-                      <a 
-                        href={selectedItem.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center"
-                      >
-                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                          <Play className="w-6 h-6 text-white ml-1" />
-                        </div>
-                      </a>
-                    </>
-                  )}
-                  {selectedItem.duration && !selectedItem.videoUrl.endsWith('.mp4') && (
-                    <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-black/60 text-white text-xs font-medium rounded">
-                      {selectedItem.duration}
-                    </span>
                   )}
                 </div>
               </div>
@@ -1106,32 +539,40 @@ const LibraryPage: React.FC = () => {
               {/* Details */}
               <div className="flex-1 flex flex-col min-w-0">
                 {/* Primary: Title */}
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4 break-words">{t(selectedItem.titleKey)}</h2>
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4 break-words">
+                    {detailData.data.title}
+                  </h2>
                 
                 {/* Secondary: Publisher Info */}
                 <div className="space-y-2 mb-5">
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">Publisher: </span>
-                    <span className="text-foreground font-medium">{selectedItem.publisher}</span>
+                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
+                      <span className="text-foreground font-medium">{detailData.data.publisher || t('library.unknown')}</span>
                   </p>
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.videoType')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
+                      <span className="text-muted-foreground">{t('library.category')}: </span>
+                      <span className="text-foreground font-medium">{detailData.data.category || t('library.unknown')}</span>
                   </p>
+                    {detailData.data.purpose && (
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.purposeKey)}</span>
+                        <span className="text-muted-foreground">{t('library.purposeLabel')}: </span>
+                        <span className="text-foreground font-medium break-words">{detailData.data.purpose}</span>
                   </p>
+                    )}
+                    {detailData.data.targetAudience && (
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.audience')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.audienceKey)}</span>
+                        <span className="text-muted-foreground">{t('library.targetAudienceLabel')}: </span>
+                        <span className="text-foreground font-medium break-words">{detailData.data.targetAudience}</span>
                   </p>
+                    )}
+                    {detailData.data.aiTech && (
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.aiAnalysisKey)}</span>
+                        <span className="text-muted-foreground">{t('library.aiTechLabel')}: </span>
+                        <span className="text-foreground font-medium break-words">{detailData.data.aiTech}</span>
                   </p>
+                    )}
                   <p className="text-xs md:text-sm text-muted-foreground">
-                    Published: {selectedItem.publishDateFull}
+                      {t('library.publishTime')}: {formatDate(detailData.data.publishTime)}
                   </p>
                 </div>
 
@@ -1139,29 +580,37 @@ const LibraryPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.views.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Views</span>
+                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.viewCount.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{t('library.views')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.likes.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Likes</span>
+                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.likeCount.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{t('library.likes')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MessageCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.comments.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Comments</span>
+                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.commentCount.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{t('library.comments')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Share2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.shares.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Shares</span>
+                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.shareCount.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{t('library.shares')}</span>
                   </div>
+                    {detailData.data.collectCount !== undefined && (
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.collectCount.toLocaleString()}</span>
+                        <span className="text-xs text-muted-foreground">{t('library.collects')}</span>
+                      </div>
+                    )}
                 </div>
 
                 {/* Tags */}
+                  {detailData.data.tags && detailData.data.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedItem.tags.map((tag, index) => (
+                      {detailData.data.tags.map((tag, index) => (
                     <span 
                       key={index}
                       className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-xs md:text-sm font-medium rounded-full border border-border/20"
@@ -1170,11 +619,12 @@ const LibraryPage: React.FC = () => {
                     </span>
                   ))}
                 </div>
+                  )}
 
                 <div className="flex gap-3">
-                  {selectedItem.videoUrl.endsWith('.mp4') ? (
+                    {isVideo(detailData.data.sourceUrl, detailData.data.mediaType) ? (
                     <a 
-                      href={selectedItem.videoUrl}
+                        href={detailData.data.sourceUrl}
                       download
                       className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
                     >
@@ -1183,22 +633,34 @@ const LibraryPage: React.FC = () => {
                     </a>
                   ) : (
                     <a 
-                      href={selectedItem.videoUrl}
+                        href={detailData.data.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
                     >
                       <Play className="w-4 h-4 md:w-5 md:h-5" />
-                      {t('library.watchVideo')}
+                        {t('library.watchResource')}
                     </a>
                   )}
-                  <button className="flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
+                  <button 
+                    className="group relative flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base cursor-default"
+                    disabled
+                  >
                     <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                     {t('library.replicate')}
+                    {/* Coming Soon Overlay */}
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                    </div>
                   </button>
                 </div>
               </div>
             </div>
+            ) : (
+              <div className="flex justify-center items-center py-20">
+                <div className="text-destructive">{t('library.loadDetailFailed')}</div>
+              </div>
+            )}
           </div>
         </div>
       )}
