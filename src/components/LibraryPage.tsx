@@ -34,6 +34,67 @@ const formatDate = (dateString: string): string => {
   }
 };
 
+// 视频卡片组件 - 自动播放视频
+interface VideoCardProps {
+  src: string;
+  className?: string;
+}
+
+const VideoCard: React.FC<VideoCardProps> = ({ src, className }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // 使用 IntersectionObserver 检测视频是否在视口中，自动播放/暂停
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // 当视频进入视口时自动播放
+            video.play().catch(() => {
+              // 如果自动播放失败（例如浏览器策略限制），静默处理
+            });
+          } else {
+            // 当视频离开视口时暂停
+            video.pause();
+          }
+        });
+      },
+      {
+        threshold: 0.3, // 当30%的视频可见时触发
+        rootMargin: '50px', // 提前50px开始加载
+      }
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      loop
+      playsInline
+      autoPlay
+      preload="auto"
+      className={className}
+      onMouseEnter={(e) => {
+        const video = e.currentTarget;
+        // 鼠标悬停时重置并播放
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      }}
+    />
+  );
+};
+
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
@@ -396,24 +457,11 @@ const LibraryPage: React.FC = () => {
                   onClick={() => setSelectedItemId(item.id)}
                 className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
               >
-                  {/* Video element for video - shows first frame as thumbnail, plays on hover */}
+                  {/* Video element for video - auto plays when visible */}
                   {isVideoItem ? (
-                  <video 
-                      src={item.sourceUrl}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
+                  <VideoCard
+                    src={item.sourceUrl}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onMouseEnter={(e) => {
-                      const video = e.currentTarget;
-                      video.currentTime = 0;
-                      video.play().catch(() => {});
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
-                    }}
                   />
                   ) : (
                   <img 
