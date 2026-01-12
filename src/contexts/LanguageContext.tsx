@@ -507,6 +507,28 @@ const translations: Record<Language, Record<string, string>> = {
       "Young individualists, new-brand watchers, ad creatives, sci-fi/myth fans",
     "library.bosie.aiAnalysis":
       "Traditional creative + production; sci-fi sets with myth visual design",
+
+    // Footer
+    "footer.copyright": "© 2025 OranAI. All rights reserved.",
+    "footer.contactUs": "Contact us",
+    "footer.phone": "Phone",
+
+    // About Us Dialog
+    "about.title": "About OranAI",
+    "about.subtitle": "Pioneering the future of AI-powered marketing intelligence",
+    "about.whoWeAre": "Who We Are",
+    "about.whoWeAreDesc": "OranAI is a leading AI company focused on integrated marketing intelligence. We combine cutting-edge multimodal AI technology with deep marketing expertise to help brands understand their markets, build compelling narratives, and scale globally.",
+    "about.mission": "Our Mission",
+    "about.missionDesc": "To empower brands with AI-driven insights and tools that transform how they connect with consumers worldwide. We believe in making sophisticated marketing intelligence accessible to businesses of all sizes.",
+    "about.values": "Our Values",
+    "about.innovation": "Innovation",
+    "about.innovationDesc": "Pushing boundaries with AI technology",
+    "about.excellence": "Excellence",
+    "about.excellenceDesc": "Delivering exceptional quality",
+    "about.collaboration": "Collaboration",
+    "about.collaborationDesc": "Building together with partners",
+    "about.integrity": "Integrity",
+    "about.integrityDesc": "Acting with honesty and transparency",
   },
   zh: {
     // Navigation
@@ -929,6 +951,28 @@ const translations: Record<Language, Record<string, string>> = {
     "library.bosie.audience":
       "年轻个性消费群体、新锐品牌关注者、广告创意从业者、科幻/神话爱好者",
     "library.bosie.aiAnalysis": "以传统创意与拍摄为主；科幻场景与神话元素视觉设计",
+
+    // Footer
+    "footer.copyright": "© 2025 OranAI. 保留所有权利。",
+    "footer.contactUs": "联系我们",
+    "footer.phone": "电话",
+
+    // About Us Dialog
+    "about.title": "关于 OranAI",
+    "about.subtitle": "引领 AI 驱动营销智能的未来",
+    "about.whoWeAre": "我们是谁",
+    "about.whoWeAreDesc": "OranAI 是一家专注于整合营销智能的领先 AI 公司。我们将前沿的多模态 AI 技术与深厚的营销专业知识相结合，帮助品牌了解市场、构建引人入胜的叙事，并实现全球化扩展。",
+    "about.mission": "我们的使命",
+    "about.missionDesc": "通过 AI 驱动的洞察和工具，赋能品牌改变与全球消费者的连接方式。我们致力于让各种规模的企业都能使用先进的营销智能。",
+    "about.values": "我们的价值观",
+    "about.innovation": "创新",
+    "about.innovationDesc": "用 AI 技术突破边界",
+    "about.excellence": "卓越",
+    "about.excellenceDesc": "交付卓越品质",
+    "about.collaboration": "协作",
+    "about.collaborationDesc": "与合作伙伴共同成长",
+    "about.integrity": "诚信",
+    "about.integrityDesc": "以诚实和透明行事",
   },
 };
 
