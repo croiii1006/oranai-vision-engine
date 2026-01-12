@@ -44,6 +44,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
   const [currentTab, setCurrentTab] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+  const [isAtEnd, setIsAtEnd] = useState(false);
 
   const sections: SectionData[] = [
     {
@@ -104,24 +105,32 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
 
   // Handle wheel events for custom scrolling
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
+    // If at end, allow normal scrolling
+    if (isAtEnd) return;
 
+    const handleWheel = (e: WheelEvent) => {
       const delta = e.deltaY;
 
       if (delta > 0) {
         // Scrolling down
         if (!showDetail) {
+          e.preventDefault();
           setShowDetail(true);
         } else if (currentTab < currentSectionData.tabs.length - 1) {
+          e.preventDefault();
           setCurrentTab((prev) => prev + 1);
         } else if (currentSection < sections.length - 1) {
+          e.preventDefault();
           setCurrentSection((prev) => prev + 1);
           setCurrentTab(0);
           setShowDetail(false);
+        } else {
+          // At the last section and last tab, allow normal scroll to footer
+          setIsAtEnd(true);
         }
       } else {
         // Scrolling up
+        e.preventDefault();
         if (showDetail && currentTab > 0) {
           setCurrentTab((prev) => prev - 1);
         } else if (showDetail && currentTab === 0) {
@@ -142,14 +151,29 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
       container.addEventListener("wheel", handleWheel, { passive: false });
       return () => container.removeEventListener("wheel", handleWheel);
     }
-  }, [showDetail, currentTab, currentSection, currentSectionData.tabs.length, sections.length]);
+  }, [showDetail, currentTab, currentSection, currentSectionData.tabs.length, sections.length, isAtEnd, onScrollToTop]);
+
+  // Reset isAtEnd when scrolling back up from footer
+  useEffect(() => {
+    if (!isAtEnd) return;
+
+    const handleScrollUp = (e: WheelEvent) => {
+      if (e.deltaY < 0 && window.scrollY === 0) {
+        e.preventDefault();
+        setIsAtEnd(false);
+      }
+    };
+
+    window.addEventListener("wheel", handleScrollUp, { passive: false });
+    return () => window.removeEventListener("wheel", handleScrollUp);
+  }, [isAtEnd]);
 
   // Calculate progress
   const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0);
   const currentStep =
     sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) +
     (showDetail ? currentTab + 1 : 0);
-  const progress = (currentStep / totalSteps) * 100;
+  const progress = isAtEnd ? 100 : (currentStep / totalSteps) * 100;
 
   return (
     <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative">
