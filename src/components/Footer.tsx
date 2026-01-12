@@ -88,32 +88,34 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
 
           {/* Contact Us Section */}
           <div className="mt-12 pt-8 border-t border-border/30">
-            {/* Social Icons */}
-            <div className="flex items-center justify-center gap-4 mb-6">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-xl bg-muted/50 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200"
-                  aria-label={social.label}
-                >
-                  <social.icon />
-                </a>
-              ))}
-            </div>
-
-            {/* Contact Info */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>{t('footer.contactUs')}: hey@photog.art</span>
+            <div className="flex flex-col items-end gap-6">
+              {/* Social Icons */}
+              <div className="flex items-center gap-4">
+                {socialLinks.map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 rounded-xl bg-muted/50 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200"
+                    aria-label={social.label}
+                  >
+                    <social.icon />
+                  </a>
+                ))}
               </div>
-              <span className="hidden sm:inline">|</span>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>{t('footer.phone')}: +86 19946254041</span>
+
+              {/* Contact Info */}
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <span>{t('footer.contactUs')}: hey@photog.art</span>
+                </div>
+                <span className="hidden sm:inline">|</span>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <span>{t('footer.phone')}: +86 19946254041</span>
+                </div>
               </div>
             </div>
           </div>
