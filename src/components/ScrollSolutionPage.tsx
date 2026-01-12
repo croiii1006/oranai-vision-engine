@@ -46,6 +46,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   const [currentTab, setCurrentTab] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+  const [isAtEnd, setIsAtEnd] = useState(false);
 
   // 滚动控制
   const scrollLock = useRef(false);
@@ -53,9 +54,9 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   const lastScrollTime = useRef(0);
   
   // 滚动配置
-  const SCROLL_THRESHOLD = 120; // 需要累积的滚动量
-  const SCROLL_LOCK_DURATION = 1000; // 滚动锁定时长（毫秒）
-  const SCROLL_DEBOUNCE = 150; // 防抖时间（毫秒）
+  const SCROLL_THRESHOLD = 50; // 需要累积的滚动量
+  const SCROLL_LOCK_DURATION = 500; // 滚动锁定时长（毫秒）
+  const SCROLL_DEBOUNCE = 50; // 防抖时间（毫秒）
 
   const sections: SectionData[] = [
     {
@@ -125,7 +126,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
       const now = Date.now();
       // 防抖：如果距离上次滚动时间太短，忽略
       if (now - lastScrollTime.current < SCROLL_DEBOUNCE) {
-      e.preventDefault();
+        e.preventDefault();
         return;
       }
 
@@ -155,16 +156,27 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
       if (delta > 0) {
         // Scrolling down
         if (!showDetail) {
+          e.preventDefault();
           setShowDetail(true);
+          setIsAtEnd(false);
         } else if (currentTab < currentSectionData.tabs.length - 1) {
+          e.preventDefault();
           setCurrentTab((prev) => prev + 1);
+          setIsAtEnd(false);
         } else if (currentSection < sections.length - 1) {
+          e.preventDefault();
           setCurrentSection((prev) => prev + 1);
           setCurrentTab(0);
           setShowDetail(false);
+          setIsAtEnd(false);
+        } else {
+          // At the last section and last tab, allow normal scroll to footer
+          setIsAtEnd(true);
         }
       } else {
         // Scrolling up
+        e.preventDefault();
+        setIsAtEnd(false); // 向上滚动时，重置isAtEnd状态
         if (showDetail && currentTab > 0) {
           setCurrentTab((prev) => prev - 1);
         } else if (showDetail && currentTab === 0) {
@@ -195,12 +207,15 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
     }
   }, [showDetail, currentTab, currentSection, onScrollToTop, onScrollToFooter]);
 
-  // 检测是否为最后一步，并控制footer显示
+  // 检测是否为最后一步，并控制footer显示和isAtEnd状态
   useEffect(() => {
     const isLastStep = 
       currentSection === sections.length - 1 &&
       showDetail &&
       currentTab === sections[sections.length - 1].tabs.length - 1;
+    
+    // 同步isAtEnd状态
+    setIsAtEnd(isLastStep);
     
     if (isLastStep) {
       onScrollToFooter?.();
@@ -209,15 +224,30 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
     }
   }, [currentSection, currentTab, showDetail, onScrollToFooter, onHideFooter]);
 
-  // Calculate progress
+  // Calculate progress - 每个section有1步标题 + tabs.length步详情
   const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0);
-  const currentStep =
-    sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) +
-    (showDetail ? currentTab + 1 : 0);
-  const progress = (currentStep / totalSteps) * 100;
+  
+  // 计算当前步数
+  let currentStep = 0;
+  
+  // 前面所有section的步数（每个section：1步标题 + tabs.length步详情）
+  for (let i = 0; i < currentSection; i++) {
+    currentStep += sections[i].tabs.length + 1;
+  }
+  
+  // 当前section的进度
+  if (showDetail) {
+    // 已展开详情：1步标题 + (currentTab + 1)步tab
+    currentStep += 1 + (currentTab + 1);
+  } else {
+    // 未展开详情：只有标题步（第0步，但算作1步）
+    currentStep += 1;
+  }
+  
+  const progress = isAtEnd ? 100 : Math.min(100, (currentStep / totalSteps) * 100);
 
   return (
-    <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative overflow-hidden">
+    <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative">
       {/* Progress bar - full width at top */}
       <div className="fixed top-16 left-0 right-0 h-0.5 bg-muted/20 z-40">
         <motion.div
@@ -228,8 +258,8 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
         />
       </div>
 
-      {/* Left sidebar navigation - compact centered */}
-      <div className="fixed left-0 top-0 h-screen w-20  z-30  hidden lg:flex  flex-col  justify-evenly  items-center  py-24">
+      {/* Left sidebar navigation - compact centered, hide when at end */}
+      <div className={`fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24 transition-opacity duration-300 ${isAtEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex flex-col gap-20">
           {sections.map((section, index) => (
             <button

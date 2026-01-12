@@ -46,15 +46,18 @@ const Index = () => {
   // Show footer for non-scroll pages or when scrolled to footer in solution page
   const showFooter = !['home', 'hero', 'solution'].includes(activeTab) || (activeTab === 'solution' && showFooterInSolution);
   
-  // Reset showFooterInSolution when leaving solution page
+  // Reset showFooterInSolution when leaving solution page or entering solution page
   useEffect(() => {
     if (activeTab !== 'solution') {
+      setShowFooterInSolution(false);
+    } else {
+      // 当切换到solution页面时，先隐藏footer，让ScrollSolutionPage来决定是否显示
       setShowFooterInSolution(false);
     }
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -64,7 +67,7 @@ const Index = () => {
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="animate-fade-in">
+      <main className="animate-fade-in flex-1">
         {renderContent()}
       </main>
 
