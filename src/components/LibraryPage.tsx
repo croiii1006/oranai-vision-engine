@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, Video, Music, User, Volume2 } from 'lucide-react';
+import { Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, Video, Music, User, Volume2, ArrowLeft, Globe, Sun, Moon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+
+interface LibraryPageProps {
+  onBack?: () => void;
+}
 
 interface LibraryItem {
   id: number;
@@ -248,13 +253,18 @@ const formatNumber = (num: number): string => {
 
 type TabType = 'video' | 'voice' | 'model';
 
-const LibraryPage: React.FC = () => {
-  const { t } = useLanguage();
+const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
   const containerRef = useRef<HTMLDivElement>(null);
   const isAnimatingRef = useRef(false);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'zh' : 'en');
+  };
 
   // Handle wheel events for animation control
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -330,26 +340,49 @@ const LibraryPage: React.FC = () => {
   return (
     <div 
       ref={containerRef} 
-      className="fixed inset-0 overflow-hidden bg-background"
+      className="fixed inset-0 overflow-hidden bg-background pt-0"
       style={{ touchAction: 'none' }}
     >
+      {/* Mini Header - Back button and controls */}
+      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-accent/50 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">OranAI</span>
+        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground transition-colors"
+          >
+            <Globe className="w-4 h-4" />
+            <span>{language === 'en' ? 'EN' : '中文'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Title Container - Animates from center to top-left */}
       <div 
-        className="absolute z-20 transition-none pt-20"
+        className="absolute z-20 transition-none"
         style={{
-          left: `${easedProgress * 120 + 24}px`,
-          top: `${easedProgress * 24}px`,
-          transform: easedProgress === 0 
-            ? 'translateX(-50%)' 
-            : 'none',
-          ...(easedProgress === 0 && { left: '50%' }),
+          left: easedProgress < 0.01 ? '50%' : `${24 + easedProgress * 8}px`,
+          top: `${100 + easedProgress * (-100 + 24)}px`,
+          transform: easedProgress < 0.01 ? 'translateX(-50%)' : 'none',
         }}
       >
         <div className="flex items-baseline gap-3">
           <h1 
             className="font-bold tracking-tight whitespace-nowrap transition-none"
             style={{
-              fontSize: `${Math.max(2, 4.5 - easedProgress * 2.8)}rem`,
+              fontSize: `${Math.max(1.75, 4 - easedProgress * 2.5)}rem`,
             }}
           >
             {t('library.title')}
@@ -371,7 +404,7 @@ const LibraryPage: React.FC = () => {
       <div 
         className="absolute left-1/2 -translate-x-1/2 max-w-3xl text-center px-6 z-10"
         style={{ 
-          top: '28%',
+          top: '22%',
           opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
@@ -382,11 +415,11 @@ const LibraryPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Tab Selector - Fades out */}
+      {/* Tab Selector - Fades out, positioned below description */}
       <div 
         className="absolute left-1/2 -translate-x-1/2 z-30"
         style={{ 
-          top: '40%',
+          top: '38%',
           opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
@@ -410,42 +443,43 @@ const LibraryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Cards Container - Positioned at bottom, cards can overflow */}
+      {/* Cards Container - Positioned at bottom initially, moves to top when expanded */}
       <div 
         className="absolute left-0 right-0 z-10 overflow-visible"
         style={{
-          bottom: `${-10 + easedProgress * 25}%`,
-          height: '60%',
+          top: easedProgress > 0.5 ? `${80 + (1 - easedProgress) * 100}px` : 'auto',
+          bottom: easedProgress > 0.5 ? 'auto' : `${-15 + easedProgress * 30}%`,
+          height: easedProgress > 0.5 ? 'auto' : '65%',
         }}
       >
         {/* Video Cards */}
         {activeTab === 'video' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
             {previewVideoItems.map((item, index) => {
               const totalCards = previewVideoItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              // Fan layout (initial state) - cards at bottom, fanning upward
-              const fanRotation = distanceFromCenter * 10;
-              const arcRadius = 320;
+              // Fan layout (initial state) - wider spread to fill bottom
+              const fanRotation = distanceFromCenter * 15; // Increased rotation for wider spread
+              const arcRadius = 450; // Larger radius for bigger fan
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
               const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
               
-              // Linear layout (expanded state) - horizontal row
+              // Linear layout (expanded state) - horizontal row at top
               const cardWidth = 200;
               const gap = 20;
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = -380;
+              const linearY = easedProgress > 0.5 ? 0 : -450; // Cards go to top
               
               // Interpolate between states
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 320 + easedProgress * 100;
+              const currentHeight = 340 + easedProgress * 80;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               
@@ -530,14 +564,14 @@ const LibraryPage: React.FC = () => {
 
         {/* Voice Cards */}
         {activeTab === 'voice' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
             {previewVoiceItems.map((item, index) => {
               const totalCards = previewVoiceItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              const fanRotation = distanceFromCenter * 10;
-              const arcRadius = 320;
+              const fanRotation = distanceFromCenter * 15;
+              const arcRadius = 450;
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
               const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
@@ -547,12 +581,12 @@ const LibraryPage: React.FC = () => {
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = -380;
+              const linearY = easedProgress > 0.5 ? 0 : -450;
               
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 320 + easedProgress * 80;
+              const currentHeight = 340 + easedProgress * 80;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               
@@ -618,14 +652,14 @@ const LibraryPage: React.FC = () => {
 
         {/* Model Cards */}
         {activeTab === 'model' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
             {previewModelItems.map((item, index) => {
               const totalCards = previewModelItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              const fanRotation = distanceFromCenter * 10;
-              const arcRadius = 320;
+              const fanRotation = distanceFromCenter * 15;
+              const arcRadius = 450;
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
               const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
@@ -635,12 +669,12 @@ const LibraryPage: React.FC = () => {
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = -380;
+              const linearY = easedProgress > 0.5 ? 0 : -450;
               
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 320 + easedProgress * 100;
+              const currentHeight = 340 + easedProgress * 80;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               

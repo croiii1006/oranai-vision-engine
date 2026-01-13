@@ -18,7 +18,7 @@ const Index = () => {
       case 'products':
         return <ProductsPage />;
       case 'library':
-        return <LibraryPage />;
+        return <LibraryPage onBack={() => setActiveTab('home')} />;
       case 'home':
       case 'hero':
       case 'solution':
@@ -27,14 +27,18 @@ const Index = () => {
     }
   };
 
+  const isLibrary = activeTab === 'library';
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+      {!isLibrary && (
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+      )}
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -42,7 +46,7 @@ const Index = () => {
         {renderContent()}
       </main>
 
-      <Footer setActiveTab={setActiveTab} />
+      {!isLibrary && <Footer setActiveTab={setActiveTab} />}
     </div>
   );
 };
