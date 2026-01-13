@@ -318,26 +318,43 @@ const LibraryPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Stacked Cards Preview */}
-          <div className="relative w-full max-w-4xl h-[300px] flex items-center justify-center">
+          {/* Stacked Cards Preview - Enhanced Fan Layout */}
+          <div className="relative w-full max-w-5xl h-[380px] flex items-center justify-center" style={{ perspective: '1200px' }}>
             {activeTab === 'video' && (
-              <div className="relative w-full h-full flex items-end justify-center">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {previewVideoItems.map((item, index) => {
-                  const offset = (index - 2.5) * 60;
-                  const zIndex = 6 - Math.abs(index - 2.5);
-                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
-                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  const totalCards = previewVideoItems.length;
+                  const centerIndex = (totalCards - 1) / 2;
+                  const distanceFromCenter = index - centerIndex;
+                  
+                  // Fan spread configuration
+                  const spreadX = distanceFromCenter * 100; // Horizontal spread
+                  const rotation = distanceFromCenter * 8; // Rotation angle
+                  const translateZ = -Math.abs(distanceFromCenter) * 30; // Depth
+                  const translateY = Math.abs(distanceFromCenter) * 15; // Vertical offset
+                  const scale = 1 - Math.abs(distanceFromCenter) * 0.08;
+                  const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
+                  const blur = Math.abs(distanceFromCenter) > 2 ? 2 : 0;
                   
                   return (
                     <div
                       key={item.id}
-                      className="absolute w-36 h-52 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      className="absolute w-44 h-64 rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
                       style={{
-                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
-                        zIndex: Math.round(zIndex),
-                        opacity,
+                        transform: `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`,
+                        zIndex,
+                        filter: blur > 0 ? `blur(${blur}px)` : 'none',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                       }}
                       onClick={() => setSelectedItem(item)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY - 20}px) translateZ(${translateZ + 50}px) rotateY(${rotation}deg) scale(${scale * 1.1})`;
+                        e.currentTarget.style.zIndex = '100';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`;
+                        e.currentTarget.style.zIndex = String(zIndex);
+                      }}
                     >
                       <video
                         src={item.videoUrl}
@@ -347,10 +364,12 @@ const LibraryPage: React.FC = () => {
                         preload="metadata"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <p className="text-white text-xs font-medium truncate">{t(item.titleKey)}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <p className="text-white text-sm font-semibold truncate drop-shadow-lg">{t(item.titleKey)}</p>
                       </div>
+                      {/* Glassmorphism border effect */}
+                      <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
                     </div>
                   );
                 })}
@@ -358,32 +377,49 @@ const LibraryPage: React.FC = () => {
             )}
 
             {activeTab === 'voice' && (
-              <div className="relative w-full h-full flex items-end justify-center">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {previewVoiceItems.map((item, index) => {
-                  const offset = (index - 2.5) * 60;
-                  const zIndex = 6 - Math.abs(index - 2.5);
-                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
-                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  const totalCards = previewVoiceItems.length;
+                  const centerIndex = (totalCards - 1) / 2;
+                  const distanceFromCenter = index - centerIndex;
+                  
+                  const spreadX = distanceFromCenter * 100;
+                  const rotation = distanceFromCenter * 8;
+                  const translateZ = -Math.abs(distanceFromCenter) * 30;
+                  const translateY = Math.abs(distanceFromCenter) * 15;
+                  const scale = 1 - Math.abs(distanceFromCenter) * 0.08;
+                  const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
+                  const blur = Math.abs(distanceFromCenter) > 2 ? 2 : 0;
                   
                   return (
                     <div
                       key={item.id}
-                      className="absolute w-36 h-36 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      className="absolute w-44 h-44 rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
                       style={{
-                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
-                        zIndex: Math.round(zIndex),
-                        opacity,
+                        transform: `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`,
+                        zIndex,
+                        filter: blur > 0 ? `blur(${blur}px)` : 'none',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY - 20}px) translateZ(${translateZ + 50}px) rotateY(${rotation}deg) scale(${scale * 1.1})`;
+                        e.currentTarget.style.zIndex = '100';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`;
+                        e.currentTarget.style.zIndex = String(zIndex);
                       }}
                     >
                       <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <Volume2 className="w-5 h-5 text-white" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                          <Volume2 className="w-6 h-6 text-white" />
                         </div>
                       </div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <p className="text-white text-xs font-medium truncate">{t(item.titleKey)}</p>
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <p className="text-white text-sm font-semibold truncate drop-shadow-lg">{t(item.titleKey)}</p>
                       </div>
+                      <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
                     </div>
                   );
                 })}
@@ -391,29 +427,46 @@ const LibraryPage: React.FC = () => {
             )}
 
             {activeTab === 'model' && (
-              <div className="relative w-full h-full flex items-end justify-center">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {previewModelItems.map((item, index) => {
-                  const offset = (index - 2.5) * 60;
-                  const zIndex = 6 - Math.abs(index - 2.5);
-                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
-                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  const totalCards = previewModelItems.length;
+                  const centerIndex = (totalCards - 1) / 2;
+                  const distanceFromCenter = index - centerIndex;
+                  
+                  const spreadX = distanceFromCenter * 100;
+                  const rotation = distanceFromCenter * 8;
+                  const translateZ = -Math.abs(distanceFromCenter) * 30;
+                  const translateY = Math.abs(distanceFromCenter) * 15;
+                  const scale = 1 - Math.abs(distanceFromCenter) * 0.08;
+                  const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
+                  const blur = Math.abs(distanceFromCenter) > 2 ? 2 : 0;
                   
                   return (
                     <div
                       key={item.id}
-                      className="absolute w-36 h-48 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      className="absolute w-44 h-56 rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
                       style={{
-                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
-                        zIndex: Math.round(zIndex),
-                        opacity,
+                        transform: `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`,
+                        zIndex,
+                        filter: blur > 0 ? `blur(${blur}px)` : 'none',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY - 20}px) translateZ(${translateZ + 50}px) rotateY(${rotation}deg) scale(${scale * 1.1})`;
+                        e.currentTarget.style.zIndex = '100';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = `translateX(${spreadX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateY(${rotation}deg) scale(${scale})`;
+                        e.currentTarget.style.zIndex = String(zIndex);
                       }}
                     >
                       <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-white/70 text-[10px]">{item.style}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <p className="text-white text-sm font-semibold truncate drop-shadow-lg">{item.name}</p>
+                        <p className="text-white/70 text-xs">{item.style}</p>
                       </div>
+                      <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
                     </div>
                   );
                 })}
