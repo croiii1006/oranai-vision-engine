@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight, Video, Music, User, Volume2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LibraryItem {
@@ -23,6 +23,49 @@ interface LibraryItem {
   thumbnail: string;
   category: string;
 }
+
+// Voice/Audio mock data
+interface VoiceItem {
+  id: number;
+  titleKey: string;
+  publisher: string;
+  duration: string;
+  style: string;
+  audioUrl: string;
+  plays: number;
+  likes: number;
+  thumbnail: string;
+}
+
+// Model mock data
+interface ModelItem {
+  id: number;
+  name: string;
+  style: string;
+  gender: string;
+  ethnicity: string;
+  thumbnail: string;
+  downloads: number;
+  likes: number;
+}
+
+const mockVoiceItems: VoiceItem[] = [
+  { id: 1, titleKey: 'library.voice.corporate', publisher: 'OranAI', duration: '0:30', style: 'Corporate', audioUrl: '#', plays: 12500, likes: 890, thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400' },
+  { id: 2, titleKey: 'library.voice.emotional', publisher: 'OranAI', duration: '0:45', style: 'Emotional', audioUrl: '#', plays: 8900, likes: 720, thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400' },
+  { id: 3, titleKey: 'library.voice.energetic', publisher: 'OranAI', duration: '0:25', style: 'Energetic', audioUrl: '#', plays: 15600, likes: 1200, thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400' },
+  { id: 4, titleKey: 'library.voice.calm', publisher: 'OranAI', duration: '1:00', style: 'Calm', audioUrl: '#', plays: 6700, likes: 540, thumbnail: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400' },
+  { id: 5, titleKey: 'library.voice.cinematic', publisher: 'OranAI', duration: '0:50', style: 'Cinematic', audioUrl: '#', plays: 11200, likes: 980, thumbnail: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400' },
+  { id: 6, titleKey: 'library.voice.upbeat', publisher: 'OranAI', duration: '0:35', style: 'Upbeat', audioUrl: '#', plays: 9400, likes: 810, thumbnail: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400' },
+];
+
+const mockModelItems: ModelItem[] = [
+  { id: 1, name: 'Emma Chen', style: 'Fashion', gender: 'Female', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400', downloads: 8900, likes: 1200 },
+  { id: 2, name: 'Marcus Johnson', style: 'Corporate', gender: 'Male', ethnicity: 'African', thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400', downloads: 6500, likes: 890 },
+  { id: 3, name: 'Sofia Martinez', style: 'Lifestyle', gender: 'Female', ethnicity: 'Hispanic', thumbnail: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400', downloads: 12400, likes: 1580 },
+  { id: 4, name: 'Alex Kim', style: 'Sports', gender: 'Male', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400', downloads: 7200, likes: 920 },
+  { id: 5, name: 'Isabella Brown', style: 'Beauty', gender: 'Female', ethnicity: 'Caucasian', thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400', downloads: 15600, likes: 2100 },
+  { id: 6, name: 'David Lee', style: 'Tech', gender: 'Male', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400', downloads: 5400, likes: 680 },
+];
 
 const mockLibraryItems: LibraryItem[] = [
   {
@@ -193,855 +236,359 @@ const mockLibraryItems: LibraryItem[] = [
     thumbnail: '',
     category: 'fashion',
   },
-  {
-    id: 9,
-    titleKey: 'library.kfcRemix.title',
-    type: 'video',
-    publisher: 'Krishna Pasi',
-    publishDate: 'Apr 2025',
-    publishDateFull: 'Apr 1, 2025',
-    videoTypeKey: 'library.kfcRemix.type',
-    purposeKey: 'library.kfcRemix.purpose',
-    audienceKey: 'library.kfcRemix.audience',
-    aiAnalysisKey: 'library.kfcRemix.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/m9IZpK.mp4',
-    duration: '00:29',
-    views: 612000,
-    likes: 13800,
-    comments: 760,
-    shares: 2500,
-    tags: ['KFC', 'Food', 'AI Voice'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 10,
-    titleKey: 'library.volvoLife.title',
-    type: 'video',
-    publisher: 'Laszlo Gaal',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 4, 2024',
-    videoTypeKey: 'library.volvoLife.type',
-    purposeKey: 'library.volvoLife.purpose',
-    audienceKey: 'library.volvoLife.audience',
-    aiAnalysisKey: 'library.volvoLife.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/5aurPq.mp4',
-    duration: '00:45',
-    views: 720000,
-    likes: 15400,
-    comments: 880,
-    shares: 3300,
-    tags: ['Volvo', 'Safety', 'Cinematic'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 11,
-    titleKey: 'library.adidasFloral.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'May 2025',
-    publishDateFull: 'May 16, 2025',
-    videoTypeKey: 'library.adidasFloral.type',
-    purposeKey: 'library.adidasFloral.purpose',
-    audienceKey: 'library.adidasFloral.audience',
-    aiAnalysisKey: 'library.adidasFloral.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/HBj45Q.mp4',
-    duration: '00:27',
-    views: 540000,
-    likes: 12000,
-    comments: 640,
-    shares: 2200,
-    tags: ['Adidas', 'Floral', 'Style Transfer'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 12,
-    titleKey: 'library.chinguCafe.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Jun 2025',
-    publishDateFull: 'Jun 4, 2025',
-    videoTypeKey: 'library.chinguCafe.type',
-    purposeKey: 'library.chinguCafe.purpose',
-    audienceKey: 'library.chinguCafe.audience',
-    aiAnalysisKey: 'library.chinguCafe.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/4VIf72.mp4',
-    duration: '00:34',
-    views: 402000,
-    likes: 9500,
-    comments: 520,
-    shares: 1800,
-    tags: ['Coffee', 'Emotive', 'Face Animation'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 13,
-    titleKey: 'library.invideoSpark.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 27, 2025',
-    videoTypeKey: 'library.invideoSpark.type',
-    purposeKey: 'library.invideoSpark.purpose',
-    audienceKey: 'library.invideoSpark.audience',
-    aiAnalysisKey: 'library.invideoSpark.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/TDAP1m.mp4',
-    duration: '00:33',
-    views: 368000,
-    likes: 8700,
-    comments: 480,
-    shares: 1700,
-    tags: ['InVideo', 'Creative', 'Polish'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 14,
-    titleKey: 'library.netflixBite.title',
-    type: 'video',
-    publisher: 'RabbitHole',
-    publishDate: 'Nov 2024',
-    publishDateFull: 'Nov 17, 2024',
-    videoTypeKey: 'library.netflixBite.type',
-    purposeKey: 'library.netflixBite.purpose',
-    audienceKey: 'library.netflixBite.audience',
-    aiAnalysisKey: 'library.netflixBite.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/UljSPp.mp4',
-    duration: '00:36',
-    views: 810000,
-    likes: 17600,
-    comments: 940,
-    shares: 3200,
-    tags: ['Netflix', 'Promo', 'Color Grade'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 15,
-    titleKey: 'library.gotMilk.title',
-    type: 'video',
-    publisher: 'Niccyan',
-    publishDate: 'May 2023',
-    publishDateFull: 'May 30, 2023',
-    videoTypeKey: 'library.gotMilk.type',
-    purposeKey: 'library.gotMilk.purpose',
-    audienceKey: 'library.gotMilk.audience',
-    aiAnalysisKey: 'library.gotMilk.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/YEhJ98.mp4',
-    duration: '00:26',
-    views: 295000,
-    likes: 7200,
-    comments: 310,
-    shares: 1400,
-    tags: ['Milk', 'Family', 'AI Render'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 16,
-    titleKey: 'library.durex.title',
-    type: 'video',
-    publisher: 'Haggar shoval',
-    publishDate: 'Jun 2025',
-    publishDateFull: 'Jun 30, 2025',
-    videoTypeKey: 'library.durex.type',
-    purposeKey: 'library.durex.purpose',
-    audienceKey: 'library.durex.audience',
-    aiAnalysisKey: 'library.durex.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/vw8t8O.mp4',
-    duration: '00:30',
-    views: 250000,
-    likes: 6800,
-    comments: 290,
-    shares: 1200,
-    tags: ['Durex', 'Low Saturation', 'Runway'],
-    thumbnail: '',
-    category: 'personal',
-  },
-  {
-    id: 17,
-    titleKey: 'library.adidasBlue.title',
-    type: 'video',
-    publisher: 'Billy Boman AI Productions',
-    publishDate: 'Jan 2024',
-    publishDateFull: 'Jan 10, 2024',
-    videoTypeKey: 'library.adidasBlue.type',
-    purposeKey: 'library.adidasBlue.purpose',
-    audienceKey: 'library.adidasBlue.audience',
-    aiAnalysisKey: 'library.adidasBlue.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/CoufwK.mp4',
-    duration: '00:38',
-    views: 630000,
-    likes: 15200,
-    comments: 780,
-    shares: 2600,
-    tags: ['Adidas', 'Runway', 'Topaz'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 18,
-    titleKey: 'library.porscheDream.title',
-    type: 'video',
-    publisher: 'Laszlo Gaal',
-    publishDate: 'Jan 2025',
-    publishDateFull: 'Jan 21, 2025',
-    videoTypeKey: 'library.porscheDream.type',
-    purposeKey: 'library.porscheDream.purpose',
-    audienceKey: 'library.porscheDream.audience',
-    aiAnalysisKey: 'library.porscheDream.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/Q0RMhR.mp4',
-    duration: '00:42',
-    views: 905000,
-    likes: 19800,
-    comments: 1030,
-    shares: 3600,
-    tags: ['Porsche', 'Luxury', 'Veo2'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 19,
-    titleKey: 'library.lincoln.title',
-    type: 'video',
-    publisher: 'Jeremy Haccoun',
-    publishDate: 'Jul 2024',
-    publishDateFull: 'Jul 31, 2024',
-    videoTypeKey: 'library.lincoln.type',
-    purposeKey: 'library.lincoln.purpose',
-    audienceKey: 'library.lincoln.audience',
-    aiAnalysisKey: 'library.lincoln.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/KQuIPR.mp4',
-    duration: '00:37',
-    views: 488000,
-    likes: 10900,
-    comments: 590,
-    shares: 1900,
-    tags: ['Lincoln', 'Luxury', 'Gen-3'],
-    thumbnail: '',
-    category: 'auto',
-  },
-  {
-    id: 20,
-    titleKey: 'library.realThing.title',
-    type: 'video',
-    publisher: 'Anima Studios TV',
-    publishDate: 'Aug 2024',
-    publishDateFull: 'Aug 4, 2024',
-    videoTypeKey: 'library.realThing.type',
-    purposeKey: 'library.realThing.purpose',
-    audienceKey: 'library.realThing.audience',
-    aiAnalysisKey: 'library.realThing.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/M0V4cZ.mp4',
-    duration: '00:30',
-    views: 720000,
-    likes: 16000,
-    comments: 840,
-    shares: 3000,
-    tags: ['Coca-Cola', 'Classic', 'AI Color'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 21,
-    titleKey: 'library.flowerTea.title',
-    type: 'video',
-    publisher: '比尧',
-    publishDate: 'May 2025',
-    publishDateFull: 'May 27, 2025',
-    videoTypeKey: 'library.flowerTea.type',
-    purposeKey: 'library.flowerTea.purpose',
-    audienceKey: 'library.flowerTea.audience',
-    aiAnalysisKey: 'library.flowerTea.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/AKq5SY.mp4',
-    duration: '00:40',
-    views: 268000,
-    likes: 7400,
-    comments: 360,
-    shares: 1500,
-    tags: ['Tea', 'Culture', 'Ink Style'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 22,
-    titleKey: 'library.warmFurball.title',
-    type: 'video',
-    publisher: '王天王-',
-    publishDate: 'Nov 2024',
-    publishDateFull: 'Nov 9, 2024',
-    videoTypeKey: 'library.warmFurball.type',
-    purposeKey: 'library.warmFurball.purpose',
-    audienceKey: 'library.warmFurball.audience',
-    aiAnalysisKey: 'library.warmFurball.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/C7jwEF.mp4',
-    duration: '00:25',
-    views: 182000,
-    likes: 5200,
-    comments: 280,
-    shares: 1100,
-    tags: ['DIY', 'Seasonal', 'AIGC'],
-    thumbnail: '',
-    category: 'diy',
-  },
-  {
-    id: 23,
-    titleKey: 'library.lenovoYouth.title',
-    type: 'video',
-    publisher: 'N_S600',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 10, 2025',
-    videoTypeKey: 'library.lenovoYouth.type',
-    purposeKey: 'library.lenovoYouth.purpose',
-    audienceKey: 'library.lenovoYouth.audience',
-    aiAnalysisKey: 'library.lenovoYouth.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/qnxNPp.mp4',
-    duration: '00:38',
-    views: 350000,
-    likes: 9100,
-    comments: 520,
-    shares: 1750,
-    tags: ['Lenovo', 'Youth Day', 'Runway'],
-    thumbnail: '',
-    category: 'digital',
-  },
-  {
-    id: 24,
-    titleKey: 'library.pocari.title',
-    type: 'video',
-    publisher: '鹿柒乐',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 26, 2025',
-    videoTypeKey: 'library.pocari.type',
-    purposeKey: 'library.pocari.purpose',
-    audienceKey: 'library.pocari.audience',
-    aiAnalysisKey: 'library.pocari.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/9FTwsP.mp4',
-    duration: '00:34',
-    views: 410000,
-    likes: 9600,
-    comments: 540,
-    shares: 1800,
-    tags: ['Sports Drink', 'AI MV', 'Workflow'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 25,
-    titleKey: 'library.xiaomiBuds.title',
-    type: 'video',
-    publisher: '红日映画AIGC',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 6, 2025',
-    videoTypeKey: 'library.xiaomiBuds.type',
-    purposeKey: 'library.xiaomiBuds.purpose',
-    audienceKey: 'library.xiaomiBuds.audience',
-    aiAnalysisKey: 'library.xiaomiBuds.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/U4Qvh1.mp4',
-    duration: '00:29',
-    views: 322000,
-    likes: 8500,
-    comments: 410,
-    shares: 1600,
-    tags: ['Xiaomi', 'Earbuds', 'Fantasy'],
-    thumbnail: '',
-    category: 'digital',
-  },
-  {
-    id: 26,
-    titleKey: 'library.ysl.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 19, 2025',
-    videoTypeKey: 'library.ysl.type',
-    purposeKey: 'library.ysl.purpose',
-    audienceKey: 'library.ysl.audience',
-    aiAnalysisKey: 'library.ysl.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/pWjX0j.mp4',
-    duration: '00:31',
-    views: 287000,
-    likes: 7900,
-    comments: 360,
-    shares: 1400,
-    tags: ['YSL', 'Fashion', 'Style Transfer'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 27,
-    titleKey: 'library.heytea.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 8, 2025',
-    videoTypeKey: 'library.heytea.type',
-    purposeKey: 'library.heytea.purpose',
-    audienceKey: 'library.heytea.audience',
-    aiAnalysisKey: 'library.heytea.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/VjPtWE.mp4',
-    duration: '00:26',
-    views: 300000,
-    likes: 7800,
-    comments: 340,
-    shares: 1300,
-    tags: ['Tea', 'Summer', 'Brand Match'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 28,
-    titleKey: 'library.guming.title',
-    type: 'video',
-    publisher: '马尚AIGC',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 5, 2025',
-    videoTypeKey: 'library.guming.type',
-    purposeKey: 'library.guming.purpose',
-    audienceKey: 'library.guming.audience',
-    aiAnalysisKey: 'library.guming.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/jbJJqO.mp4',
-    duration: '00:27',
-    views: 278000,
-    likes: 7300,
-    comments: 320,
-    shares: 1250,
-    tags: ['Milk Tea', 'Guochao', 'Character'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 29,
-    titleKey: 'library.taobao.title',
-    type: 'video',
-    publisher: 'Taobao',
-    publishDate: 'Apr 2023',
-    publishDateFull: 'Apr 19, 2023',
-    videoTypeKey: 'library.taobao.type',
-    purposeKey: 'library.taobao.purpose',
-    audienceKey: 'library.taobao.audience',
-    aiAnalysisKey: 'library.taobao.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/15WMVc.mp4',
-    duration: '00:35',
-    views: 950000,
-    likes: 18800,
-    comments: 1040,
-    shares: 3700,
-    tags: ['Taobao', 'Interactive', 'Digital Human'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 30,
-    titleKey: 'library.oreoCosmos.title',
-    type: 'video',
-    publisher: 'Oreo',
-    publishDate: 'Jun 2023',
-    publishDateFull: 'Jun 30, 2023',
-    videoTypeKey: 'library.oreoCosmos.type',
-    purposeKey: 'library.oreoCosmos.purpose',
-    audienceKey: 'library.oreoCosmos.audience',
-    aiAnalysisKey: 'library.oreoCosmos.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/8x26RE.mp4',
-    duration: '00:30',
-    views: 520000,
-    likes: 11800,
-    comments: 610,
-    shares: 2100,
-    tags: ['Oreo', 'Space', 'Zero Gravity'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 31,
-    titleKey: 'library.snickers.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 18, 2025',
-    videoTypeKey: 'library.snickers.type',
-    purposeKey: 'library.snickers.purpose',
-    audienceKey: 'library.snickers.audience',
-    aiAnalysisKey: 'library.snickers.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/zzaJ70.mp4',
-    duration: '00:28',
-    views: 440000,
-    likes: 10900,
-    comments: 520,
-    shares: 1900,
-    tags: ['Snickers', 'Veo 3', 'Slo-mo'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 32,
-    titleKey: 'library.felix.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 2, 2025',
-    videoTypeKey: 'library.felix.type',
-    purposeKey: 'library.felix.purpose',
-    audienceKey: 'library.felix.audience',
-    aiAnalysisKey: 'library.felix.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/dq5Ola.mp4',
-    duration: '00:32',
-    views: 305000,
-    likes: 8200,
-    comments: 390,
-    shares: 1500,
-    tags: ['Felix', 'Sora', 'Food Detail'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 33,
-    titleKey: 'library.redbull.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 28, 2025',
-    videoTypeKey: 'library.redbull.type',
-    purposeKey: 'library.redbull.purpose',
-    audienceKey: 'library.redbull.audience',
-    aiAnalysisKey: 'library.redbull.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/qU95N8.mp4',
-    duration: '00:29',
-    views: 670000,
-    likes: 15000,
-    comments: 760,
-    shares: 2700,
-    tags: ['Red Bull', 'Extreme', 'Flow'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 34,
-    titleKey: 'library.benefit.title',
-    type: 'video',
-    publisher: 'Billy Boman',
-    publishDate: 'Apr 2025',
-    publishDateFull: 'Apr 11, 2025',
-    videoTypeKey: 'library.benefit.type',
-    purposeKey: 'library.benefit.purpose',
-    audienceKey: 'library.benefit.audience',
-    aiAnalysisKey: 'library.benefit.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/kbLya2.mp4',
-    duration: '00:27',
-    views: 298000,
-    likes: 8700,
-    comments: 430,
-    shares: 1500,
-    tags: ['Benefit', 'Cosmetics', 'Luma'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 35,
-    titleKey: 'library.kalshi.title',
-    type: 'video',
-    publisher: 'PJ Ace',
-    publishDate: 'Jul 2025',
-    publishDateFull: 'Jul 11, 2025',
-    videoTypeKey: 'library.kalshi.type',
-    purposeKey: 'library.kalshi.purpose',
-    audienceKey: 'library.kalshi.audience',
-    aiAnalysisKey: 'library.kalshi.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/ODHWX7.mp4',
-    duration: '00:36',
-    views: 210000,
-    likes: 6200,
-    comments: 310,
-    shares: 1100,
-    tags: ['Finance', 'Prediction', 'LoRA'],
-    thumbnail: '',
-    category: 'finance',
-  },
-  {
-    id: 36,
-    titleKey: 'library.im8.title',
-    type: 'video',
-    publisher: 'PJ Ace',
-    publishDate: 'Aug 2025',
-    publishDateFull: 'Aug 27, 2025',
-    videoTypeKey: 'library.im8.type',
-    purposeKey: 'library.im8.purpose',
-    audienceKey: 'library.im8.audience',
-    aiAnalysisKey: 'library.im8.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/6WJEf7.mp4',
-    duration: '00:32',
-    views: 240000,
-    likes: 6800,
-    comments: 330,
-    shares: 1200,
-    tags: ['IM8', 'Health Drink', 'Digital Human'],
-    thumbnail: '',
-    category: 'food',
-  },
-  {
-    id: 37,
-    titleKey: 'library.wistiaLenny.title',
-    type: 'video',
-    publisher: 'Billy Woodward',
-    publishDate: 'Oct 2025',
-    publishDateFull: 'Oct 1, 2025',
-    videoTypeKey: 'library.wistiaLenny.type',
-    purposeKey: 'library.wistiaLenny.purpose',
-    audienceKey: 'library.wistiaLenny.audience',
-    aiAnalysisKey: 'library.wistiaLenny.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/mock-lenny.mp4',
-    duration: '00:30',
-    views: 190000,
-    likes: 5400,
-    comments: 260,
-    shares: 1000,
-    tags: ['Wistia', 'Narrative', 'Mock'],
-    thumbnail: '',
-    category: 'platform',
-  },
-  {
-    id: 38,
-    titleKey: 'library.guerlain.title',
-    type: 'video',
-    publisher: 'Guerlain',
-    publishDate: '2023',
-    publishDateFull: '2023',
-    videoTypeKey: 'library.guerlain.type',
-    purposeKey: 'library.guerlain.purpose',
-    audienceKey: 'library.guerlain.audience',
-    aiAnalysisKey: 'library.guerlain.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/yIpmK5.mp4',
-    duration: '00:40',
-    views: 510000,
-    likes: 12400,
-    comments: 580,
-    shares: 1900,
-    tags: ['Luxury', 'Craft', '3D'],
-    thumbnail: '',
-    category: 'fashion',
-  },
-  {
-    id: 39,
-    titleKey: 'library.bosie.title',
-    type: 'video',
-    publisher: 'bosie',
-    publishDate: 'Jun 2021',
-    publishDateFull: 'Jun 20, 2021',
-    videoTypeKey: 'library.bosie.type',
-    purposeKey: 'library.bosie.purpose',
-    audienceKey: 'library.bosie.audience',
-    aiAnalysisKey: 'library.bosie.aiAnalysis',
-    videoUrl: 'https://photog.art/api/oss/liq5Q5.mp4',
-    duration: '00:44',
-    views: 330000,
-    likes: 8900,
-    comments: 430,
-    shares: 1500,
-    tags: ['bosie', 'Sci-fi', 'Myth'],
-    thumbnail: '',
-    category: 'fashion',
-  },
 ];
 
 const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
   if (num >= 1000) {
     return (num / 1000).toFixed(1) + 'K';
   }
   return num.toString();
 };
 
+type TabType = 'video' | 'voice' | 'model';
+
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('video');
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
-  const filters = [
-    { id: 'all', labelKey: 'library.all' },
-    { id: 'food', labelKey: 'library.food' },
-    { id: 'auto', labelKey: 'library.auto' },
-    { id: 'fashion', labelKey: 'library.fashion' },
-    { id: 'digital', labelKey: 'library.digital' },
-    { id: 'finance', labelKey: 'library.finance' },
-    { id: 'personal', labelKey: 'library.personal' },
-    { id: 'culture', labelKey: 'library.culture' },
-    { id: 'platform', labelKey: 'library.platform' },
-    { id: 'diy', labelKey: 'library.diy' },
+  // Track scroll progress for animation
+  useEffect(() => {
+    const handleScroll = () => {
+      if (containerRef.current && heroRef.current) {
+        const heroHeight = heroRef.current.offsetHeight;
+        const scrollY = window.scrollY;
+        const progress = Math.min(scrollY / (heroHeight * 0.5), 1);
+        setScrollProgress(progress);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const tabs = [
+    { id: 'video' as TabType, labelKey: 'library.tab.video', icon: Video },
+    { id: 'voice' as TabType, labelKey: 'library.tab.voice', icon: Music },
+    { id: 'model' as TabType, labelKey: 'library.tab.model', icon: User },
   ];
 
-  const filteredItems = mockLibraryItems.filter(item => {
-    const title = t(item.titleKey);
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = activeFilter === 'all' || item.category === activeFilter;
-    return matchesSearch && matchesFilter;
-  });
+  // Get 6 items for stacked preview
+  const previewVideoItems = mockLibraryItems.slice(0, 6);
+  const previewVoiceItems = mockVoiceItems.slice(0, 6);
+  const previewModelItems = mockModelItems.slice(0, 6);
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
-      <div className="w-full px-6 sm:px-10 lg:px-16">
-        {/* Header with Title and Search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+    <div ref={containerRef} className="min-h-screen">
+      {/* Hero Section - First Screen */}
+      <div ref={heroRef} className="min-h-screen flex flex-col pt-24">
+        {/* Top Half - Title and Description */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8">
             {t('library.title')}
           </h1>
-          
-          <div className="flex items-center gap-4 flex-1 max-w-2xl">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder={t('common.search')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-3 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
-              />
-            </div>
-            <button className="px-8 py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
-              <ArrowUp className="w-5 h-5" />
-            </button>
-          </div>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
+            {t('library.heroDesc')}
+          </p>
         </div>
 
-        {/* Filter Tabs with horizontal scroll */}
-        <div className="relative mb-8">
-          <div className="flex items-center gap-2">
-            {/* Left Arrow */}
-            <button 
-              onClick={() => {
-                const container = document.getElementById('filter-scroll');
-                if (container) container.scrollBy({ left: -200, behavior: 'smooth' });
-              }}
-              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+        {/* Bottom Half - Tabs and Stacked Cards */}
+        <div className="flex-1 flex flex-col items-center px-6 pb-12">
+          {/* Tab Selector */}
+          <div className="flex items-center gap-3 mb-12">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? 'bg-foreground text-background'
+                    : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {t(tab.labelKey)}
+              </button>
+            ))}
+          </div>
 
-            {/* Scrollable Filter Container */}
-            <div 
-              id="filter-scroll"
-              className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {filters.map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all ${
-                    activeFilter === filter.id
-                      ? 'bg-foreground text-background'
-                      : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                  }`}
-                >
-                  {t(filter.labelKey)}
-                </button>
-              ))}
+          {/* Stacked Cards Preview */}
+          <div className="relative w-full max-w-4xl h-[300px] flex items-center justify-center">
+            {activeTab === 'video' && (
+              <div className="relative w-full h-full flex items-end justify-center">
+                {previewVideoItems.map((item, index) => {
+                  const offset = (index - 2.5) * 60;
+                  const zIndex = 6 - Math.abs(index - 2.5);
+                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
+                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className="absolute w-36 h-52 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      style={{
+                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
+                        zIndex: Math.round(zIndex),
+                        opacity,
+                      }}
+                      onClick={() => setSelectedItem(item)}
+                    >
+                      <video
+                        src={item.videoUrl}
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-white text-xs font-medium truncate">{t(item.titleKey)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {activeTab === 'voice' && (
+              <div className="relative w-full h-full flex items-end justify-center">
+                {previewVoiceItems.map((item, index) => {
+                  const offset = (index - 2.5) * 60;
+                  const zIndex = 6 - Math.abs(index - 2.5);
+                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
+                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className="absolute w-36 h-36 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      style={{
+                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
+                        zIndex: Math.round(zIndex),
+                        opacity,
+                      }}
+                    >
+                      <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <Volume2 className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-white text-xs font-medium truncate">{t(item.titleKey)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {activeTab === 'model' && (
+              <div className="relative w-full h-full flex items-end justify-center">
+                {previewModelItems.map((item, index) => {
+                  const offset = (index - 2.5) * 60;
+                  const zIndex = 6 - Math.abs(index - 2.5);
+                  const scale = 1 - Math.abs(index - 2.5) * 0.05;
+                  const opacity = 1 - Math.abs(index - 2.5) * 0.15;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className="absolute w-36 h-48 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer hover:scale-110"
+                      style={{
+                        transform: `translateX(${offset}px) scale(${scale}) translateY(${Math.abs(index - 2.5) * 10}px)`,
+                        zIndex: Math.round(zIndex),
+                        opacity,
+                      }}
+                    >
+                      <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-white text-xs font-medium truncate">{item.name}</p>
+                        <p className="text-white/70 text-[10px]">{item.style}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className="mt-8 flex flex-col items-center gap-2 text-muted-foreground animate-bounce">
+            <span className="text-sm">{t('library.scrollToExplore')}</span>
+            <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/50 flex items-start justify-center p-1">
+              <div className="w-1.5 h-3 bg-muted-foreground/50 rounded-full" />
             </div>
-
-            {/* Right Arrow */}
-            <button 
-              onClick={() => {
-                const container = document.getElementById('filter-scroll');
-                if (container) container.scrollBy({ left: 200, behavior: 'smooth' });
-              }}
-              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
+      </div>
 
-        {/* Library Grid - TikTok style vertical cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filteredItems.map((item) => {
-            const isMp4 = item.videoUrl.endsWith('.mp4');
-            return (
+      {/* Section 2: AI Video */}
+      <div className="min-h-screen py-24 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-baseline gap-4 mb-12">
+          <h2 className="text-5xl md:text-6xl font-bold tracking-tight">{t('library.title')}</h2>
+          <span className="text-3xl md:text-4xl font-light text-muted-foreground">{t('library.section.video')}</span>
+        </div>
+        
+        {/* Horizontal Scrolling Video Grid */}
+        <div className="relative">
+          <div 
+            className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {mockLibraryItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
+                className="group relative flex-shrink-0 w-[240px] aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
               >
-                {/* Video element for mp4 - shows first frame as thumbnail, plays on hover */}
-                {isMp4 ? (
-                  <video 
-                    src={item.videoUrl}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onMouseEnter={(e) => {
-                      const video = e.currentTarget;
-                      video.currentTime = 0;
-                      video.play().catch(() => {});
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
-                    }}
-                  />
-                ) : null}
-                
-                {/* Thumbnail - only for non-mp4 */}
-                {!isMp4 && (
-                  <img 
-                    src={item.thumbnail} 
-                    alt={t(item.titleKey)}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-                
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 pointer-events-none" />
-                
-                {/* Play button - hide for mp4 on hover since video plays */}
-                {item.type === 'video' && (
-                  <div className={`absolute inset-0 flex items-center justify-center transition-opacity z-20 pointer-events-none ${isMp4 ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
-                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Play className="w-5 h-5 text-white ml-0.5" />
-                    </div>
-                  </div>
-                )}
-
-                {/* Duration badge */}
+                <video 
+                  src={item.videoUrl}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.currentTime = 0;
+                    e.currentTarget.play().catch(() => {});
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.pause();
+                    e.currentTarget.currentTime = 0;
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {item.duration && (
-                  <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded z-20">
+                  <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded">
                     {item.duration}
                   </span>
                 )}
-                
-                {/* Content overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
-                  {/* Stats - prominent display at top */}
-                  <div className="flex items-center gap-4 text-white mb-3">
-                    <span className="flex items-center gap-1.5">
-                      <Heart className="w-5 h-5" />
-                      <span className="text-base font-bold">{formatNumber(item.likes)}</span>
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <div className="flex items-center gap-3 text-white mb-2">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-4 h-4" />
+                      <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
                     </span>
-                    <span className="flex items-center gap-1.5">
-                      <MessageCircle className="w-5 h-5" />
-                      <span className="text-base font-bold">{item.comments}</span>
+                    <span className="flex items-center gap-1">
+                      <Eye className="w-4 h-4" />
+                      <span className="text-sm font-medium">{formatNumber(item.views)}</span>
                     </span>
                   </div>
-                  
-                  {/* Title */}
-                  <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
-                    {t(item.titleKey)}
-                  </h3>
-                  
-                  {/* Publisher & Views */}
-                  <div className="flex items-center justify-between text-white/80">
-                    <span className="text-sm">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</span>
-                    <span className="flex items-center gap-1 text-sm">
-                      <Eye className="w-4 h-4" />
-                      {formatNumber(item.views)}
+                  <h3 className="text-white text-sm font-bold line-clamp-2">{t(item.titleKey)}</h3>
+                  <p className="text-white/70 text-xs mt-1">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: AI Voice/Music */}
+      <div className="min-h-screen py-24 px-6 sm:px-10 lg:px-16 bg-muted/20">
+        <div className="flex items-baseline gap-4 mb-12">
+          <h2 className="text-5xl md:text-6xl font-bold tracking-tight">{t('library.title')}</h2>
+          <span className="text-3xl md:text-4xl font-light text-muted-foreground">{t('library.section.voice')}</span>
+        </div>
+        
+        {/* Voice/Music Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockVoiceItems.map((item) => (
+            <div
+              key={item.id}
+              className="group relative bg-background rounded-2xl p-6 border border-border/30 hover:border-foreground/20 transition-all duration-300 cursor-pointer"
+            >
+              <div className="flex gap-4">
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                  <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Play className="w-5 h-5 text-white ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold mb-1 truncate">{t(item.titleKey)}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{item.style} • {item.duration}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Play className="w-3 h-3" />
+                      {formatNumber(item.plays)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3 h-3" />
+                      {formatNumber(item.likes)}
                     </span>
                   </div>
                 </div>
               </div>
-            );
-          })}
+              
+              {/* Audio Waveform Visual */}
+              <div className="mt-4 h-12 flex items-center justify-center gap-0.5">
+                {Array.from({ length: 40 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-foreground/20 group-hover:bg-primary/50 rounded-full transition-all duration-300"
+                    style={{ 
+                      height: `${Math.random() * 100}%`,
+                      animationDelay: `${i * 50}ms`
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 4: AI Model */}
+      <div className="min-h-screen py-24 px-6 sm:px-10 lg:px-16">
+        <div className="flex items-baseline gap-4 mb-12">
+          <h2 className="text-5xl md:text-6xl font-bold tracking-tight">{t('library.title')}</h2>
+          <span className="text-3xl md:text-4xl font-light text-muted-foreground">{t('library.section.model')}</span>
+        </div>
+        
+        {/* Model Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          {mockModelItems.map((item) => (
+            <div
+              key={item.id}
+              className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
+            >
+              <img 
+                src={item.thumbnail} 
+                alt={item.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              {/* Always visible name badge */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h3 className="text-white font-bold text-lg">{item.name}</h3>
+                <p className="text-white/70 text-sm">{item.style} • {item.gender}</p>
+              </div>
+              
+              {/* Hover stats */}
+              <div className="absolute top-4 left-4 right-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="flex items-center gap-1 text-white text-sm bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
+                  <Download className="w-3 h-3" />
+                  {formatNumber(item.downloads)}
+                </span>
+                <span className="flex items-center gap-1 text-white text-sm bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm">
+                  <Heart className="w-3 h-3" />
+                  {formatNumber(item.likes)}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -1052,11 +599,10 @@ const LibraryPage: React.FC = () => {
           onClick={() => setSelectedItem(null)}
         >
           <div 
-            className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto overflow-x-hidden"
+            className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button 
               onClick={() => setSelectedItem(null)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors"
@@ -1065,50 +611,23 @@ const LibraryPage: React.FC = () => {
             </button>
 
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              {/* Media Preview - Phone style */}
+              {/* Media Preview */}
               <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
                 <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                  {selectedItem.videoUrl.endsWith('.mp4') ? (
-                    <video 
-                      src={selectedItem.videoUrl}
-                      controls
-                      autoPlay
-                      className="w-full h-full object-cover"
-                      poster={selectedItem.thumbnail}
-                    />
-                  ) : (
-                    <>
-                      <img 
-                        src={selectedItem.thumbnail} 
-                        alt={t(selectedItem.titleKey)}
-                        className="w-full h-full object-cover"
-                      />
-                      <a 
-                        href={selectedItem.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 flex items-center justify-center"
-                      >
-                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors">
-                          <Play className="w-6 h-6 text-white ml-1" />
-                        </div>
-                      </a>
-                    </>
-                  )}
-                  {selectedItem.duration && !selectedItem.videoUrl.endsWith('.mp4') && (
-                    <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-black/60 text-white text-xs font-medium rounded">
-                      {selectedItem.duration}
-                    </span>
-                  )}
+                  <video 
+                    src={selectedItem.videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-cover"
+                    poster={selectedItem.thumbnail}
+                  />
                 </div>
               </div>
               
               {/* Details */}
               <div className="flex-1 flex flex-col min-w-0">
-                {/* Primary: Title */}
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4 break-words">{t(selectedItem.titleKey)}</h2>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
                 
-                {/* Secondary: Publisher Info */}
                 <div className="space-y-2 mb-5">
                   <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">Publisher: </span>
@@ -1120,51 +639,42 @@ const LibraryPage: React.FC = () => {
                   </p>
                   <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.purposeKey)}</span>
+                    <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
                   </p>
                   <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.audience')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.audienceKey)}</span>
+                    <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
                   </p>
                   <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                    <span className="text-foreground font-medium break-words">{t(selectedItem.aiAnalysisKey)}</span>
-                  </p>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Published: {selectedItem.publishDateFull}
+                    <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
                   </p>
                 </div>
 
-                {/* Stats - 2x2 Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
                   <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.views.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Views</span>
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-lg font-bold">{selectedItem.views.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.likes.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Likes</span>
+                    <Heart className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-lg font-bold">{selectedItem.likes.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.comments.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Comments</span>
+                    <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-lg font-bold">{selectedItem.comments.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-base md:text-lg font-bold text-foreground">{selectedItem.shares.toLocaleString()}</span>
-                    <span className="text-xs text-muted-foreground">Shares</span>
+                    <Share2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-lg font-bold">{selectedItem.shares.toLocaleString()}</span>
                   </div>
                 </div>
 
-                {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-6">
                   {selectedItem.tags.map((tag, index) => (
                     <span 
                       key={index}
-                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-xs md:text-sm font-medium rounded-full border border-border/20"
+                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20"
                     >
                       #{tag}
                     </span>
@@ -1172,28 +682,16 @@ const LibraryPage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  {selectedItem.videoUrl.endsWith('.mp4') ? (
-                    <a 
-                      href={selectedItem.videoUrl}
-                      download
-                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
-                    >
-                      <Download className="w-4 h-4 md:w-5 md:h-5" />
-                      {t('library.downloadVideo')}
-                    </a>
-                  ) : (
-                    <a 
-                      href={selectedItem.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
-                    >
-                      <Play className="w-4 h-4 md:w-5 md:h-5" />
-                      {t('library.watchVideo')}
-                    </a>
-                  )}
-                  <button className="flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base">
-                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+                  <a 
+                    href={selectedItem.videoUrl}
+                    download
+                    className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-5 h-5" />
+                    {t('library.downloadVideo')}
+                  </a>
+                  <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                    <Sparkles className="w-5 h-5" />
                     {t('library.replicate')}
                   </button>
                 </div>
