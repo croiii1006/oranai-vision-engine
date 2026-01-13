@@ -335,21 +335,28 @@ const LibraryPage: React.FC = () => {
     >
       {/* Title Container - Animates from center to top-left */}
       <div 
-        className="absolute z-20 transition-none"
+        className="absolute z-20 transition-none pt-20"
         style={{
-          left: `${50 - easedProgress * 42}%`,
-          top: `${20 - easedProgress * 12}%`,
-          transform: `translate(-50%, -50%) scale(${1 - easedProgress * 0.5})`,
-          transformOrigin: 'left center',
+          left: `${easedProgress * 120 + 24}px`,
+          top: `${easedProgress * 24}px`,
+          transform: easedProgress === 0 
+            ? 'translateX(-50%)' 
+            : 'none',
+          ...(easedProgress === 0 && { left: '50%' }),
         }}
       >
-        <div className="flex items-baseline gap-4">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight whitespace-nowrap">
+        <div className="flex items-baseline gap-3">
+          <h1 
+            className="font-bold tracking-tight whitespace-nowrap transition-none"
+            style={{
+              fontSize: `${Math.max(2, 4.5 - easedProgress * 2.8)}rem`,
+            }}
+          >
             {t('library.title')}
           </h1>
           {/* Subtitle - Fades in */}
           <span 
-            className="text-2xl md:text-3xl font-light text-muted-foreground whitespace-nowrap"
+            className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap"
             style={{ 
               opacity: easedProgress,
               transform: `translateX(${(1 - easedProgress) * 20}px)`,
@@ -364,8 +371,8 @@ const LibraryPage: React.FC = () => {
       <div 
         className="absolute left-1/2 -translate-x-1/2 max-w-3xl text-center px-6 z-10"
         style={{ 
-          top: '32%',
-          opacity: 1 - easedProgress * 2,
+          top: '28%',
+          opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
         }}
@@ -377,10 +384,10 @@ const LibraryPage: React.FC = () => {
 
       {/* Tab Selector - Fades out */}
       <div 
-        className="absolute left-1/2 -translate-x-1/2 z-20"
+        className="absolute left-1/2 -translate-x-1/2 z-30"
         style={{ 
-          top: '46%',
-          opacity: 1 - easedProgress * 2,
+          top: '40%',
+          opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
         }}
@@ -403,42 +410,42 @@ const LibraryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Cards Container */}
+      {/* Cards Container - Positioned at bottom, cards can overflow */}
       <div 
-        className="absolute left-0 right-0 z-10"
+        className="absolute left-0 right-0 z-10 overflow-visible"
         style={{
-          top: `${55 - easedProgress * 30}%`,
-          height: '50%',
+          bottom: `${-10 + easedProgress * 25}%`,
+          height: '60%',
         }}
       >
         {/* Video Cards */}
         {activeTab === 'video' && (
-          <div className="relative w-full h-full flex items-start justify-center">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
             {previewVideoItems.map((item, index) => {
               const totalCards = previewVideoItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              // Fan layout (initial state)
-              const fanRotation = distanceFromCenter * 12;
-              const arcRadius = 380;
+              // Fan layout (initial state) - cards at bottom, fanning upward
+              const fanRotation = distanceFromCenter * 10;
+              const arcRadius = 320;
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
-              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 140;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
               
-              // Linear layout (expanded state)
+              // Linear layout (expanded state) - horizontal row
               const cardWidth = 200;
               const gap = 20;
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = 20;
+              const linearY = -380;
               
               // Interpolate between states
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 280 + easedProgress * 140;
+              const currentHeight = 320 + easedProgress * 100;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               
@@ -450,7 +457,7 @@ const LibraryPage: React.FC = () => {
                     width: `${cardWidth}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
-                    top: '0',
+                    bottom: '0',
                     marginLeft: `-${cardWidth / 2}px`,
                     transformOrigin: 'center bottom',
                     transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
@@ -523,29 +530,29 @@ const LibraryPage: React.FC = () => {
 
         {/* Voice Cards */}
         {activeTab === 'voice' && (
-          <div className="relative w-full h-full flex items-start justify-center">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
             {previewVoiceItems.map((item, index) => {
               const totalCards = previewVoiceItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              const fanRotation = distanceFromCenter * 12;
-              const arcRadius = 350;
+              const fanRotation = distanceFromCenter * 10;
+              const arcRadius = 320;
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
-              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 110;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
               
               const cardWidth = 200;
               const gap = 20;
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = 20;
+              const linearY = -380;
               
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 220 + easedProgress * 100;
+              const currentHeight = 320 + easedProgress * 80;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               
@@ -557,7 +564,7 @@ const LibraryPage: React.FC = () => {
                     width: `${cardWidth}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
-                    top: '0',
+                    bottom: '0',
                     marginLeft: `-${cardWidth / 2}px`,
                     transformOrigin: 'center bottom',
                     transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
@@ -611,29 +618,29 @@ const LibraryPage: React.FC = () => {
 
         {/* Model Cards */}
         {activeTab === 'model' && (
-          <div className="relative w-full h-full flex items-start justify-center">
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible">
             {previewModelItems.map((item, index) => {
               const totalCards = previewModelItems.length;
               const centerIndex = (totalCards - 1) / 2;
               const distanceFromCenter = index - centerIndex;
               
-              const fanRotation = distanceFromCenter * 12;
-              const arcRadius = 360;
+              const fanRotation = distanceFromCenter * 10;
+              const arcRadius = 320;
               const angleRad = (fanRotation * Math.PI) / 180;
               const fanX = Math.sin(angleRad) * arcRadius;
-              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 130;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
               
               const cardWidth = 200;
               const gap = 20;
               const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
               const startX = -totalWidth / 2 + cardWidth / 2;
               const linearX = startX + index * (cardWidth + gap);
-              const linearY = 20;
+              const linearY = -380;
               
               const currentX = fanX + (linearX - fanX) * easedProgress;
               const currentY = fanY + (linearY - fanY) * easedProgress;
               const currentRotation = fanRotation * (1 - easedProgress);
-              const currentHeight = 260 + easedProgress * 120;
+              const currentHeight = 320 + easedProgress * 100;
               
               const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
               
@@ -645,7 +652,7 @@ const LibraryPage: React.FC = () => {
                     width: `${cardWidth}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
-                    top: '0',
+                    bottom: '0',
                     marginLeft: `-${cardWidth / 2}px`,
                     transformOrigin: 'center bottom',
                     transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
