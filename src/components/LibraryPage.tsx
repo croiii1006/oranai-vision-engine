@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight, Video, Music, User, Volume2 } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, Video, Music, User, Volume2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LibraryItem {
@@ -252,22 +252,59 @@ const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
   const containerRef = useRef<HTMLDivElement>(null);
+  const isAnimatingRef = useRef(false);
 
-  // Track scroll progress for animation (0 to 1)
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      // Transition happens within first screen height
-      const progress = Math.min(Math.max(scrollY / (windowHeight * 0.5), 0), 1);
-      setScrollProgress(progress);
-    };
+  // Handle wheel events for animation control
+  const handleWheel = useCallback((e: WheelEvent) => {
+    if (selectedItem) return; // Don't animate when modal is open
+    
+    e.preventDefault();
+    
+    const delta = e.deltaY;
+    const sensitivity = 0.003;
+    
+    setAnimationProgress(prev => {
+      const newProgress = prev + delta * sensitivity;
+      return Math.max(0, Math.min(1, newProgress));
+    });
+  }, [selectedItem]);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+  // Handle touch events for mobile
+  const touchStartY = useRef(0);
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
   }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (selectedItem) return;
+    
+    e.preventDefault();
+    const deltaY = touchStartY.current - e.touches[0].clientY;
+    touchStartY.current = e.touches[0].clientY;
+    
+    const sensitivity = 0.005;
+    setAnimationProgress(prev => {
+      const newProgress = prev + deltaY * sensitivity;
+      return Math.max(0, Math.min(1, newProgress));
+    });
+  }, [selectedItem]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [handleWheel, handleTouchStart, handleTouchMove]);
 
   const tabs = [
     { id: 'video' as TabType, labelKey: 'library.tab.video', icon: Video, sectionKey: 'library.section.video' },
@@ -279,370 +316,404 @@ const LibraryPage: React.FC = () => {
   const previewVoiceItems = mockVoiceItems.slice(0, 6);
   const previewModelItems = mockModelItems.slice(0, 6);
 
-  // Animation values based on scroll progress
-  const isExpanded = scrollProgress > 0.5;
-  
-  // Title animation
-  const titleScale = 1 - scrollProgress * 0.6; // 1 -> 0.4
-  const titleX = scrollProgress * -40; // 0 -> -40%
-  const titleY = scrollProgress * -35; // 0 -> -35%
+  const progress = animationProgress;
+  const isExpanded = progress > 0.5;
 
   // Get current section subtitle
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const subtitleKey = currentTab?.sectionKey || 'library.section.video';
 
+  // Easing function for smoother animations
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+  const easedProgress = easeOutCubic(progress);
+
   return (
-    <div ref={containerRef} className="min-h-[200vh]">
-      {/* Fixed Container for Animations */}
-      <div className="fixed inset-0 pt-20 overflow-hidden pointer-events-none">
-        {/* Title - Animates from center to top-left */}
-        <div 
-          className="absolute transition-all duration-300 ease-out pointer-events-auto"
-          style={{
-            left: `calc(50% + ${titleX}%)`,
-            top: `calc(20% + ${titleY}%)`,
-            transform: `translate(-50%, -50%) scale(${titleScale})`,
-          }}
-        >
-          <div className="flex items-baseline gap-4">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight whitespace-nowrap">
-              {t('library.title')}
-            </h1>
-            {/* Subtitle - Fades in */}
-            <span 
-              className="text-3xl md:text-4xl font-light text-muted-foreground whitespace-nowrap transition-opacity duration-500"
-              style={{ opacity: scrollProgress }}
+    <div 
+      ref={containerRef} 
+      className="fixed inset-0 overflow-hidden bg-background"
+      style={{ touchAction: 'none' }}
+    >
+      {/* Title Container - Animates from center to top-left */}
+      <div 
+        className="absolute z-20 transition-none"
+        style={{
+          left: `${50 - easedProgress * 42}%`,
+          top: `${20 - easedProgress * 12}%`,
+          transform: `translate(-50%, -50%) scale(${1 - easedProgress * 0.5})`,
+          transformOrigin: 'left center',
+        }}
+      >
+        <div className="flex items-baseline gap-4">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight whitespace-nowrap">
+            {t('library.title')}
+          </h1>
+          {/* Subtitle - Fades in */}
+          <span 
+            className="text-2xl md:text-3xl font-light text-muted-foreground whitespace-nowrap"
+            style={{ 
+              opacity: easedProgress,
+              transform: `translateX(${(1 - easedProgress) * 20}px)`,
+            }}
+          >
+            {t(subtitleKey)}
+          </span>
+        </div>
+      </div>
+
+      {/* Description - Fades out */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 max-w-3xl text-center px-6 z-10"
+        style={{ 
+          top: '32%',
+          opacity: 1 - easedProgress * 2,
+          transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
+          pointerEvents: progress > 0.3 ? 'none' : 'auto',
+        }}
+      >
+        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+          {t('library.heroDesc')}
+        </p>
+      </div>
+
+      {/* Tab Selector - Fades out */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 z-20"
+        style={{ 
+          top: '46%',
+          opacity: 1 - easedProgress * 2,
+          transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
+          pointerEvents: progress > 0.3 ? 'none' : 'auto',
+        }}
+      >
+        <div className="flex items-center gap-3">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
+                activeTab === tab.id
+                  ? 'bg-foreground text-background'
+                  : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+              }`}
             >
-              {t(subtitleKey)}
-            </span>
-          </div>
+              <tab.icon className="w-4 h-4" />
+              {t(tab.labelKey)}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Description - Fades out */}
-        <div 
-          className="absolute left-1/2 top-[32%] -translate-x-1/2 max-w-3xl text-center px-6 transition-opacity duration-300"
-          style={{ opacity: 1 - scrollProgress * 2 }}
-        >
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            {t('library.heroDesc')}
-          </p>
-        </div>
-
-        {/* Tab Selector - Fades out as we scroll */}
-        <div 
-          className="absolute left-1/2 top-[45%] -translate-x-1/2 transition-opacity duration-300 pointer-events-auto"
-          style={{ opacity: 1 - scrollProgress * 2 }}
-        >
-          <div className="flex items-center gap-3">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-foreground text-background'
-                    : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {t(tab.labelKey)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cards Container */}
-        <div 
-          className="absolute left-0 right-0 transition-all duration-500 ease-out pointer-events-auto"
-          style={{
-            top: isExpanded ? '25%' : '55%',
-            height: isExpanded ? '70%' : '45%',
-          }}
-        >
-          {/* Video Cards */}
-          {activeTab === 'video' && (
-            <div className="relative w-full h-full flex items-center justify-center px-6">
-              {previewVideoItems.map((item, index) => {
-                const totalCards = previewVideoItems.length;
-                const centerIndex = (totalCards - 1) / 2;
-                const distanceFromCenter = index - centerIndex;
-                
-                // Fan layout (initial state)
-                const fanRotation = distanceFromCenter * 12;
-                const arcRadius = 400;
-                const angleRad = (fanRotation * Math.PI) / 180;
-                const fanX = Math.sin(angleRad) * arcRadius;
-                const fanY = -Math.cos(angleRad) * arcRadius + arcRadius;
-                
-                // Linear layout (expanded state)
-                const cardWidth = 180;
-                const gap = 16;
-                const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
-                const startX = -totalWidth / 2 + cardWidth / 2;
-                const linearX = startX + index * (cardWidth + gap);
-                const linearY = 0;
-                
-                // Interpolate between states
-                const currentX = fanX + (linearX - fanX) * scrollProgress;
-                const currentY = fanY + (linearY - fanY) * scrollProgress;
-                const currentRotation = fanRotation * (1 - scrollProgress);
-                const currentHeight = 280 + scrollProgress * 120; // Taller when expanded
-                
-                const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
-                
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer transition-all duration-500 ease-out"
-                    style={{
-                      width: `${cardWidth}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      top: '50%',
-                      marginLeft: `-${cardWidth / 2}px`,
-                      marginTop: `-${currentHeight / 2}px`,
-                      transformOrigin: 'center center',
-                      transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
-                      zIndex: isExpanded ? index : zIndex,
-                    }}
-                    onClick={() => setSelectedItem(item)}
-                    onMouseEnter={(e) => {
-                      if (isExpanded) {
-                        e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 20}px) rotate(0deg) scale(1.05)`;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`;
-                    }}
-                  >
-                    <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
-                      <video
-                        src={item.videoUrl}
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full object-cover"
-                        onMouseEnter={(e) => {
-                          if (isExpanded) {
-                            e.currentTarget.currentTime = 0;
-                            e.currentTarget.play().catch(() => {});
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.pause();
+      {/* Cards Container */}
+      <div 
+        className="absolute left-0 right-0 z-10"
+        style={{
+          top: `${55 - easedProgress * 30}%`,
+          height: '50%',
+        }}
+      >
+        {/* Video Cards */}
+        {activeTab === 'video' && (
+          <div className="relative w-full h-full flex items-start justify-center">
+            {previewVideoItems.map((item, index) => {
+              const totalCards = previewVideoItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              // Fan layout (initial state)
+              const fanRotation = distanceFromCenter * 12;
+              const arcRadius = 380;
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 140;
+              
+              // Linear layout (expanded state)
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = 20;
+              
+              // Interpolate between states
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 280 + easedProgress * 140;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
+                <div
+                  key={item.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    top: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onClick={() => isExpanded && setSelectedItem(item)}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
+                    <video
+                      src={item.videoUrl}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                      onMouseEnter={(e) => {
+                        if (isExpanded) {
                           e.currentTarget.currentTime = 0;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      {item.duration && (
-                        <span className="absolute top-3 right-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded">
-                          {item.duration}
+                          e.currentTarget.play().catch(() => {});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.pause();
+                        e.currentTarget.currentTime = 0;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    {item.duration && (
+                      <span className="absolute top-3 right-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded">
+                        {item.duration}
+                      </span>
+                    )}
+                    <div className="absolute top-3 left-3">
+                      <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
                         </span>
-                      )}
-                      <div className="absolute bottom-4 left-4 right-4">
-                        {isExpanded && (
-                          <div className="flex items-center gap-3 text-white mb-2">
-                            <span className="flex items-center gap-1">
-                              <Heart className="w-4 h-4" />
-                              <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              <span className="text-sm font-medium">{formatNumber(item.views)}</span>
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
-                        {isExpanded && (
-                          <p className="text-white/70 text-xs mt-1">@{item.publisher.replace(/\s+/g, '').toLowerCase()}</p>
-                        )}
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.views)}</span>
+                        </span>
                       </div>
-                      <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
                     </div>
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
                   </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Voice Cards */}
-          {activeTab === 'voice' && (
-            <div className="relative w-full h-full flex items-center justify-center px-6">
-              {previewVoiceItems.map((item, index) => {
-                const totalCards = previewVoiceItems.length;
-                const centerIndex = (totalCards - 1) / 2;
-                const distanceFromCenter = index - centerIndex;
-                
-                const fanRotation = distanceFromCenter * 12;
-                const arcRadius = 350;
-                const angleRad = (fanRotation * Math.PI) / 180;
-                const fanX = Math.sin(angleRad) * arcRadius;
-                const fanY = -Math.cos(angleRad) * arcRadius + arcRadius;
-                
-                const cardWidth = 180;
-                const gap = 16;
-                const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
-                const startX = -totalWidth / 2 + cardWidth / 2;
-                const linearX = startX + index * (cardWidth + gap);
-                const linearY = 0;
-                
-                const currentX = fanX + (linearX - fanX) * scrollProgress;
-                const currentY = fanY + (linearY - fanY) * scrollProgress;
-                const currentRotation = fanRotation * (1 - scrollProgress);
-                const currentHeight = 220 + scrollProgress * 80;
-                
-                const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
-                
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer transition-all duration-500 ease-out"
-                    style={{
-                      width: `${cardWidth}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      top: '50%',
-                      marginLeft: `-${cardWidth / 2}px`,
-                      marginTop: `-${currentHeight / 2}px`,
-                      transformOrigin: 'center center',
-                      transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
-                      zIndex: isExpanded ? index : zIndex,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (isExpanded) {
-                        e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 20}px) rotate(0deg) scale(1.05)`;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`;
-                    }}
-                  >
-                    <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
-                      <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                          <Volume2 className="w-7 h-7 text-white" />
-                        </div>
-                      </div>
-                      <div className="absolute top-3 left-3 right-3">
-                        <p className="text-white/60 text-xs font-medium">{item.style} • {item.duration}</p>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        {isExpanded && (
-                          <div className="flex items-center gap-3 text-white mb-2">
-                            <span className="flex items-center gap-1">
-                              <Play className="w-3 h-3" />
-                              <span className="text-xs">{formatNumber(item.plays)}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className="w-3 h-3" />
-                              <span className="text-xs">{formatNumber(item.likes)}</span>
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
-                      </div>
-                      <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Model Cards */}
-          {activeTab === 'model' && (
-            <div className="relative w-full h-full flex items-center justify-center px-6">
-              {previewModelItems.map((item, index) => {
-                const totalCards = previewModelItems.length;
-                const centerIndex = (totalCards - 1) / 2;
-                const distanceFromCenter = index - centerIndex;
-                
-                const fanRotation = distanceFromCenter * 12;
-                const arcRadius = 380;
-                const angleRad = (fanRotation * Math.PI) / 180;
-                const fanX = Math.sin(angleRad) * arcRadius;
-                const fanY = -Math.cos(angleRad) * arcRadius + arcRadius;
-                
-                const cardWidth = 180;
-                const gap = 16;
-                const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
-                const startX = -totalWidth / 2 + cardWidth / 2;
-                const linearX = startX + index * (cardWidth + gap);
-                const linearY = 0;
-                
-                const currentX = fanX + (linearX - fanX) * scrollProgress;
-                const currentY = fanY + (linearY - fanY) * scrollProgress;
-                const currentRotation = fanRotation * (1 - scrollProgress);
-                const currentHeight = 260 + scrollProgress * 100;
-                
-                const zIndex = totalCards - Math.abs(Math.round(distanceFromCenter));
-                
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer transition-all duration-500 ease-out"
-                    style={{
-                      width: `${cardWidth}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      top: '50%',
-                      marginLeft: `-${cardWidth / 2}px`,
-                      marginTop: `-${currentHeight / 2}px`,
-                      transformOrigin: 'center center',
-                      transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
-                      zIndex: isExpanded ? index : zIndex,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (isExpanded) {
-                        e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 20}px) rotate(0deg) scale(1.05)`;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`;
-                    }}
-                  >
-                    <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
-                      <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute top-3 left-3 right-3">
-                        <p className="text-white/60 text-xs font-medium">{item.style} • {item.gender}</p>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        {isExpanded && (
-                          <div className="flex items-center gap-3 text-white mb-2">
-                            <span className="flex items-center gap-1">
-                              <Download className="w-3 h-3" />
-                              <span className="text-xs">{formatNumber(item.downloads)}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className="w-3 h-3" />
-                              <span className="text-xs">{formatNumber(item.likes)}</span>
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
-                      </div>
-                      <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Scroll Indicator - Fades out */}
-        <div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground transition-opacity duration-300"
-          style={{ opacity: 1 - scrollProgress * 3 }}
-        >
-          <span className="text-sm">{t('library.scrollToExplore')}</span>
-          <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/50 flex items-start justify-center p-1 animate-bounce">
-            <div className="w-1.5 h-3 bg-muted-foreground/50 rounded-full" />
+                </div>
+              );
+            })}
           </div>
+        )}
+
+        {/* Voice Cards */}
+        {activeTab === 'voice' && (
+          <div className="relative w-full h-full flex items-start justify-center">
+            {previewVoiceItems.map((item, index) => {
+              const totalCards = previewVoiceItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              const fanRotation = distanceFromCenter * 12;
+              const arcRadius = 350;
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 110;
+              
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = 20;
+              
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 220 + easedProgress * 100;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
+                <div
+                  key={item.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    top: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
+                    <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <Volume2 className="w-7 h-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">{item.style} • {item.duration}</p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Play className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.plays)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes)}</span>
+                        </span>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Model Cards */}
+        {activeTab === 'model' && (
+          <div className="relative w-full h-full flex items-start justify-center">
+            {previewModelItems.map((item, index) => {
+              const totalCards = previewModelItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              const fanRotation = distanceFromCenter * 12;
+              const arcRadius = 360;
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = -Math.cos(angleRad) * arcRadius + arcRadius - 130;
+              
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = 20;
+              
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 260 + easedProgress * 120;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
+                <div
+                  key={item.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    top: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
+                    <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">{item.style} • {item.gender}</p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Download className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.downloads)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes)}</span>
+                        </span>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Scroll Indicator - Fades out */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground z-20"
+        style={{ 
+          opacity: 1 - easedProgress * 3,
+          pointerEvents: progress > 0.2 ? 'none' : 'auto',
+        }}
+      >
+        <span className="text-sm">{t('library.scrollToExplore')}</span>
+        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/50 flex items-start justify-center p-1 animate-bounce">
+          <div className="w-1.5 h-3 bg-muted-foreground/50 rounded-full" />
         </div>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="absolute bottom-4 right-4 w-1 h-20 bg-muted/30 rounded-full overflow-hidden z-20">
+        <div 
+          className="w-full bg-foreground/50 rounded-full transition-all duration-100"
+          style={{ height: `${progress * 100}%` }}
+        />
       </div>
 
       {/* Detail Modal */}
