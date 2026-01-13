@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { config } from '@/lib/config';
 
 // 列表项接口
 export interface MaterialSquareItem {
@@ -91,7 +92,7 @@ export async function fetchMaterialSquareList(
       queryParams.append('sort', params.sort.trim());
     }
 
-    const url = `http://192.168.112.139:8080/api/app/material-square/page${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/page${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
     logger.info('Fetching material square list', { url, params });
 
@@ -125,7 +126,7 @@ export async function fetchMaterialSquareList(
  */
 export async function fetchMaterialSquareDetail(id: number): Promise<MaterialSquareDetailResponse> {
   try {
-    const url = `http://192.168.112.139:8080/api/app/material-square/${id}`;
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/${id}`;
     
     logger.info('Fetching material square detail', { url, id });
 

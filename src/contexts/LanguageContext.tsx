@@ -111,6 +111,10 @@ const translations: Record<Language, Record<string, string>> = {
     "models.expand": "Show more",
     "models.collapse": "Collapse",
     "models.unknownSupplier": "Unknown",
+    "models.loading": "Loading...",
+    "models.loadingMore": "Loading...",
+    "models.loadFailed": "Failed to load model data",
+    "models.retry": "Retry",
 
     // Products Page
     "products.title": "PHOTOG",
@@ -528,7 +532,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Traditional creative + production; sci-fi sets with myth visual design",
 
     // Footer
-    "footer.copyright": "© 2025 OranAI. All rights reserved.",
+    "footer.copyright": "粤ICP备 2024322593号 Copyright © 2025 OranAI. All rights reserved.",
     "footer.contactUs": "Contact us",
     "footer.phone": "Phone",
 
@@ -638,6 +642,10 @@ const translations: Record<Language, Record<string, string>> = {
     "models.expand": "展开更多",
     "models.collapse": "收起",
     "models.unknownSupplier": "未知供应商",
+    "models.loading": "加载中...",
+    "models.loadingMore": "加载中...",
+    "models.loadFailed": "加载模型数据失败",
+    "models.retry": "重试",
 
     // Products Page
     "products.title": "PHOTOG",
@@ -991,7 +999,7 @@ const translations: Record<Language, Record<string, string>> = {
     "library.bosie.aiAnalysis": "以传统创意与拍摄为主；科幻场景与神话元素视觉设计",
 
     // Footer
-    "footer.copyright": "© 2025 OranAI. 保留所有权利。",
+    "footer.copyright": "粤ICP备 2024322593号 Copyright © 2025 OranAI. 保留所有权利。",
     "footer.contactUs": "联系我们",
     "footer.phone": "电话",
 

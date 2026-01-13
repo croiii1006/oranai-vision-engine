@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowUp, ArrowRight, ChevronDown, ChevronUp, Sparkles, Brain, Diamond, Layers, Wind, Moon, Zap, Play, Video, Grid3X3, MessageCircle, ShoppingBag, Bot, HelpCircle, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIPDetection } from '@/contexts/IPDetectionContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { fetchPricingData, type ModelData, type Vendor } from '@/lib/api/models';
 import { logger } from '@/lib/logger';
-import { isChinaIP } from '@/lib/utils/ip-detection';
 
 // 供应商图标映射
 const vendorIconMap: Record<string, LucideIcon> = {
@@ -41,6 +41,7 @@ interface DisplayModel {
 
 const ModelsPage: React.FC = () => {
   const { t } = useLanguage();
+  const { isChinaIP: isChinaIPAddress, isLoading: isIPDetecting } = useIPDetection();
   // 搜索输入值（立即更新，用于显示）
   const [searchInput, setSearchInput] = useState('');
   // 实际用于筛选的搜索关键词（防抖后更新）
@@ -64,9 +65,6 @@ const ModelsPage: React.FC = () => {
   const itemsPerPage = 18; // 每次加载18个
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // IP检测状态
-  const [isChinaIPAddress, setIsChinaIPAddress] = useState<boolean | null>(null); // null表示检测中
-
   // 中国大模型供应商名称列表
   const chinaVendorNames = useMemo(() => [
     '字节跳动',
@@ -76,18 +74,6 @@ const ModelsPage: React.FC = () => {
     '阿里巴巴',
     '零一万物',
   ], []);
-
-  // 检测IP地址
-  useEffect(() => {
-    isChinaIP()
-      .then((isChina) => {
-        setIsChinaIPAddress(isChina);
-      })
-      .catch((error) => {
-        logger.error('Failed to detect IP location', error as Error);
-        setIsChinaIPAddress(false); // 出错时默认显示所有模型
-      });
-  }, []);
 
   // 获取数据
   const { data: pricingData, isLoading, error } = useQuery({
@@ -329,11 +315,11 @@ const ModelsPage: React.FC = () => {
   ];
 
   // 如果数据加载中或IP检测中，显示加载状态
-  if (isLoading || isChinaIPAddress === null) {
+  if (isLoading || isIPDetecting || isChinaIPAddress === null) {
     return (
       <div className="min-h-screen pt-32 pb-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-muted-foreground">加载中...</div>
+          <div className="text-lg text-muted-foreground">{t('models.loading')}</div>
         </div>
       </div>
     );
@@ -344,12 +330,12 @@ const ModelsPage: React.FC = () => {
     return (
       <div className="min-h-screen pt-32 pb-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg text-destructive">加载模型数据失败</div>
+          <div className="text-lg text-destructive">{t('models.loadFailed')}</div>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 rounded-full bg-foreground text-background"
           >
-            重试
+            {t('models.retry')}
           </button>
         </div>
       </div>
@@ -605,7 +591,7 @@ const ModelsPage: React.FC = () => {
             {/* 加载更多触发器 */}
             {hasMore && (
               <div ref={loadMoreRef} className="flex justify-center items-center py-8">
-                <div className="text-sm text-muted-foreground">加载中...</div>
+                <div className="text-sm text-muted-foreground">{t('models.loadingMore')}</div>
               </div>
             )}
           </main>
@@ -684,7 +670,7 @@ const ModelsPage: React.FC = () => {
                 
                 <div className="pt-4">
                   <button 
-                    onClick={() => window.open('http://119.12.161.54:3000/login', '_blank')}
+                    onClick={() => window.open('https://models.photog.art', '_blank')}
                     className="w-full py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2"
                   >
                     <span>Try this model</span>

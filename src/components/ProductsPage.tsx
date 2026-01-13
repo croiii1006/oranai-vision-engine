@@ -211,7 +211,7 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
             {/* Send Button */}
             <button 
-              onClick={() => window.open('https://photog.art/', '_blank')}
+              onClick={() => window.open('https://photog.art/p/trend', '_blank')}
               className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors"
             >
               <ArrowUp className="w-4 h-4" />

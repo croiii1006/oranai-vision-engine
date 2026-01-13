@@ -47,7 +47,7 @@ export interface PricingResponse {
  * 获取模型定价数据
  */
 export async function fetchPricingData(): Promise<PricingResponse> {
-  const apiUrl = "http://119.12.161.54:3000/api/pricing";
+  const apiUrl = `${config.api.modelsBaseUrl}/api/pricing`;
 
   try {
     const response = await fetch(apiUrl, {

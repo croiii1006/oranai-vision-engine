@@ -31,6 +31,12 @@ export const config = {
   api: {
     baseUrl: import.meta.env.VITE_API_BASE_URL || "",
     timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
+    // 模型页面API地址
+    modelsBaseUrl: import.meta.env.VITE_MODELS_API_BASE_URL || 
+      (import.meta.env.PROD ? "https://models.photog.art" : "http://119.12.161.54:3000"),
+    // LIBRARY页面API地址
+    libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
+      (import.meta.env.PROD ? "https://wwww.photog.art" : "http://192.168.112.139:8080"),
   },
 
   // 应用信息
