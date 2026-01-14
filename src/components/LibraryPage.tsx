@@ -28,6 +28,11 @@ const Y_OFFSETS = [0, 8, 16, 24, 30];
 const OPACITY_DROP_BY_DISTANCE = [0, 0.06, 0.12, 0.18, 0.2];
 const BLUR_PER_STEP = 0.6;
 const MAX_DISTANCE_INDEX = FAN_OFFSETS.length - 1;
+// Decouple collapsed/expanded title top positions
+const TITLE_TOP_COLLAPSED = 70;
+const TITLE_TOP_EXPANDED = 20;
+// Gap between main title and subtitle/search row (px)
+const TITLE_SUBTITLE_GAP = 1;
 
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -232,7 +237,8 @@ const LibraryPage: React.FC = () => {
 
   // Only shift left once aligned; keep centered before expansion
   const titleTranslateX = alignToLeft ? titleOffsets.x * easedProgress * 0.85 + 310 : 0;
-  const titleTranslateY = titleOffsets.y * easedProgress * 0.4;
+  const titleTranslateY = 0; // vertical handled via top interpolation
+  const titleTop = TITLE_TOP_COLLAPSED + (TITLE_TOP_EXPANDED - TITLE_TOP_COLLAPSED) * easedProgress;
 
   // Subtitle fades only after expansion nearly completes
   useEffect(() => {
@@ -326,16 +332,17 @@ const LibraryPage: React.FC = () => {
     <div
       ref={containerRef}
       className="fixed inset-0 overflow-hidden bg-background"
-      style={{ touchAction: 'none', top: '64px' }}
+      style={{ touchAction: 'none', top: '60px' }}
     >
       {/* Title Container - Animates from center to top-left */}
       <div
         className="absolute z-20 left-0 right-0 px-6 sm:px-10 lg:px-16"
-        style={{ top: 80, opacity: titleOpacity }}
+        style={{ top: titleTop, opacity: titleOpacity }}
       >
         <div 
-          className={`flex flex-col gap-2 ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
+          className={`flex flex-col ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
           style={{
+            gap: `${TITLE_SUBTITLE_GAP}px`,
             transform: alignToLeft ? 'none' : `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
             transition: 'transform 0.35s ease, opacity 0.35s ease',
           }}
@@ -357,7 +364,7 @@ const LibraryPage: React.FC = () => {
               opacity: subtitleOpacity,
               transform: `translateY(6px)`,
               transition: 'opacity 0.35s ease, transform 0.35s ease',
-              marginTop: '16px',
+              marginTop: '1px',
             }}
           >
             <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
@@ -384,9 +391,11 @@ const LibraryPage: React.FC = () => {
         className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
         style={{
           top: '26%',
-          opacity: 1 - easedProgress * 2.5,
+          // Fade even faster as soon as the user starts scrolling
+          opacity: Math.max(0, 1 - easedProgress * 10),
           transform: `translateX(-50%) translateY(${easedProgress * -25}px)`,
-          pointerEvents: progress > 0.3 ? 'none' : 'auto',
+          pointerEvents: progress > 0.02 ? 'none' : 'auto',
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
         }}
       >
         <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
@@ -424,7 +433,7 @@ const LibraryPage: React.FC = () => {
       <div
         className="absolute left-0 right-0 z-30 px-6 sm:px-10 lg:px-16"
         style={{
-          top: '20vh',
+          top: '18vh',
           opacity: alignToLeft ? 1 : 0,
           transform: `translateY(${alignToLeft ? 0 : 8}px)`,
           pointerEvents: alignToLeft ? 'auto' : 'none',

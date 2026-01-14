@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [libraryFooterVisible, setLibraryFooterVisible] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -18,7 +19,7 @@ const Index = () => {
       case 'products':
         return <ProductsPage />;
       case 'library':
-        return <LibraryPage />;
+        return <LibraryPage onExpandedChange={setLibraryFooterVisible} />;
       case 'home':
       case 'hero':
       case 'solution':
@@ -44,7 +45,7 @@ const Index = () => {
         {renderContent()}
       </main>
 
-      {!isLibrary && <Footer setActiveTab={setActiveTab} />}
+      {(!isLibrary || libraryFooterVisible) && <Footer setActiveTab={setActiveTab} />}
     </div>
   );
 };
