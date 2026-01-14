@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    className={`px-6 py-2 rounded-full text-sm font-extralight transition-all duration-300 ${
                       activeTab === tab.id
                         ? 'bg-foreground text-background shadow-md'
                         : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-full text-sm font-extralight transition-all duration-300 ${
                     activeTab === tab.id
                       ? 'bg-foreground text-background shadow-md'
                       : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
