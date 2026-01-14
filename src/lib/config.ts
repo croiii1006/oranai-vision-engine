@@ -36,7 +36,7 @@ export const config = {
       (import.meta.env.PROD ? "https://models.photog.art" : "http://119.12.161.54:3000"),
     // LIBRARY页面API地址
     libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://wwww.photog.art" : "http://192.168.112.139:8080"),
+      (import.meta.env.PROD ? "https://photog.art" : "http://192.168.112.139:8080"),
   },
 
   // 应用信息

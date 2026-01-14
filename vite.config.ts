@@ -74,6 +74,10 @@ export default defineConfig(({ mode }) => ({
       "react-router-dom",
       "@tanstack/react-query",
       "framer-motion",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-toast",
     ],
   },
 }));
