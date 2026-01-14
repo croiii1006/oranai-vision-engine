@@ -32,11 +32,13 @@ export const config = {
     baseUrl: import.meta.env.VITE_API_BASE_URL || "",
     timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
     // 模型页面API地址
+    // 生产环境使用相对路径通过 Nginx 代理，开发环境使用完整 URL
     modelsBaseUrl: import.meta.env.VITE_MODELS_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://models.photog.art" : "http://119.12.161.54:3000"),
+      (import.meta.env.PROD ? "/api/models" : "https://models.photog.art"),
     // LIBRARY页面API地址
+    // 生产环境使用相对路径通过 Nginx 代理，开发环境使用完整 URL
     libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://photog.art" : "http://192.168.112.139:8080"),
+      (import.meta.env.PROD ? "/api/library" : "https://photog.art"),
   },
 
   // 应用信息

@@ -92,6 +92,7 @@ export async function fetchMaterialSquareList(
       queryParams.append('sort', params.sort.trim());
     }
 
+    // 统一拼接路径，无论是完整 URL 还是代理路径
     const url = `${config.api.libraryBaseUrl}/api/app/material-square/page${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
     logger.info('Fetching material square list', { url, params });
@@ -126,6 +127,7 @@ export async function fetchMaterialSquareList(
  */
 export async function fetchMaterialSquareDetail(id: number): Promise<MaterialSquareDetailResponse> {
   try {
+    // 统一拼接路径，无论是完整 URL 还是代理路径
     const url = `${config.api.libraryBaseUrl}/api/app/material-square/${id}`;
     
     logger.info('Fetching material square detail', { url, id });

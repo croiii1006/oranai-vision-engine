@@ -47,6 +47,7 @@ export interface PricingResponse {
  * 获取模型定价数据
  */
 export async function fetchPricingData(): Promise<PricingResponse> {
+  // 统一拼接路径，无论是完整 URL 还是代理路径
   const apiUrl = `${config.api.modelsBaseUrl}/api/pricing`;
 
   try {
