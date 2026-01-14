@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   Play,
   Download,
@@ -12,20 +12,12 @@ import {
   Music,
   User,
   Volume2,
-  ArrowLeft,
-  Globe,
-  Sun,
-  Moon,
+  Search,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceItem, ModelItem } from '../data/libraryData';
 import { fetchMaterialSquareDetail, fetchMaterialSquareList, type MaterialSquareItem } from '@/lib/api/library';
-
-interface LibraryPageProps {
-  onBack?: () => void;
-}
 
 // Shared layout constants for the carousel fan
 const CARD_WIDTH = 210;
@@ -48,9 +40,8 @@ const formatNumber = (num: number | undefined | null): string => {
 
 type TabType = 'video' | 'voice' | 'model';
 
-const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
-  const { t, language, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+const LibraryPage: React.FC = () => {
+  const { t } = useLanguage();
 
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
@@ -72,6 +63,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     model: 0,
   });
   const [maxVideoOffset, setMaxVideoOffset] = useState(800);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
@@ -166,24 +159,36 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   const previewVoiceItems = mockVoiceItems.slice(0, 8);
   const previewModelItems = mockModelItems.slice(0, 8);
 
-  // 判断选中的项目是否来自 API（只有 video tab 且是 API 数据才需要调用详情接口）
-  const isApiVideoItem = selectedItem?.type === 'video' && 
-    apiVideoItems.some(item => item.id === selectedItem.id);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  // 只有 AI 视频卡片才调用详情接口
-  const { data: detailData, isLoading: detailLoading } = useQuery({
-    queryKey: ['materialSquareDetail', selectedItem?.id],
-    queryFn: () => selectedItem?.id ? fetchMaterialSquareDetail(selectedItem.id) : null,
-    enabled: !!isApiVideoItem && !!selectedItem?.id,
-  });
+  const filteredVideoItems = useMemo(() => {
+    return previewVideoItems.filter((item) => {
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      const textBlob = `${t(item.titleKey)} ${item.publisher} ${item.tags.join(' ')}`.toLowerCase();
+      const matchesSearch = !normalizedQuery || textBlob.includes(normalizedQuery);
+      return matchesCategory && matchesSearch;
+    });
+  }, [previewVideoItems, selectedCategory, normalizedQuery, t]);
+
+  const filteredVoiceItems = useMemo(() => {
+    return previewVoiceItems.filter((item) => {
+      const textBlob = `${t(item.titleKey)} ${item.publisher} ${item.style}`.toLowerCase();
+      return !normalizedQuery || textBlob.includes(normalizedQuery);
+    });
+  }, [previewVoiceItems, normalizedQuery, t]);
+
+  const filteredModelItems = useMemo(() => {
+    return previewModelItems.filter((item) => {
+      const textBlob = `${item.name} ${item.style} ${item.gender} ${item.ethnicity}`.toLowerCase();
+      return !normalizedQuery || textBlob.includes(normalizedQuery);
+    });
+  }, [previewModelItems, normalizedQuery]);
 
   const clampIndex = (index: number, total: number) => Math.max(0, Math.min(total - 1, index));
   const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
   const progress = animationProgress;
   const isExpanded = progress > 0.5;
-
-  const toggleLanguage = () => setLanguage(language === 'en' ? 'zh' : 'en');
 
   useEffect(() => {
     animationProgressRef.current = animationProgress;
@@ -199,7 +204,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   useLayoutEffect(() => {
     const HERO_TOP = 140;
     const TARGET_TOP = 24;
-    const LEFT_PADDING = 24;
+    const LEFT_PADDING = 185;
 
     const updateOffsets = () => {
       if (typeof window === 'undefined') return;
@@ -209,7 +214,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       setTitleOffsets({ x: centerToLeftX, y: centerToTopY });
 
       // Update max horizontal offset for video carousel so we can scroll all cards
-      const totalVideoCards = previewVideoItems.length;
+      const totalVideoCards = filteredVideoItems.length;
+      if (totalVideoCards === 0) {
+        setMaxVideoOffset(0);
+        return;
+      }
       const totalWidth = totalVideoCards * CARD_WIDTH + (totalVideoCards - 1) * CARD_GAP;
       const maxOffset = Math.max(0, (totalWidth - viewportWidth) / 2 + 120);
       setMaxVideoOffset(maxOffset);
@@ -218,7 +227,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => window.removeEventListener('resize', updateOffsets);
-  }, [previewVideoItems.length]);
+  }, [filteredVideoItems.length]);
 
   // Handle wheel events for animation control
   const handleWheel = useCallback(
@@ -308,7 +317,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   const subtitleOpacity = subtitleFade;
   const alignToLeft = easedProgress >= 0.85;
 
-  const titleTranslateX = titleOffsets.x * easedProgress * 0.85;
+  // Only shift left once aligned; keep centered before expansion
+  const titleTranslateX = alignToLeft ? titleOffsets.x * easedProgress * 0.85 + 310 : 0;
   const titleTranslateY = titleOffsets.y * easedProgress * 0.4;
 
   // Subtitle fades only after expansion nearly completes
@@ -339,12 +349,20 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   // Initialize active cards to the middle item of each tab
   useEffect(() => {
     setActiveCardIndex({
-      video: clampIndex(Math.floor(previewVideoItems.length / 2), previewVideoItems.length),
-      voice: clampIndex(Math.floor(previewVoiceItems.length / 2), previewVoiceItems.length),
-      model: clampIndex(Math.floor(previewModelItems.length / 2), previewModelItems.length),
+      video: clampIndex(Math.floor(filteredVideoItems.length / 2), filteredVideoItems.length),
+      voice: clampIndex(Math.floor(filteredVoiceItems.length / 2), filteredVoiceItems.length),
+      model: clampIndex(Math.floor(filteredModelItems.length / 2), filteredModelItems.length),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setActiveCardIndex((prev) => ({
+      video: clampIndex(prev.video ?? 0, filteredVideoItems.length),
+      voice: clampIndex(prev.voice ?? 0, filteredVoiceItems.length),
+      model: clampIndex(prev.model ?? 0, filteredModelItems.length),
+    }));
+  }, [filteredVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
 
   const buildFanLayout = useCallback(
     (index: number, totalCards: number, activeIndex: number) => {
@@ -392,34 +410,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   );
 
   return (
-    <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-background pt-0" style={{ touchAction: 'none' }}>
-      {/* Mini Header - Back button and controls */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-accent/50 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">OranAI</span>
-        </button>
-
-        <div className="flex items-center gap-2">
-          <button onClick={toggleTheme} className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors">
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground transition-colors"
-          >
-            <Globe className="w-4 h-4" />
-            <span>{language === 'en' ? 'EN' : '中文'}</span>
-          </button>
-        </div>
-      </div>
-
+    <div
+      ref={containerRef}
+      className="fixed inset-0 overflow-hidden bg-background"
+      style={{ touchAction: 'none', top: '64px' }}
+    >
       {/* Title Container - Animates from center to top-left */}
-      <div className="absolute z-20 left-1/2 -translate-x-1/2" style={{ top: 140, opacity: titleOpacity }}>
+      <div
+        className="absolute z-20 left-1/2 -translate-x-1/2 w-[92vw] max-w-5xl"
+        style={{ top: 80, opacity: titleOpacity }}
+      >
         <div 
           className={`flex flex-col gap-2 ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
           style={{
@@ -438,24 +438,38 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
             {t('library.title')}
           </h1>
           
-          <span
-            className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block"
+          <div
+            className={`flex w-full items-center gap-6 sm:gap-8 ${alignToLeft ? 'justify-between' : 'justify-center md:justify-between'}`}
             style={{
               opacity: subtitleOpacity,
               transform: `translateY(6px)`,
               transition: 'opacity 0.35s ease, transform 0.35s ease',
             }}
           >
-            {t(subtitleKey)}
-          </span>
+            <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
+              {t(subtitleKey)}
+            </span>
+
+            <div className="w-[220px] sm:w-[260px] md:w-[320px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by title, tags, or publisher"
+                  className="w-full h-10 pl-10 pr-3 rounded-lg border border-border/50 bg-background/90 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/30 transition-all"
+              />
+            </div>
+            </div>
           </div>
         </div>
+      </div>
 
       {/* Description - Fades out */}
       <div
         className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
         style={{
-          top: '30%',
+          top: '26%',
           opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -25}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
@@ -468,7 +482,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       <div
         className="absolute left-1/2 -translate-x-1/2 z-30"
         style={{
-          top: '48%',
+          top: '42%',
           opacity: 1 - easedProgress * 2.5,
           transform: `translateX(-50%) translateY(${easedProgress * -20}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
@@ -492,11 +506,52 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
         </div>
             </div>
 
+      {/* Filter Bar - sits under subtitle, full width */}
+      <div
+        className="absolute left-0 right-0 z-30 px-6 sm:px-10 lg:px-16"
+        style={{
+          top: '20vh',
+          opacity: alignToLeft ? 1 : 0,
+          transform: `translateY(${alignToLeft ? 0 : 8}px)`,
+          pointerEvents: alignToLeft ? 'auto' : 'none',
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
+        }}
+      >
+        {activeTab === 'video' && (
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: 'all', label: 'library.all' },
+              { id: 'food', label: 'library.food' },
+              { id: 'auto', label: 'library.auto' },
+              { id: 'fashion', label: 'library.fashion' },
+              { id: 'digital', label: 'library.digital' },
+              { id: 'finance', label: 'library.finance' },
+              { id: 'personal', label: 'library.personal' },
+              { id: 'culture', label: 'library.culture' },
+              { id: 'platform', label: 'library.platform' },
+              { id: 'diy', label: 'library.diy' },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+                  selectedCategory === cat.id
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'border-border/60 text-foreground/70 hover:border-foreground/40 hover:text-foreground'
+                }`}
+              >
+                {t(cat.label)}
+            </button>
+            ))}
+          </div>
+        )}
+        </div>
+
       {/* Cards Container - Positioned at bottom initially, moves to top when expanded */}
       <div
         className="absolute left-0 right-0 z-10 overflow-visible"
         style={{
-          top: easedProgress > 0.5 ? '35vh' : 'auto',
+          top: easedProgress > 0.5 ? '30vh' : 'auto',
           bottom: easedProgress > 0.5 ? 'auto' : `${-15 + easedProgress * 30}%`,
           height: easedProgress > 0.5 ? 'auto' : '65%',
         }}
@@ -506,8 +561,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
         {/* Video Cards */}
         {activeTab === 'video' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {previewVideoItems.map((item, index) => {
-              const totalCards = previewVideoItems.length;
+            {filteredVideoItems.map((item, index) => {
+              const totalCards = filteredVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
               const layout = buildFanLayout(index, totalCards, activeIndex);
 
@@ -608,8 +663,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
         {/* Voice Cards */}
         {activeTab === 'voice' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {previewVoiceItems.map((item, index) => {
-              const totalCards = previewVoiceItems.length;
+            {filteredVoiceItems.map((item, index) => {
+              const totalCards = filteredVoiceItems.length;
               const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
               const layout = buildFanLayout(index, totalCards, activeIndex);
 
@@ -678,7 +733,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                           <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
                     </span>
                   </div>
-                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
                     </div>
                     <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
                   </div>
@@ -691,8 +746,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
         {/* Model Cards */}
         {activeTab === 'model' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {previewModelItems.map((item, index) => {
-              const totalCards = previewModelItems.length;
+            {filteredModelItems.map((item, index) => {
+              const totalCards = filteredModelItems.length;
               const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
               const layout = buildFanLayout(index, totalCards, activeIndex);
 
@@ -784,7 +839,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
             }
           }}
         >
-          <div
+          <div 
             className="relative bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onClick={(e) => e.stopPropagation()}
@@ -800,172 +855,66 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {/* AI 视频卡片：需要调用接口获取详情 */}
-            {isApiVideoItem ? (
-              detailLoading ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="text-muted-foreground">{t('library.loading')}</div>
-                </div>
-              ) : detailData?.data ? (
+            {/* 详情内容：使用 selectedItem 的静态数据 */}
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
                 <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                  <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
-                </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col min-w-0">
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
-                
-                <div className="space-y-2 mb-5">
-                  <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
-                      <span className="text-foreground font-medium">{detailData.data.publisher || t('library.unknown')}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.category')}: </span>
-                      <span className="text-foreground font-medium">{detailData.data.category || t('library.unknown')}</span>
-                  </p>
-                    {detailData.data.purpose && (
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
-                  </p>
-                    )}
-                    {detailData.data.targetAudience && (
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.audience')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
-                  </p>
-                    )}
-                    {detailData.data.aiTech && (
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
-                  </p>
-                    )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{(selectedItem.comments ?? 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{(selectedItem.shares ?? 0).toLocaleString()}</span>
-                  </div>
-                    {detailData.data.collectCount !== undefined && detailData.data.collectCount !== null && (
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-base md:text-lg font-bold text-foreground">{(detailData.data.collectCount ?? 0).toLocaleString()}</span>
-                        <span className="text-xs text-muted-foreground">{t('library.collects')}</span>
-                      </div>
-                    )}
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedItem.tags.map((tag, index) => (
-                    <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                    <a 
-                      href={selectedItem.videoUrl}
-                      download
-                    className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
-                    >
-                    <Download className="w-5 h-5" />
-                      {t('library.downloadVideo')}
-                    </a>
-                  <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    {t('library.replicate')}
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-              ) : (
-                <div className="flex justify-center items-center py-20">
-                  <div className="text-destructive">{t('library.loadDetailFailed')}</div>
-                </div>
-              )
-            ) : (
-              /* 其他卡片（voice/model/静态video）：直接使用静态数据，不需要调用接口 */
-              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
-                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
                     {selectedItem.type === 'video' && selectedItem.videoUrl ? (
                       <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
                     ) : selectedItem.type === 'audio' && selectedItem.videoUrl ? (
                       <audio src={selectedItem.videoUrl} controls className="w-full h-full" />
                     ) : (
                       <img src={selectedItem.thumbnail} alt={t(selectedItem.titleKey)} className="w-full h-full object-cover" />
-                    )}
-                  </div>
+                  )}
                 </div>
-                
-                <div className="flex-1 flex flex-col min-w-0">
+              </div>
+              
+              <div className="flex-1 flex flex-col min-w-0">
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
-                  
-                  <div className="space-y-2 mb-5">
-                    <p className="text-sm md:text-base">
+                
+                <div className="space-y-2 mb-5">
+                  <p className="text-sm md:text-base">
                       <span className="text-muted-foreground">{t('library.publisher')}: </span>
                       <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
-                    </p>
+                  </p>
                     {selectedItem.category && (
-                      <p className="text-sm md:text-base">
+                  <p className="text-sm md:text-base">
                         <span className="text-muted-foreground">{t('library.category')}: </span>
                         <span className="text-foreground font-medium">{selectedItem.category}</span>
-                      </p>
+                  </p>
                     )}
                     {selectedItem.duration && (
-                      <p className="text-sm md:text-base">
+                  <p className="text-sm md:text-base">
                         <span className="text-muted-foreground">{t('library.duration')}: </span>
                         <span className="text-foreground font-medium">{selectedItem.duration}</span>
                       </p>
                     )}
-                  </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
                     {selectedItem.type === 'audio' ? (
                       /* Voice 卡片：显示 plays 和 likes */
                       <>
-                        <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                           <Play className="w-4 h-4 text-muted-foreground" />
                           <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2">
                           <Heart className="w-4 h-4 text-muted-foreground" />
                           <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                        </div>
+                  </div>
                       </>
                     ) : selectedItem.type === 'template' ? (
                       /* Model 卡片：显示 downloads 和 likes */
                       <>
-                        <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                           <Download className="w-4 h-4 text-muted-foreground" />
                           <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2">
                           <Heart className="w-4 h-4 text-muted-foreground" />
                           <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                        </div>
+                  </div>
                       </>
                     ) : (
                       /* Video 卡片：显示完整的统计数据 */
@@ -988,23 +937,23 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                         </div>
                       </>
                     )}
-                  </div>
+                </div>
 
                   {selectedItem.tags && selectedItem.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {selectedItem.tags.map((tag, index) => (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {selectedItem.tags.map((tag, index) => (
                         <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
                   )}
 
-                  <div className="flex gap-3">
+                <div className="flex gap-3">
                     {(selectedItem.videoUrl || selectedItem.type === 'audio') && (
-                      <a 
+                    <a 
                         href={selectedItem.videoUrl || '#'}
-                        download
+                      download
                         className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
                       >
                         <Download className="w-5 h-5" />
@@ -1021,7 +970,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                 </div>
               </div>
             </div>
-            )}
           </div>
         </div>
       )}
