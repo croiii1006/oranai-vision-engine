@@ -34,7 +34,7 @@ const Index = () => {
       case 'products':
         return <ProductsPage />;
       case 'library':
-        return <LibraryPage />;
+        return <LibraryPage onBack={() => setActiveTab('home')} />;
       case 'home':
       case 'hero':
       case 'solution':
@@ -43,27 +43,18 @@ const Index = () => {
     }
   };
 
-  // Show footer for non-scroll pages or when scrolled to footer in solution page
-  const showFooter = !['home', 'hero', 'solution'].includes(activeTab) || (activeTab === 'solution' && showFooterInSolution);
-  
-  // Reset showFooterInSolution when leaving solution page or entering solution page
-  useEffect(() => {
-    if (activeTab !== 'solution') {
-      setShowFooterInSolution(false);
-    } else {
-      // 当切换到solution页面时，先隐藏footer，让ScrollSolutionPage来决定是否显示
-      setShowFooterInSolution(false);
-    }
-  }, [activeTab]);
+  const isLibrary = activeTab === 'library';
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+      {!isLibrary && (
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+      )}
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -71,7 +62,7 @@ const Index = () => {
         {renderContent()}
       </main>
 
-      {showFooter && <Footer setActiveTab={setActiveTab} />}
+      {!isLibrary && <Footer setActiveTab={setActiveTab} />}
     </div>
   );
 };
