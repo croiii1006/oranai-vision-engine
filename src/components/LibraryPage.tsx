@@ -37,10 +37,12 @@ const formatNumber = (num: number): string => {
 
 type TabType = 'video' | 'voice' | 'model';
 
+type SelectedItemType = LibraryItem | VoiceItem | ModelItem;
+
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
 
-  const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
 
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
@@ -350,18 +352,19 @@ const LibraryPage: React.FC = () => {
           </h1>
 
           <div
-            className={`flex w-full items-center gap-6 sm:gap-8 ${alignToLeft ? 'justify-between' : 'justify-center md:justify-between'}`}
+            className={`flex w-full items-center ${alignToLeft ? 'justify-between' : 'justify-center md:justify-between'}`}
             style={{
               opacity: subtitleOpacity,
               transform: `translateY(6px)`,
               transition: 'opacity 0.35s ease, transform 0.35s ease',
+              marginTop: '16px',
             }}
           >
             <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
               {t(subtitleKey)}
             </span>
 
-            <div className="w-[220px] sm:w-[260px] md:w-[320px]">
+            <div className="w-[220px] sm:w-[260px] md:w-[320px]" style={{ marginRight: '-100px' }}>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
@@ -751,82 +754,108 @@ const LibraryPage: React.FC = () => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
-                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                  <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
+            {'videoUrl' in selectedItem ? (
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
+
+                  <div className="space-y-2 mb-5">
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">Publisher: </span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.videoType')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.purpose')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.audience')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.views.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.likes.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.comments.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.shares.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {selectedItem.tags.map((tag, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <a
+                      href={selectedItem.videoUrl}
+                      download
+                      className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-5 h-5" />
+                      {t('library.downloadVideo')}
+                    </a>
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      {t('library.replicate')}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex-1 flex flex-col min-w-0">
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
-
-                <div className="space-y-2 mb-5">
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">Publisher: </span>
-                    <span className="text-foreground font-medium">{selectedItem.publisher}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.videoType')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.audience')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                    <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
-                  </p>
+            ) : 'audioUrl' in selectedItem ? (
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-48 h-48 rounded-2xl overflow-hidden">
+                  <img src={selectedItem.thumbnail} alt={t(selectedItem.titleKey)} className="w-full h-full object-cover" />
                 </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{selectedItem.views.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{selectedItem.likes.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{selectedItem.comments.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-lg font-bold">{selectedItem.shares.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedItem.tags.map((tag, index) => (
-                    <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <a
-                    href={selectedItem.videoUrl}
-                    download
-                    className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-5 h-5" />
-                    {t('library.downloadVideo')}
-                  </a>
-                  <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    {t('library.replicate')}
-                  </button>
+                <h2 className="text-2xl font-bold">{t(selectedItem.titleKey)}</h2>
+                <p className="text-muted-foreground">{selectedItem.publisher} • {selectedItem.style} • {selectedItem.duration}</p>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1"><Play className="w-4 h-4" /> {formatNumber(selectedItem.plays)}</span>
+                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-48 h-64 rounded-2xl overflow-hidden">
+                  <img src={selectedItem.thumbnail} alt={selectedItem.name} className="w-full h-full object-cover" />
+                </div>
+                <h2 className="text-2xl font-bold">{selectedItem.name}</h2>
+                <p className="text-muted-foreground">{selectedItem.style} • {selectedItem.gender} • {selectedItem.ethnicity}</p>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1"><Download className="w-4 h-4" /> {formatNumber(selectedItem.downloads)}</span>
+                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
