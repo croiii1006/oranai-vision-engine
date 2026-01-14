@@ -1,193 +1,305 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
-import {
-  Play,
-  Download,
-  Eye,
-  Heart,
-  MessageCircle,
-  Share2,
-  X,
-  Sparkles,
-  Video,
-  Music,
-  User,
-  Volume2,
-  ArrowLeft,
-  Globe,
-  Sun,
-  Moon,
-  Search,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, Video, Music, User, Volume2, ArrowLeft, Globe, Sun, Moon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceItem, ModelItem } from '../data/libraryData';
 
 interface LibraryPageProps {
   onBack?: () => void;
 }
 
-// Shared layout constants for the carousel fan
-const CARD_WIDTH = 210;
-const CARD_GAP = 28;
-// Fan/stack tuning for up to 8 cards (distance 0-4), wider spread to fill width
-const FAN_OFFSETS = [0, 130, 240, 340, 440];
-const SCALE_BY_DISTANCE = [1, 0.92, 0.84, 0.76, 0.74];
-const ROTATE_BY_DISTANCE = [0, 6, 10, 14, 16];
-const Y_OFFSETS = [0, 8, 16, 24, 30];
-const OPACITY_DROP_BY_DISTANCE = [0, 0.06, 0.12, 0.18, 0.2];
-const BLUR_PER_STEP = 0.6;
-const MAX_DISTANCE_INDEX = FAN_OFFSETS.length - 1;
+interface LibraryItem {
+  id: number;
+  titleKey: string;
+  type: 'video' | 'image' | 'audio' | 'template';
+  publisher: string;
+  publishDate: string;
+  publishDateFull: string;
+  videoTypeKey: string;
+  purposeKey: string;
+  audienceKey: string;
+  aiAnalysisKey: string;
+  videoUrl: string;
+  duration?: string;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  tags: string[];
+  thumbnail: string;
+  category: string;
+}
 
-// Expanded view card dimensions
-const EXPANDED_CARD_WIDTH = 280;
-const EXPANDED_CARD_HEIGHT = 420;
+interface VoiceItem {
+  id: number;
+  titleKey: string;
+  publisher: string;
+  duration: string;
+  style: string;
+  audioUrl: string;
+  plays: number;
+  likes: number;
+  thumbnail: string;
+}
+
+interface ModelItem {
+  id: number;
+  name: string;
+  style: string;
+  gender: string;
+  ethnicity: string;
+  thumbnail: string;
+  downloads: number;
+  likes: number;
+}
+
+const mockVoiceItems: VoiceItem[] = [
+  { id: 1, titleKey: 'library.voice.corporate', publisher: 'OranAI', duration: '0:30', style: 'Corporate', audioUrl: '#', plays: 12500, likes: 890, thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400' },
+  { id: 2, titleKey: 'library.voice.emotional', publisher: 'OranAI', duration: '0:45', style: 'Emotional', audioUrl: '#', plays: 8900, likes: 720, thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400' },
+  { id: 3, titleKey: 'library.voice.energetic', publisher: 'OranAI', duration: '0:25', style: 'Energetic', audioUrl: '#', plays: 15600, likes: 1200, thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400' },
+  { id: 4, titleKey: 'library.voice.calm', publisher: 'OranAI', duration: '1:00', style: 'Calm', audioUrl: '#', plays: 6700, likes: 540, thumbnail: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400' },
+  { id: 5, titleKey: 'library.voice.cinematic', publisher: 'OranAI', duration: '0:50', style: 'Cinematic', audioUrl: '#', plays: 11200, likes: 980, thumbnail: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400' },
+  { id: 6, titleKey: 'library.voice.upbeat', publisher: 'OranAI', duration: '0:35', style: 'Upbeat', audioUrl: '#', plays: 9400, likes: 810, thumbnail: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400' },
+];
+
+const mockModelItems: ModelItem[] = [
+  { id: 1, name: 'Emma Chen', style: 'Fashion', gender: 'Female', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400', downloads: 8900, likes: 1200 },
+  { id: 2, name: 'Marcus Johnson', style: 'Corporate', gender: 'Male', ethnicity: 'African', thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400', downloads: 6500, likes: 890 },
+  { id: 3, name: 'Sofia Martinez', style: 'Lifestyle', gender: 'Female', ethnicity: 'Hispanic', thumbnail: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400', downloads: 12400, likes: 1580 },
+  { id: 4, name: 'Alex Kim', style: 'Sports', gender: 'Male', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400', downloads: 7200, likes: 920 },
+  { id: 5, name: 'Isabella Brown', style: 'Beauty', gender: 'Female', ethnicity: 'Caucasian', thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400', downloads: 15600, likes: 2100 },
+  { id: 6, name: 'David Lee', style: 'Tech', gender: 'Male', ethnicity: 'Asian', thumbnail: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400', downloads: 5400, likes: 680 },
+];
+
+const mockLibraryItems: LibraryItem[] = [
+  {
+    id: 1,
+    titleKey: 'library.cocacola.title',
+    type: 'video',
+    publisher: 'Coca-Cola',
+    publishDate: 'Nov 2024',
+    publishDateFull: 'Nov 19, 2024',
+    videoTypeKey: 'library.cocacola.type',
+    purposeKey: 'library.cocacola.purpose',
+    audienceKey: 'library.cocacola.audience',
+    aiAnalysisKey: 'library.cocacola.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/BVCOGW.mp4',
+    duration: '01:00',
+    views: 2850000,
+    likes: 48200,
+    comments: 3150,
+    shares: 12400,
+    tags: ['Christmas', 'Holiday', 'AI', 'Animation'],
+    thumbnail: 'https://img.youtube.com/vi/4RSTupbfGog/maxresdefault.jpg',
+    category: 'food',
+  },
+  {
+    id: 2,
+    titleKey: 'library.mcdonalds.title',
+    type: 'video',
+    publisher: "McDonald's",
+    publishDate: '2024',
+    publishDateFull: '2024',
+    videoTypeKey: 'library.mcdonalds.type',
+    purposeKey: 'library.mcdonalds.purpose',
+    audienceKey: 'library.mcdonalds.audience',
+    aiAnalysisKey: 'library.mcdonalds.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/4ov76u.mp4',
+    duration: '00:40',
+    views: 1420000,
+    likes: 25600,
+    comments: 1820,
+    shares: 6340,
+    tags: ['Future', 'Tech', 'AI', 'Innovation'],
+    thumbnail: '',
+    category: 'food',
+  },
+  {
+    id: 3,
+    titleKey: 'library.nike.title',
+    type: 'video',
+    publisher: 'Audiovisual con IA',
+    publishDate: 'Apr 2025',
+    publishDateFull: 'Apr 28, 2025',
+    videoTypeKey: 'library.nike.type',
+    purposeKey: 'library.nike.purpose',
+    audienceKey: 'library.nike.audience',
+    aiAnalysisKey: 'library.nike.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/8XDY2f.mp4',
+    duration: '00:30',
+    views: 980000,
+    likes: 18400,
+    comments: 920,
+    shares: 4100,
+    tags: ['Nike', 'AI Sports', 'Slow Motion'],
+    thumbnail: '',
+    category: 'fashion',
+  },
+  {
+    id: 4,
+    titleKey: 'library.jeremyRazors.title',
+    type: 'video',
+    publisher: "Jeremy's Razors",
+    publishDate: 'Feb 2025',
+    publishDateFull: 'Feb 7, 2025',
+    videoTypeKey: 'library.jeremyRazors.type',
+    purposeKey: 'library.jeremyRazors.purpose',
+    audienceKey: 'library.jeremyRazors.audience',
+    aiAnalysisKey: 'library.jeremyRazors.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/IKqMZ0.mp4',
+    duration: '00:35',
+    views: 520000,
+    likes: 12800,
+    comments: 740,
+    shares: 2900,
+    tags: ['Razor', 'Metal', 'AI Render'],
+    thumbnail: '',
+    category: 'personal',
+  },
+  {
+    id: 5,
+    titleKey: 'library.zaraDor.title',
+    type: 'video',
+    publisher: 'The Dor Brothers',
+    publishDate: 'Aug 2024',
+    publishDateFull: 'Aug 5, 2024',
+    videoTypeKey: 'library.zaraDor.type',
+    purposeKey: 'library.zaraDor.purpose',
+    audienceKey: 'library.zaraDor.audience',
+    aiAnalysisKey: 'library.zaraDor.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/NWfxHT.mp4',
+    duration: '00:32',
+    views: 610000,
+    likes: 14300,
+    comments: 820,
+    shares: 3100,
+    tags: ['Zara', 'Concept', 'AI Fashion'],
+    thumbnail: '',
+    category: 'fashion',
+  },
+  {
+    id: 6,
+    titleKey: 'library.hiamiHooch.title',
+    type: 'video',
+    publisher: 'The Dor Brothers',
+    publishDate: 'Jul 2024',
+    publishDateFull: 'Jul 31, 2024',
+    videoTypeKey: 'library.hiamiHooch.type',
+    purposeKey: 'library.hiamiHooch.purpose',
+    audienceKey: 'library.hiamiHooch.audience',
+    aiAnalysisKey: 'library.hiamiHooch.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/4ABq2l.mp4',
+    duration: '00:28',
+    views: 455000,
+    likes: 11200,
+    comments: 580,
+    shares: 2400,
+    tags: ['Beverage', 'Concept', 'Liquid FX'],
+    thumbnail: '',
+    category: 'food',
+  },
+  {
+    id: 7,
+    titleKey: 'library.dorSoda.title',
+    type: 'video',
+    publisher: 'The Dor Brothers',
+    publishDate: 'Aug 2024',
+    publishDateFull: 'Aug 15, 2024',
+    videoTypeKey: 'library.dorSoda.type',
+    purposeKey: 'library.dorSoda.purpose',
+    audienceKey: 'library.dorSoda.audience',
+    aiAnalysisKey: 'library.dorSoda.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/ENHpkU.mp4',
+    duration: '00:33',
+    views: 388000,
+    likes: 9300,
+    comments: 520,
+    shares: 1800,
+    tags: ['Soda', 'Concept', 'Motion'],
+    thumbnail: '',
+    category: 'food',
+  },
+  {
+    id: 8,
+    titleKey: 'library.roguePerfume.title',
+    type: 'video',
+    publisher: 'The Dor Brothers',
+    publishDate: 'Jul 2024',
+    publishDateFull: 'Jul 30, 2024',
+    videoTypeKey: 'library.roguePerfume.type',
+    purposeKey: 'library.roguePerfume.purpose',
+    audienceKey: 'library.roguePerfume.audience',
+    aiAnalysisKey: 'library.roguePerfume.aiAnalysis',
+    videoUrl: 'https://photog.art/api/oss/adMqvZ.mp4',
+    duration: '00:31',
+    views: 442000,
+    likes: 10100,
+    comments: 610,
+    shares: 2100,
+    tags: ['Perfume', 'Luxury', 'Stylized'],
+    thumbnail: '',
+    category: 'fashion',
+  },
+];
 
 const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
   return num.toString();
 };
 
 type TabType = 'video' | 'voice' | 'model';
 
-const CATEGORY_FILTERS = [
-  { id: 'all', labelKey: 'library.all' },
-  { id: 'food', labelKey: 'library.food' },
-  { id: 'auto', labelKey: 'library.auto' },
-  { id: 'fashion', labelKey: 'library.fashion' },
-  { id: 'digital', labelKey: 'library.digital' },
-  { id: 'finance', labelKey: 'library.finance' },
-  { id: 'personal', labelKey: 'library.personal' },
-  { id: 'culture', labelKey: 'library.culture' },
-  { id: 'platform', labelKey: 'library.platform' },
-  { id: 'diy', labelKey: 'library.diy' },
-];
-
 const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
-
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
-  const animationProgressRef = useRef(0);
-
-  const [titleOffsets, setTitleOffsets] = useState({ x: 0, y: -116 }); // defaults aligned with HERO_TOP->TARGET_TOP
-  const [subtitleFade, setSubtitleFade] = useState(0);
-
-  const [activeCardIndex, setActiveCardIndex] = useState<Record<TabType, number>>({
-    video: 2,
-    voice: 2,
-    model: 2,
-  });
-
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
+  const isAnimatingRef = useRef(false);
 
-  const previewVideoItems = mockLibraryItems.slice(0, 8);
-  const previewVoiceItems = mockVoiceItems.slice(0, 8);
-  const previewModelItems = mockModelItems.slice(0, 8);
-
-  // Filter videos based on search and category
-  const filteredVideoItems = mockLibraryItems.filter((item) => {
-    const matchesSearch = searchQuery === '' || 
-      t(item.titleKey).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.publisher.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const clampIndex = (index: number, total: number) => Math.max(0, Math.min(total - 1, index));
-  const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-
-  const progress = animationProgress;
-  const isExpanded = progress > 0.5;
-
-  const toggleLanguage = () => setLanguage(language === 'en' ? 'zh' : 'en');
-
-  useEffect(() => {
-    animationProgressRef.current = animationProgress;
-  }, [animationProgress]);
-
-  const setProgressClamped = useCallback((next: number) => {
-    const clamped = Math.max(0, Math.min(1, next));
-    animationProgressRef.current = clamped;
-    setAnimationProgress(clamped);
-  }, []);
-
-  // Compute dynamic offsets so the title moves from centered to ~24px from edges responsively
-  useLayoutEffect(() => {
-    const HERO_TOP = 140;
-    const TARGET_TOP = 24;
-    const LEFT_PADDING = 24;
-
-    const updateOffsets = () => {
-      if (typeof window === 'undefined') return;
-      const viewportWidth = window.innerWidth;
-      const centerToLeftX = -(viewportWidth / 2 - LEFT_PADDING);
-      const centerToTopY = TARGET_TOP - HERO_TOP;
-      setTitleOffsets({ x: centerToLeftX, y: centerToTopY });
-    };
-
-    updateOffsets();
-    window.addEventListener('resize', updateOffsets);
-    return () => window.removeEventListener('resize', updateOffsets);
-  }, []);
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'zh' : 'en');
+  };
 
   // Handle wheel events for animation control
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      if (selectedItem) return; // Don't animate when modal is open
-      
-      // If expanded and scrolling horizontally, let the scroll container handle it
-      if (isExpanded && scrollContainerRef.current) {
-        const container = scrollContainerRef.current;
-        const target = e.target as HTMLElement;
-        if (container.contains(target)) {
-          return; // Let the horizontal scroll happen
-        }
-      }
-      
-      e.preventDefault();
-
-      const delta = e.deltaY;
-      const sensitivity = 0.012;
-      const current = animationProgressRef.current;
-      const target = current + delta * sensitivity;
-      setProgressClamped(target);
-    },
-    [selectedItem, setProgressClamped, isExpanded]
-  );
+  const handleWheel = useCallback((e: WheelEvent) => {
+    if (selectedItem) return; // Don't animate when modal is open
+    
+    e.preventDefault();
+    
+    const delta = e.deltaY;
+    const sensitivity = 0.003;
+    
+    setAnimationProgress(prev => {
+      const newProgress = prev + delta * sensitivity;
+      return Math.max(0, Math.min(1, newProgress));
+    });
+  }, [selectedItem]);
 
   // Handle touch events for mobile
+  const touchStartY = useRef(0);
   const handleTouchStart = useCallback((e: TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   }, []);
 
-  const handleTouchMove = useCallback(
-    (e: TouchEvent) => {
-      if (selectedItem) return;
-      if (isExpanded) return; // Let touch scroll work in expanded state
-      e.preventDefault();
-
-      const deltaY = touchStartY.current - e.touches[0].clientY;
-      touchStartY.current = e.touches[0].clientY;
-
-      const sensitivity = 0.014;
-      const current = animationProgressRef.current;
-      const target = current + deltaY * sensitivity;
-      setProgressClamped(target);
-    },
-    [selectedItem, setProgressClamped, isExpanded]
-  );
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (selectedItem) return;
+    
+    e.preventDefault();
+    const deltaY = touchStartY.current - e.touches[0].clientY;
+    touchStartY.current = e.touches[0].clientY;
+    
+    const sensitivity = 0.005;
+    setAnimationProgress(prev => {
+      const newProgress = prev + deltaY * sensitivity;
+      return Math.max(0, Math.min(1, newProgress));
+    });
+  }, [selectedItem]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -210,126 +322,27 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
     { id: 'model' as TabType, labelKey: 'library.tab.model', icon: User, sectionKey: 'library.section.model' },
   ];
 
-  const setActiveForTab = useCallback((tab: TabType, index: number, total: number) => {
-    setActiveCardIndex((prev) => ({
-      ...prev,
-      [tab]: clampIndex(index, total),
-    }));
-  }, []);
+  const previewVideoItems = mockLibraryItems.slice(0, 6);
+  const previewVoiceItems = mockVoiceItems.slice(0, 6);
+  const previewModelItems = mockModelItems.slice(0, 6);
 
-  // Subtitle content based on tab
-  const currentTab = tabs.find((tab) => tab.id === activeTab);
+  const progress = animationProgress;
+  const isExpanded = progress > 0.5;
+
+  // Get current section subtitle
+  const currentTab = tabs.find(tab => tab.id === activeTab);
   const subtitleKey = currentTab?.sectionKey || 'library.section.video';
 
   // Easing function for smoother animations
-  const easeOutCubic = (tt: number) => 1 - Math.pow(1 - tt, 3);
-  const easedProgress = easeOutCubic(animationProgress);
-
-  // Title fade logic: fade out mid-way, then fade back in
-  const fadeOut = clamp01((progress - 0.1) / 0.25);
-  const fadeIn = clamp01((progress - 0.55) / 0.25);
-  const titleOpacity = clamp01(1 - fadeOut + fadeIn);
-  const subtitleOpacity = subtitleFade;
-  const alignToLeft = easedProgress >= 0.85;
-
-  const titleTranslateX = titleOffsets.x * easedProgress * 0.85;
-  const titleTranslateY = titleOffsets.y * easedProgress * 0.4;
-
-  // Subtitle fades only after expansion nearly completes
-  useEffect(() => {
-    let raf = 0;
-
-    if (alignToLeft) {
-      const start = performance.now();
-      const duration = 400; // ms
-
-      const tick = (ts: number) => {
-        const tt = Math.min(1, (ts - start) / duration);
-        setSubtitleFade(tt);
-        if (tt < 1) raf = requestAnimationFrame(tick);
-      };
-
-      setSubtitleFade(0);
-      raf = requestAnimationFrame(tick);
-    } else {
-      setSubtitleFade(0);
-    }
-
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [alignToLeft]);
-
-  // Initialize active cards to the middle item of each tab
-  useEffect(() => {
-    setActiveCardIndex({
-      video: clampIndex(Math.floor(previewVideoItems.length / 2), previewVideoItems.length),
-      voice: clampIndex(Math.floor(previewVoiceItems.length / 2), previewVoiceItems.length),
-      model: clampIndex(Math.floor(previewModelItems.length / 2), previewModelItems.length),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const buildFanLayout = useCallback(
-    (index: number, totalCards: number, activeIndex: number) => {
-      const distanceFromActive = index - activeIndex;
-      const distanceAbs = Math.min(Math.abs(distanceFromActive), MAX_DISTANCE_INDEX);
-      const sign = Math.sign(distanceFromActive);
-
-      const fanX = sign * FAN_OFFSETS[distanceAbs];
-      const fanY = Y_OFFSETS[distanceAbs];
-      const fanRotation = sign * ROTATE_BY_DISTANCE[distanceAbs];
-
-      const totalWidth = totalCards * CARD_WIDTH + (totalCards - 1) * CARD_GAP;
-      const startX = -totalWidth / 2 + CARD_WIDTH / 2;
-      const linearX = startX + index * (CARD_WIDTH + CARD_GAP);
-      const linearY = easedProgress > 0.5 ? 0 : -450;
-
-      const currentX = fanX + (linearX - fanX) * easedProgress;
-      const currentY = fanY + (linearY - fanY) * easedProgress;
-      const currentRotation = fanRotation * (1 - easedProgress);
-
-      const baseScale = SCALE_BY_DISTANCE[distanceAbs];
-      const currentScale = baseScale + (1 - baseScale) * easedProgress;
-
-      const opacityDrop = OPACITY_DROP_BY_DISTANCE[distanceAbs];
-      const opacity = 1 - opacityDrop * (1 - easedProgress);
-
-      const tiltY = -fanRotation * (1 - easedProgress);
-      const blur = BLUR_PER_STEP * distanceAbs * (1 - easedProgress);
-      const shadowStrength = Math.max(0.15, 0.35 - distanceAbs * 0.06);
-      const zIndex = 200 - Math.abs(Math.round(distanceFromActive));
-
-      return {
-        currentX,
-        currentY,
-        currentRotation,
-        currentScale,
-        opacity,
-        tiltY,
-        blur,
-        shadowStrength,
-        zIndex,
-      };
-    },
-    [easedProgress]
-  );
-
-  // Scroll handlers for horizontal scroll
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+  const easedProgress = easeOutCubic(progress);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 overflow-hidden bg-background pt-0" style={{ touchAction: 'none' }}>
+    <div 
+      ref={containerRef} 
+      className="fixed inset-0 overflow-hidden bg-background pt-0"
+      style={{ touchAction: 'none' }}
+    >
       {/* Mini Header - Back button and controls */}
       <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
         <button
@@ -339,12 +352,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-medium">OranAI</span>
         </button>
-
         <div className="flex items-center gap-2">
-          <button onClick={toggleTheme} className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
+          >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground transition-colors"
@@ -356,31 +370,29 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       </div>
 
       {/* Title Container - Animates from center to top-left */}
-      <div className="absolute z-20 left-1/2 -translate-x-1/2" style={{ top: 140, opacity: titleOpacity }}>
-        <div 
-          className={`flex flex-col gap-2 ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
-          style={{
-            transform: `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
-            transition: 'transform 0.35s ease, opacity 0.35s ease',
-          }}
-        >
-          <h1
-            className="font-bold tracking-tight whitespace-nowrap"
+      <div 
+        className="absolute z-20 transition-none"
+        style={{
+          left: easedProgress < 0.01 ? '50%' : `${24 + easedProgress * 8}px`,
+          top: `${100 + easedProgress * (-100 + 24)}px`,
+          transform: easedProgress < 0.01 ? 'translateX(-50%)' : 'none',
+        }}
+      >
+        <div className="flex items-baseline gap-3">
+          <h1 
+            className="font-bold tracking-tight whitespace-nowrap transition-none"
             style={{
               fontSize: `${Math.max(1.75, 4 - easedProgress * 2.5)}rem`,
-              opacity: titleOpacity,
-              transition: 'font-size 0.35s ease, opacity 0.35s ease',
             }}
           >
             {t('library.title')}
           </h1>
-
-          <span
-            className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block"
-            style={{
-              opacity: subtitleOpacity,
-              transform: `translateY(6px)`,
-              transition: 'opacity 0.35s ease, transform 0.35s ease',
+          {/* Subtitle - Fades in */}
+          <span 
+            className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap"
+            style={{ 
+              opacity: easedProgress,
+              transform: `translateX(${(1 - easedProgress) * 20}px)`,
             }}
           >
             {t(subtitleKey)}
@@ -389,25 +401,27 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
       </div>
 
       {/* Description - Fades out */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
-        style={{
-          top: '30%',
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 max-w-3xl text-center px-6 z-10"
+        style={{ 
+          top: '22%',
           opacity: 1 - easedProgress * 2.5,
-          transform: `translateX(-50%) translateY(${easedProgress * -25}px)`,
+          transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
         }}
       >
-        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
+        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+          {t('library.heroDesc')}
+        </p>
       </div>
 
       {/* Tab Selector - Fades out, positioned below description */}
-      <div
+      <div 
         className="absolute left-1/2 -translate-x-1/2 z-30"
-        style={{
-          top: '48%',
+        style={{ 
+          top: '38%',
           opacity: 1 - easedProgress * 2.5,
-          transform: `translateX(-50%) translateY(${easedProgress * -20}px)`,
+          transform: `translateX(-50%) translateY(${easedProgress * -30}px)`,
           pointerEvents: progress > 0.3 ? 'none' : 'auto',
         }}
       >
@@ -429,291 +443,74 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Filter Bar - Only shows when expanded */}
-      {isExpanded && activeTab === 'video' && (
-        <div 
-          className="absolute left-0 right-0 z-30 px-6"
-          style={{
-            top: '100px',
-            opacity: Math.min(1, (easedProgress - 0.5) * 2),
-            transform: `translateY(${(1 - easedProgress) * 20}px)`,
-            transition: 'opacity 0.3s ease, transform 0.3s ease',
-          }}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-4">
-            {/* Search Bar */}
-            <div className="relative flex-shrink-0 w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('common.search')}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-muted/30 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
-              />
-            </div>
-
-            {/* Category Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 flex-1 scrollbar-hide">
-              <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              {CATEGORY_FILTERS.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    activeCategory === cat.id
-                      ? 'bg-foreground text-background'
-                      : 'bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-border/30'
-                  }`}
-                >
-                  {t(cat.labelKey)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cards Container - Fan view (initial) */}
-      {!isExpanded && (
-        <div
-          className="absolute left-0 right-0 z-10 overflow-visible"
-          style={{
-            top: 'auto',
-            bottom: `${-15 + easedProgress * 30}%`,
-            height: '65%',
-          }}
-        >
-          <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
-
-          {/* Video Cards - Fan Layout */}
-          {activeTab === 'video' && (
-            <div className="relative w-full h-full flex items-end justify-center overflow-visible">
-              {previewVideoItems.map((item, index) => {
-                const totalCards = previewVideoItems.length;
-                const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
-                const layout = buildFanLayout(index, totalCards, activeIndex);
-
-                const currentHeight = 340 + easedProgress * 80;
-                const isActiveCard = index === activeIndex;
-
-                const baseTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-                const zIndex = isActiveCard ? 999 : layout.zIndex;
-
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer"
-                    style={{
-                      width: `${CARD_WIDTH}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      bottom: '0',
-                      marginLeft: `-${CARD_WIDTH / 2}px`,
-                      transformOrigin: 'center bottom',
-                      transform: baseTransform,
-                      zIndex,
-                      opacity: layout.opacity,
-                      transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
-                      filter: `blur(${layout.blur}px)`,
-                      boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
-                      borderRadius: '24px',
-                      overflow: 'hidden',
-                    }}
-                    onClick={() => setActiveForTab('video', index, totalCards)}
-                  >
-                    <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                      <video
-                        src={item.videoUrl}
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full object-cover rounded-[inherit]"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.currentTime = 0;
-                          e.currentTarget.play().catch(() => {});
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
-                      {item.duration && (
-                        <span className="absolute top-3 right-3 text-white text-xs font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
-                          {item.duration}
-                        </span>
-                      )}
-                      <div className="absolute top-3 left-3">
-                        <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
-                      </div>
-                      <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Voice Cards - Fan Layout */}
-          {activeTab === 'voice' && (
-            <div className="relative w-full h-full flex items-end justify-center overflow-visible">
-              {previewVoiceItems.map((item, index) => {
-                const totalCards = previewVoiceItems.length;
-                const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
-                const layout = buildFanLayout(index, totalCards, activeIndex);
-
-                const currentHeight = 340 + easedProgress * 80;
-                const isActiveCard = index === activeIndex;
-
-                const baseTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-                const zIndex = isActiveCard ? 999 : layout.zIndex;
-
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer"
-                    style={{
-                      width: `${CARD_WIDTH}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      bottom: '0',
-                      marginLeft: `-${CARD_WIDTH / 2}px`,
-                      transformOrigin: 'center bottom',
-                      transform: baseTransform,
-                      zIndex,
-                      opacity: layout.opacity,
-                      transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
-                      filter: `blur(${layout.blur}px)`,
-                      boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
-                      borderRadius: '24px',
-                      overflow: 'hidden',
-                    }}
-                    onClick={() => setActiveForTab('voice', index, totalCards)}
-                  >
-                    <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                      <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover rounded-[inherit]" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center rounded-[inherit]">
-                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                          <Volume2 className="w-7 h-7 text-white" />
-                        </div>
-                      </div>
-                      <div className="absolute top-3 left-3 right-3">
-                        <p className="text-white/60 text-xs font-medium">
-                          {item.style} • {item.duration}
-                        </p>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
-                      </div>
-                      <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Model Cards - Fan Layout */}
-          {activeTab === 'model' && (
-            <div className="relative w-full h-full flex items-end justify-center overflow-visible">
-              {previewModelItems.map((item, index) => {
-                const totalCards = previewModelItems.length;
-                const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
-                const layout = buildFanLayout(index, totalCards, activeIndex);
-
-                const currentHeight = 340 + easedProgress * 80;
-                const isActiveCard = index === activeIndex;
-
-                const baseTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-                const zIndex = isActiveCard ? 999 : layout.zIndex;
-
-                return (
-                  <div
-                    key={item.id}
-                    className="absolute cursor-pointer"
-                    style={{
-                      width: `${CARD_WIDTH}px`,
-                      height: `${currentHeight}px`,
-                      left: '50%',
-                      bottom: '0',
-                      marginLeft: `-${CARD_WIDTH / 2}px`,
-                      transformOrigin: 'center bottom',
-                      transform: baseTransform,
-                      zIndex,
-                      opacity: layout.opacity,
-                      transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
-                      filter: `blur(${layout.blur}px)`,
-                      boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
-                      borderRadius: '24px',
-                      overflow: 'hidden',
-                    }}
-                    onClick={() => setActiveForTab('model', index, totalCards)}
-                  >
-                    <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                      <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover rounded-[inherit]" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
-                      <div className="absolute top-3 left-3 right-3">
-                        <p className="text-white/60 text-xs font-medium">
-                          {item.style} • {item.gender}
-                        </p>
-                      </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
-                      </div>
-                      <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Expanded Horizontal Scroll View */}
-      {isExpanded && activeTab === 'video' && (
-        <div 
-          className="absolute left-0 right-0 z-10"
-          style={{
-            top: '180px',
-            bottom: '40px',
-            opacity: Math.min(1, (easedProgress - 0.5) * 2),
-          }}
-        >
-          {/* Scroll Navigation Buttons */}
-          <button
-            onClick={scrollLeft}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center text-foreground hover:bg-background transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={scrollRight}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm border border-border/30 flex items-center justify-center text-foreground hover:bg-background transition-colors"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Scrollable Cards Container */}
-          <div
-            ref={scrollContainerRef}
-            className="h-full overflow-x-auto overflow-y-hidden px-16 py-4 scrollbar-hide"
-            style={{ scrollBehavior: 'smooth' }}
-          >
-            <div className="flex gap-6 h-full items-center" style={{ width: 'max-content' }}>
-              {filteredVideoItems.map((item) => (
+      {/* Cards Container - Positioned at bottom initially, moves to top when expanded */}
+      <div 
+        className="absolute left-0 right-0 z-10 overflow-visible"
+        style={{
+          top: easedProgress > 0.5 ? `${80 + (1 - easedProgress) * 100}px` : 'auto',
+          bottom: easedProgress > 0.5 ? 'auto' : `${-15 + easedProgress * 30}%`,
+          height: easedProgress > 0.5 ? 'auto' : '65%',
+        }}
+      >
+        {/* Video Cards */}
+        {activeTab === 'video' && (
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {previewVideoItems.map((item, index) => {
+              const totalCards = previewVideoItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              // Fan layout (initial state) - wider spread to fill bottom
+              const fanRotation = distanceFromCenter * 15; // Increased rotation for wider spread
+              const arcRadius = 450; // Larger radius for bigger fan
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
+              
+              // Linear layout (expanded state) - horizontal row at top
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = easedProgress > 0.5 ? 0 : -450; // Cards go to top
+              
+              // Interpolate between states
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 340 + easedProgress * 80;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
                 <div
                   key={item.id}
-                  className="flex-shrink-0 cursor-pointer group"
-                  style={{ width: `${EXPANDED_CARD_WIDTH}px`, height: `${EXPANDED_CARD_HEIGHT}px` }}
-                  onClick={() => setSelectedItem(item)}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onClick={() => isExpanded && setSelectedItem(item)}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
                 >
-                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted relative transition-transform duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
                     <video
                       src={item.videoUrl}
                       muted
@@ -722,8 +519,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                       preload="metadata"
                       className="w-full h-full object-cover"
                       onMouseEnter={(e) => {
-                        e.currentTarget.currentTime = 0;
-                        e.currentTarget.play().catch(() => {});
+                        if (isExpanded) {
+                          e.currentTarget.currentTime = 0;
+                          e.currentTarget.play().catch(() => {});
+                        }
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.pause();
@@ -731,93 +530,271 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    
-                    {/* Duration */}
                     {item.duration && (
-                      <span className="absolute top-3 right-3 text-white text-xs font-semibold bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+                      <span className="absolute top-3 right-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded">
                         {item.duration}
                       </span>
                     )}
-                    
-                    {/* Publisher */}
                     <div className="absolute top-3 left-3">
-                      <p className="text-white/80 text-xs font-medium bg-black/30 px-2 py-1 rounded-md backdrop-blur-sm">{item.publisher}</p>
+                      <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
                     </div>
-                    
-                    {/* Stats */}
-                    <div className="absolute bottom-16 left-4 right-4 flex items-center gap-3 text-white/80">
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-4 h-4" />
-                        <span className="text-xs">{formatNumber(item.likes)}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        <span className="text-xs">{formatNumber(item.views)}</span>
-                      </span>
-                    </div>
-                    
-                    {/* Title */}
                     <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.views)}</span>
+                        </span>
+                      </div>
                       <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
                     </div>
-                    
-                    {/* Hover Play Icon */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                        <Play className="w-8 h-8 text-white fill-white" />
-                      </div>
-                    </div>
-                    
-                    <div className="absolute inset-0 rounded-[24px] border border-white/10 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
                   </div>
                 </div>
-              ))}
-              
-              {filteredVideoItems.length === 0 && (
-                <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-                  <p className="text-lg">{language === 'en' ? 'No videos found' : '未找到视频'}</p>
-                </div>
-              )}
-            </div>
+              );
+            })}
           </div>
+        )}
+
+        {/* Voice Cards */}
+        {activeTab === 'voice' && (
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {previewVoiceItems.map((item, index) => {
+              const totalCards = previewVoiceItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              const fanRotation = distanceFromCenter * 15;
+              const arcRadius = 450;
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
+              
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = easedProgress > 0.5 ? 0 : -450;
+              
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 340 + easedProgress * 80;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
+                <div
+                  key={item.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
+                    <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <Volume2 className="w-7 h-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">{item.style} • {item.duration}</p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Play className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.plays)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes)}</span>
+                        </span>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Model Cards */}
+        {activeTab === 'model' && (
+          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {previewModelItems.map((item, index) => {
+              const totalCards = previewModelItems.length;
+              const centerIndex = (totalCards - 1) / 2;
+              const distanceFromCenter = index - centerIndex;
+              
+              const fanRotation = distanceFromCenter * 15;
+              const arcRadius = 450;
+              const angleRad = (fanRotation * Math.PI) / 180;
+              const fanX = Math.sin(angleRad) * arcRadius;
+              const fanY = Math.cos(angleRad) * arcRadius - arcRadius;
+              
+              const cardWidth = 200;
+              const gap = 20;
+              const totalWidth = totalCards * cardWidth + (totalCards - 1) * gap;
+              const startX = -totalWidth / 2 + cardWidth / 2;
+              const linearX = startX + index * (cardWidth + gap);
+              const linearY = easedProgress > 0.5 ? 0 : -450;
+              
+              const currentX = fanX + (linearX - fanX) * easedProgress;
+              const currentY = fanY + (linearY - fanY) * easedProgress;
+              const currentRotation = fanRotation * (1 - easedProgress);
+              const currentHeight = 340 + easedProgress * 80;
+              
+              const zIndex = isExpanded ? 10 : (totalCards - Math.abs(Math.round(distanceFromCenter)));
+              
+              return (
+                <div
+                  key={item.id}
+                  className="absolute cursor-pointer"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${cardWidth / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg)`,
+                    zIndex,
+                    transition: 'transform 0.1s ease-out, height 0.1s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY - 15}px) rotate(0deg) scale(1.03)`;
+                      e.currentTarget.style.zIndex = '100';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${currentRotation}deg) scale(1)`;
+                    e.currentTarget.style.zIndex = String(zIndex);
+                  }}
+                >
+                  <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-muted">
+                    <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">{item.style} • {item.gender}</p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div 
+                        className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300"
+                        style={{ opacity: easedProgress }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Download className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.downloads)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes)}</span>
+                        </span>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border border-white/20 pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Scroll Indicator - Fades out */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground z-20"
+        style={{ 
+          opacity: 1 - easedProgress * 3,
+          pointerEvents: progress > 0.2 ? 'none' : 'auto',
+        }}
+      >
+        <span className="text-sm">{t('library.scrollToExplore')}</span>
+        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/50 flex items-start justify-center p-1 animate-bounce">
+          <div className="w-1.5 h-3 bg-muted-foreground/50 rounded-full" />
         </div>
-      )}
+      </div>
 
       {/* Progress Indicator */}
       <div className="absolute bottom-4 right-4 w-1 h-20 bg-muted/30 rounded-full overflow-hidden z-20">
-        <div className="w-full bg-foreground/50 rounded-full transition-all duration-100" style={{ height: `${progress * 100}%` }} />
+        <div 
+          className="w-full bg-foreground/50 rounded-full transition-all duration-100"
+          style={{ height: `${progress * 100}%` }}
+        />
       </div>
 
       {/* Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedItem(null)}>
-          <div
-            className="relative bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div 
+            className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors z-10">
+            <button 
+              onClick={() => setSelectedItem(null)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors"
+            >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              <div className="lg:w-[280px] flex-shrink-0 mx-auto lg:mx-0">
-                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[240px] lg:max-w-none mx-auto">
-                  <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
+              <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                  <video 
+                    src={selectedItem.videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-cover"
+                    poster={selectedItem.thumbnail}
+                  />
                 </div>
               </div>
-
+              
               <div className="flex-1 flex flex-col min-w-0">
                 <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
-
+                
                 <div className="space-y-2 mb-5">
                   <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{language === 'en' ? 'Publisher' : '发布者'}: </span>
+                    <span className="text-muted-foreground">Publisher: </span>
                     <span className="text-foreground font-medium">{selectedItem.publisher}</span>
-                  </p>
-                  <p className="text-sm md:text-base">
-                    <span className="text-muted-foreground">{language === 'en' ? 'Release Date' : '发布时间'}: </span>
-                    <span className="text-foreground font-medium">{selectedItem.publishDateFull}</span>
                   </p>
                   <p className="text-sm md:text-base">
                     <span className="text-muted-foreground">{t('library.videoType')}: </span>
@@ -858,14 +835,17 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onBack }) => {
 
                 <div className="flex flex-wrap gap-2 mb-6">
                   {selectedItem.tags.map((tag, index) => (
-                    <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
+                    <span 
+                      key={index}
+                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20"
+                    >
                       #{tag}
                     </span>
                   ))}
                 </div>
 
                 <div className="flex gap-3">
-                  <a
+                  <a 
                     href={selectedItem.videoUrl}
                     download
                     className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
