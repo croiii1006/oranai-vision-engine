@@ -330,13 +330,13 @@ const LibraryPage: React.FC = () => {
     >
       {/* Title Container - Animates from center to top-left */}
       <div
-        className="absolute z-20 left-1/2 -translate-x-1/2 w-[92vw] max-w-5xl"
+        className="absolute z-20 left-0 right-0 px-6 sm:px-10 lg:px-16"
         style={{ top: 80, opacity: titleOpacity }}
       >
         <div 
           className={`flex flex-col gap-2 ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
           style={{
-            transform: `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
+            transform: alignToLeft ? 'none' : `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
             transition: 'transform 0.35s ease, opacity 0.35s ease',
           }}
         >
@@ -352,7 +352,7 @@ const LibraryPage: React.FC = () => {
           </h1>
 
           <div
-            className={`flex w-full items-center ${alignToLeft ? 'justify-between' : 'justify-center md:justify-between'}`}
+            className="flex w-full items-center justify-between"
             style={{
               opacity: subtitleOpacity,
               transform: `translateY(6px)`,
@@ -364,7 +364,7 @@ const LibraryPage: React.FC = () => {
               {t(subtitleKey)}
             </span>
 
-            <div className="w-[220px] sm:w-[260px] md:w-[320px]" style={{ marginRight: '-100px' }}>
+            <div className="w-[220px] sm:w-[260px] md:w-[320px]">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
