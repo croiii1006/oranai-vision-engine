@@ -52,8 +52,118 @@ export interface MaterialSquareDetailResponse {
 // 列表查询参数
 export interface MaterialSquareListParams {
   title?: string;
-  type?: string;
+  category?: string;
   mediaType?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+// Voice 列表项接口
+export interface MaterialSquareAudioItem {
+  id: number;
+  createUserString: string | null;
+  createTime: string;
+  disabled: boolean;
+  title: string;
+  publisher: string;
+  duration: string;
+  style: string;
+  audioUrl: string;
+  thumbnail: string;
+  plays: number;
+  likes: number;
+  publishTime: string;
+  status: number;
+}
+
+// Voice 详情接口
+export interface MaterialSquareAudioDetail extends MaterialSquareAudioItem {
+  timestamp?: number;
+}
+
+// Voice 列表响应接口
+export interface MaterialSquareAudioListResponse {
+  success: boolean;
+  code: number;
+  msg: string;
+  data: {
+    list: MaterialSquareAudioItem[];
+    total: number;
+    timestamp?: number;
+  };
+  timestamp?: number;
+}
+
+// Voice 详情响应接口
+export interface MaterialSquareAudioDetailResponse {
+  success: boolean;
+  code: number;
+  msg: string;
+  data: MaterialSquareAudioDetail;
+  timestamp?: number;
+}
+
+// Voice 列表查询参数
+export interface MaterialSquareAudioListParams {
+  title?: string;
+  style?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+// Model 列表项接口
+export interface MaterialSquareModelItem {
+  id: number;
+  createUserString: string | null;
+  createTime: string;
+  disabled: boolean;
+  name: string;
+  style: string;
+  gender: string;
+  ethnicity: string;
+  thumbnail: string;
+  downloads: number;
+  likes: number;
+  publishTime: string;
+  status: number;
+}
+
+// Model 详情接口
+export interface MaterialSquareModelDetail extends MaterialSquareModelItem {
+  timestamp?: number;
+}
+
+// Model 列表响应接口
+export interface MaterialSquareModelListResponse {
+  success: boolean;
+  code: number;
+  msg: string;
+  data: {
+    list: MaterialSquareModelItem[];
+    total: number;
+    timestamp?: number;
+  };
+  timestamp?: number;
+}
+
+// Model 详情响应接口
+export interface MaterialSquareModelDetailResponse {
+  success: boolean;
+  code: number;
+  msg: string;
+  data: MaterialSquareModelDetail;
+  timestamp?: number;
+}
+
+// Model 列表查询参数
+export interface MaterialSquareModelListParams {
+  name?: string;
+  style?: string;
+  gender?: string;
   status?: string;
   page?: number;
   size?: number;
@@ -73,8 +183,8 @@ export async function fetchMaterialSquareList(
     if (params.title && params.title.trim()) {
       queryParams.append('title', params.title.trim());
     }
-    if (params.type && params.type.trim() && params.type !== 'all') {
-      queryParams.append('type', params.type.trim());
+    if (params.category && params.category.trim() && params.category !== 'all') {
+      queryParams.append('category', params.category.trim());
     }
     if (params.mediaType && params.mediaType.trim()) {
       queryParams.append('mediaType', params.mediaType.trim());
@@ -155,3 +265,187 @@ export async function fetchMaterialSquareDetail(id: number): Promise<MaterialSqu
   }
 }
 
+/**
+ * 获取素材广场音频列表
+ */
+export async function fetchMaterialSquareAudioList(
+  params: MaterialSquareAudioListParams = {}
+): Promise<MaterialSquareAudioListResponse> {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params.title && params.title.trim()) {
+      queryParams.append('title', params.title.trim());
+    }
+    if (params.style && params.style.trim()) {
+      queryParams.append('style', params.style.trim());
+    }
+    if (params.status && params.status.trim()) {
+      queryParams.append('status', params.status.trim());
+    }
+    if (params.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.size) {
+      queryParams.append('size', params.size.toString());
+    }
+    if (params.sort && params.sort.trim()) {
+      queryParams.append('sort', params.sort.trim());
+    }
+
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/audio${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    
+    logger.info('Fetching material square audio list', { url, params });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: MaterialSquareAudioListResponse = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.msg || 'Failed to fetch material square audio list');
+    }
+
+    logger.info('Material square audio list fetched successfully', { count: data.data.list.length });
+    return data;
+  } catch (error) {
+    logger.error('Error fetching material square audio list', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取素材广场音频详情
+ */
+export async function fetchMaterialSquareAudioDetail(id: number): Promise<MaterialSquareAudioDetailResponse> {
+  try {
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/audio/${id}`;
+    
+    logger.info('Fetching material square audio detail', { url, id });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: MaterialSquareAudioDetailResponse = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.msg || 'Failed to fetch material square audio detail');
+    }
+
+    logger.info('Material square audio detail fetched successfully', { id });
+    return data;
+  } catch (error) {
+    logger.error('Error fetching material square audio detail', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取素材广场模特列表
+ */
+export async function fetchMaterialSquareModelList(
+  params: MaterialSquareModelListParams = {}
+): Promise<MaterialSquareModelListResponse> {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params.name && params.name.trim()) {
+      queryParams.append('name', params.name.trim());
+    }
+    if (params.style && params.style.trim()) {
+      queryParams.append('style', params.style.trim());
+    }
+    if (params.gender && params.gender.trim()) {
+      queryParams.append('gender', params.gender.trim());
+    }
+    if (params.status && params.status.trim()) {
+      queryParams.append('status', params.status.trim());
+    }
+    if (params.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.size) {
+      queryParams.append('size', params.size.toString());
+    }
+    if (params.sort && params.sort.trim()) {
+      queryParams.append('sort', params.sort.trim());
+    }
+
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/model${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    
+    logger.info('Fetching material square model list', { url, params });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: MaterialSquareModelListResponse = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.msg || 'Failed to fetch material square model list');
+    }
+
+    logger.info('Material square model list fetched successfully', { count: data.data.list.length });
+    return data;
+  } catch (error) {
+    logger.error('Error fetching material square model list', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取素材广场模特详情
+ */
+export async function fetchMaterialSquareModelDetail(id: number): Promise<MaterialSquareModelDetailResponse> {
+  try {
+    const url = `${config.api.libraryBaseUrl}/api/app/material-square/model/${id}`;
+    
+    logger.info('Fetching material square model detail', { url, id });
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: MaterialSquareModelDetailResponse = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.msg || 'Failed to fetch material square model detail');
+    }
+
+    logger.info('Material square model detail fetched successfully', { id });
+    return data;
+  } catch (error) {
+    logger.error('Error fetching material square model detail', error);
+    throw error;
+  }
+}

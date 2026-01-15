@@ -16,8 +16,20 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceItem, ModelItem } from '../data/libraryData';
-import { fetchMaterialSquareDetail, fetchMaterialSquareList, type MaterialSquareItem } from '@/lib/api/library';
+import {
+  fetchMaterialSquareDetail,
+  fetchMaterialSquareList,
+  fetchMaterialSquareAudioList,
+  fetchMaterialSquareAudioDetail,
+  fetchMaterialSquareModelList,
+  fetchMaterialSquareModelDetail,
+  type MaterialSquareItem,
+  type MaterialSquareDetail,
+  type MaterialSquareAudioItem,
+  type MaterialSquareAudioDetail,
+  type MaterialSquareModelItem,
+  type MaterialSquareModelDetail,
+} from '@/lib/api/library';
 
 // Shared layout constants for the carousel fan
 const CARD_WIDTH = 210;
@@ -45,7 +57,7 @@ const formatNumber = (num: number | undefined | null): string => {
 
 type TabType = 'video' | 'voice' | 'model';
 
-type SelectedItemType = LibraryItem | VoiceItem | ModelItem;
+type SelectedItemType = MaterialSquareDetail | MaterialSquareAudioDetail | MaterialSquareModelDetail;
 
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
@@ -71,38 +83,15 @@ const LibraryPage: React.FC = () => {
   });
   const [maxVideoOffset, setMaxVideoOffset] = useState(800);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
+  const searchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 将 API 数据转换为 LibraryItem 格式
-  const convertToLibraryItem = (item: MaterialSquareItem): LibraryItem => {
-    return {
-      id: item.id,
-      titleKey: item.title || '',
-    type: 'video',
-      publisher: item.publisher || '',
-      publishDate: item.publishTime ? (item.publishTime.split(' ')[0] || item.publishTime) : '',
-      publishDateFull: item.publishTime || '',
-      videoTypeKey: item.category || '',
-      purposeKey: '',
-      audienceKey: '',
-      aiAnalysisKey: '',
-      videoUrl: item.sourceUrl || '',
-      thumbnail: item.sourceUrl || '',
-      duration: '',
-      views: item.viewCount ?? 0,
-      likes: item.likeCount ?? 0,
-      comments: item.commentCount ?? 0,
-      shares: item.shareCount ?? 0,
-      tags: item.tags || [],
-      category: item.category || '',
-    };
-  };
-
-  // 只获取 AI 视频列表数据（video tab）
-  const { data: listData } = useQuery({
+  // 获取 AI 视频列表数据（只在初始加载时获取，不依赖搜索和分类）
+  const { data: videoListData } = useQuery({
     queryKey: ['materialSquareList', 'video'],
     queryFn: () => fetchMaterialSquareList({
       page: 1,
@@ -110,79 +99,91 @@ const LibraryPage: React.FC = () => {
     }),
   });
 
-  // 转换 API 数据为 LibraryItem 格式
-  const apiVideoItems: LibraryItem[] = listData?.data?.list
-    ? listData.data.list.map(convertToLibraryItem)
-    : [];
-
-  // 将 VoiceItem 转换为 LibraryItem 格式（用于详情展示）
-  const convertVoiceItemToLibraryItem = (item: VoiceItem): LibraryItem => ({
-    id: item.id,
-    titleKey: item.titleKey,
-    type: 'audio',
-    publisher: item.publisher,
-    publishDate: '',
-    publishDateFull: '',
-    videoTypeKey: item.style,
-    purposeKey: '',
-    audienceKey: '',
-    aiAnalysisKey: '',
-    videoUrl: item.audioUrl,
-    thumbnail: item.thumbnail,
-    duration: item.duration,
-    views: item.plays,
-    likes: item.likes,
-    comments: 0,
-    shares: 0,
-    tags: [],
-    category: item.style,
+  // 获取 AI 音频列表数据（只在初始加载时获取，不依赖搜索）
+  const { data: audioListData } = useQuery({
+    queryKey: ['materialSquareAudioList'],
+    queryFn: () => fetchMaterialSquareAudioList({
+      page: 1,
+      size: 100,
+    }),
   });
 
-  // 将 ModelItem 转换为 LibraryItem 格式（用于详情展示）
-  const convertModelItemToLibraryItem = (item: ModelItem): LibraryItem => ({
-    id: item.id,
-    titleKey: item.name,
-    type: 'template',
-    publisher: 'OranAI',
-    publishDate: '',
-    publishDateFull: '',
-    videoTypeKey: item.style,
-    purposeKey: '',
-    audienceKey: '',
-    aiAnalysisKey: '',
-    videoUrl: '',
-    thumbnail: item.thumbnail,
-    duration: '',
-    views: item.downloads,
-    likes: item.likes,
-    comments: 0,
-    shares: 0,
-    tags: [item.style, item.gender, item.ethnicity].filter(Boolean),
-    category: item.style,
+  // 获取 AI 模特列表数据（只在初始加载时获取，不依赖搜索）
+  const { data: modelListData } = useQuery({
+    queryKey: ['materialSquareModelList'],
+    queryFn: () => fetchMaterialSquareModelList({
+      page: 1,
+      size: 100,
+    }),
   });
 
-  // 数据源：只有 video 使用 API 数据，其他使用静态数据
-  const previewVideoItems = apiVideoItems.length > 0 ? apiVideoItems : mockLibraryItems;
-  const previewVoiceItems = mockVoiceItems.slice(0, 8);
-  const previewModelItems = mockModelItems.slice(0, 8);
+  // 搜索防抖：300ms延迟
+  useEffect(() => {
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
+    }
+    searchDebounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
 
-  const normalizedQuery = searchQuery.trim().toLowerCase();
+    return () => {
+      if (searchDebounceTimerRef.current) {
+        clearTimeout(searchDebounceTimerRef.current);
+      }
+    };
+  }, [searchQuery]);
 
+  // 切换tab时清空搜索框和重置Video类型
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab);
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    setSelectedCategory('all');
+  }, []);
+
+  // 使用 API 数据
+  const previewVideoItems: MaterialSquareItem[] = videoListData?.data?.list || [];
+  const previewVoiceItems: MaterialSquareAudioItem[] = audioListData?.data?.list || [];
+  const previewModelItems: MaterialSquareModelItem[] = modelListData?.data?.list || [];
+
+  // 从 API 数据中提取所有唯一的 category 值（去重处理）
+  const videoCategories = useMemo(() => {
+    const categoryMap = new Map<string, string>(); // 使用 Map 存储：小写key -> 原始值
+    previewVideoItems.forEach((item) => {
+      if (item.category && item.category.trim()) {
+        const trimmedCategory = item.category.trim();
+        const lowerKey = trimmedCategory.toLowerCase();
+        // 如果已存在，保留第一个出现的原始值（保持大小写）
+        if (!categoryMap.has(lowerKey)) {
+          categoryMap.set(lowerKey, trimmedCategory);
+        }
+      }
+    });
+    // 转换为数组并排序（按原始值排序，不区分大小写）
+    return Array.from(categoryMap.values()).sort((a, b) => 
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    );
+  }, [previewVideoItems]);
+
+  // 使用防抖后的搜索查询进行过滤
+  const normalizedQuery = debouncedSearchQuery.trim().toLowerCase();
+
+  // 客户端过滤：前端遍历控制数据展示隐藏
   const filteredVideoItems = useMemo(() => {
     return previewVideoItems.filter((item) => {
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      const textBlob = `${t(item.titleKey)} ${item.publisher} ${item.tags.join(' ')}`.toLowerCase();
+      const textBlob = `${item.title} ${item.publisher} ${(item.tags || []).join(' ')}`.toLowerCase();
       const matchesSearch = !normalizedQuery || textBlob.includes(normalizedQuery);
       return matchesCategory && matchesSearch;
     });
-  }, [previewVideoItems, selectedCategory, normalizedQuery, t]);
+  }, [previewVideoItems, selectedCategory, normalizedQuery]);
 
   const filteredVoiceItems = useMemo(() => {
     return previewVoiceItems.filter((item) => {
-      const textBlob = `${t(item.titleKey)} ${item.publisher} ${item.style}`.toLowerCase();
+      const textBlob = `${item.title} ${item.publisher} ${item.style}`.toLowerCase();
       return !normalizedQuery || textBlob.includes(normalizedQuery);
     });
-  }, [previewVoiceItems, normalizedQuery, t]);
+  }, [previewVoiceItems, normalizedQuery]);
 
   const filteredModelItems = useMemo(() => {
     return previewModelItems.filter((item) => {
@@ -472,8 +473,8 @@ const LibraryPage: React.FC = () => {
             </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
 
       {/* Description - Fades out */}
       <div
@@ -504,7 +505,7 @@ const LibraryPage: React.FC = () => {
           {tabs.map((tab) => (
                 <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
                 activeTab === tab.id
                       ? 'bg-foreground text-background'
@@ -530,31 +531,35 @@ const LibraryPage: React.FC = () => {
         }}
       >
         {activeTab === 'video' && (
-          <div className="flex flex-wrap gap-2">
-            {[
-              { id: 'all', label: 'library.all' },
-              { id: 'food', label: 'library.food' },
-              { id: 'auto', label: 'library.auto' },
-              { id: 'fashion', label: 'library.fashion' },
-              { id: 'digital', label: 'library.digital' },
-              { id: 'finance', label: 'library.finance' },
-              { id: 'personal', label: 'library.personal' },
-              { id: 'culture', label: 'library.culture' },
-              { id: 'platform', label: 'library.platform' },
-              { id: 'diy', label: 'library.diy' },
-            ].map((cat) => (
+          <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex flex-nowrap gap-2 min-w-max pb-1">
+              {/* All 选项 */}
               <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-                  selectedCategory === cat.id
+                key="all"
+                onClick={() => setSelectedCategory('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                  selectedCategory === 'all'
                     ? 'bg-foreground text-background border-foreground'
                     : 'border-border/60 text-foreground/70 hover:border-foreground/40 hover:text-foreground'
                 }`}
               >
-                {t(cat.label)}
+                {t('library.all')}
             </button>
-            ))}
+              {/* 从 API 数据中动态生成的分类 */}
+              {videoCategories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                    selectedCategory === category
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'border-border/60 text-foreground/70 hover:border-foreground/40 hover:text-foreground'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+          </div>
           </div>
         )}
         </div>
@@ -571,8 +576,13 @@ const LibraryPage: React.FC = () => {
         <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
         {/* Video Cards */}
-        {activeTab === 'video' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+        <div 
+          className="relative w-full h-full flex items-end justify-center overflow-visible" 
+          style={{ 
+            minHeight: easedProgress > 0.5 ? '420px' : 'auto',
+            display: activeTab === 'video' ? 'flex' : 'none',
+          }}
+        >
             {filteredVideoItems.map((item, index) => {
               const totalCards = filteredVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
@@ -608,9 +618,18 @@ const LibraryPage: React.FC = () => {
                     borderRadius: '24px',
                     overflow: 'hidden',
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     setActiveForTab('video', index, totalCards);
-                    if (isExpanded) setSelectedItem(item);
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch video detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
@@ -625,7 +644,7 @@ const LibraryPage: React.FC = () => {
                 >
                   <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
                   <video 
-                    src={item.videoUrl}
+                    src={item.sourceUrl}
                     muted
                     loop
                     playsInline
@@ -643,11 +662,6 @@ const LibraryPage: React.FC = () => {
                     }}
                   />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
-                    {item.duration && (
-                      <span className="absolute top-3 right-3 text-white text-xs font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
-                        {item.duration}
-                      </span>
-                    )}
                     <div className="absolute top-3 left-3">
                       <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
                     </div>
@@ -655,26 +669,30 @@ const LibraryPage: React.FC = () => {
                       <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
                         <span className="flex items-center gap-1">
                           <Heart className="w-4 h-4" />
-                          <span className="text-sm font-medium">{formatNumber(item.likes ?? 0)}</span>
+                          <span className="text-sm font-medium">{formatNumber(item.likeCount ?? 0)}</span>
                         </span>
                         <span className="flex items-center gap-1">
                           <Eye className="w-4 h-4" />
-                          <span className="text-sm font-medium">{formatNumber(item.views ?? 0)}</span>
+                          <span className="text-sm font-medium">{formatNumber(item.viewCount ?? 0)}</span>
                         </span>
                       </div>
-                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{item.title}</p>
                     </div>
                     <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
                   </div>
                 </div>
               );
             })}
-                  </div>
-                )}
+          </div>
 
         {/* Voice Cards */}
-        {activeTab === 'voice' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+        <div 
+          className="relative w-full h-full flex items-end justify-center overflow-visible" 
+          style={{ 
+            minHeight: easedProgress > 0.5 ? '420px' : 'auto',
+            display: activeTab === 'voice' ? 'flex' : 'none',
+          }}
+        >
             {filteredVoiceItems.map((item, index) => {
               const totalCards = filteredVoiceItems.length;
               const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
@@ -707,9 +725,18 @@ const LibraryPage: React.FC = () => {
                     borderRadius: '24px',
                     overflow: 'hidden',
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     setActiveForTab('voice', index, totalCards);
-                    if (isExpanded) setSelectedItem(convertVoiceItemToLibraryItem(item));
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareAudioDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch audio detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
@@ -723,12 +750,12 @@ const LibraryPage: React.FC = () => {
                   }}
                 >
                   <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                    <img src={item.thumbnail} alt={t(item.titleKey)} className="w-full h-full object-cover rounded-[inherit]" />
+                    <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover rounded-[inherit]" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center rounded-[inherit]">
                       <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
                         <Volume2 className="w-7 h-7 text-white" />
-                      </div>
                     </div>
+                  </div>
                     <div className="absolute top-3 left-3 right-3">
                       <p className="text-white/60 text-xs font-medium">
                         {item.style} • {item.duration}
@@ -739,25 +766,29 @@ const LibraryPage: React.FC = () => {
                         <span className="flex items-center gap-1">
                           <Play className="w-3 h-3" />
                           <span className="text-xs">{formatNumber(item.plays ?? 0)}</span>
-                    </span>
+                  </span>
                         <span className="flex items-center gap-1">
                           <Heart className="w-3 h-3" />
                           <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
                     </span>
-                  </div>
-                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{t(item.titleKey)}</p>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.title}</p>
                     </div>
                     <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
                   </div>
                 </div>
               );
             })}
-          </div>
-        )}
-
+                  </div>
+                  
         {/* Model Cards */}
-        {activeTab === 'model' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+        <div 
+          className="relative w-full h-full flex items-end justify-center overflow-visible" 
+          style={{ 
+            minHeight: easedProgress > 0.5 ? '420px' : 'auto',
+            display: activeTab === 'model' ? 'flex' : 'none',
+          }}
+        >
             {filteredModelItems.map((item, index) => {
               const totalCards = filteredModelItems.length;
               const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
@@ -790,9 +821,18 @@ const LibraryPage: React.FC = () => {
                     borderRadius: '24px',
                     overflow: 'hidden',
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     setActiveForTab('model', index, totalCards);
-                    if (isExpanded) setSelectedItem(convertModelItemToLibraryItem(item));
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareModelDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch model detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
@@ -832,7 +872,6 @@ const LibraryPage: React.FC = () => {
             );
           })}
         </div>
-        )}
       </div>
 
       {/* Progress Indicator */}
@@ -867,105 +906,221 @@ const LibraryPage: React.FC = () => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {'videoUrl' in selectedItem ? (
-              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
-                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                    <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
+            {/* 判断类型并渲染对应的详情 */}
+            {('sourceUrl' in selectedItem) ? (
+              // Video 详情
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+              <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <video src={selectedItem.sourceUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.sourceUrl} />
+                </div>
+              </div>
+              
+              <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.title}</h2>
+                
+                <div className="space-y-2 mb-5">
+                  <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
+                  </p>
+                    {selectedItem.category && (
+                  <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.category')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.category}</span>
+                  </p>
+                    )}
+                    {selectedItem.purpose && (
+                  <p className="text-sm md:text-base">
+                    <span className="text-muted-foreground">{t('library.purpose')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.purpose}</span>
+                  </p>
+                    )}
+                    {selectedItem.targetAudience && (
+                  <p className="text-sm md:text-base">
+                    <span className="text-muted-foreground">{t('library.audience')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.targetAudience}</span>
+                  </p>
+                    )}
+                    {selectedItem.aiTech && (
+                  <p className="text-sm md:text-base">
+                    <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.aiTech}</span>
+                  </p>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                  <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.viewCount ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likeCount ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.commentCount ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.shareCount ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col min-w-0">
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
+                  {selectedItem.tags && selectedItem.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {selectedItem.tags.map((tag, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                  )}
 
-                  <div className="space-y-2 mb-5">
-                    <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">Publisher: </span>
-                      <span className="text-foreground font-medium">{selectedItem.publisher}</span>
-                    </p>
-                    <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.videoType')}: </span>
-                      <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
-                    </p>
-                    <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.purpose')}: </span>
-                      <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
-                    </p>
-                    <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.audience')}: </span>
-                      <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
-                    </p>
-                    <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
-                      <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-lg font-bold">{selectedItem.views.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Heart className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-lg font-bold">{selectedItem.likes.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-lg font-bold">{selectedItem.comments.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Share2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-lg font-bold">{selectedItem.shares.toLocaleString()}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {selectedItem.tags.map((tag, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-3">
-                    <a
-                      href={selectedItem.videoUrl}
+                <div className="flex gap-3">
+                    {selectedItem.sourceUrl && (
+                    <a 
+                        href={selectedItem.sourceUrl}
                       download
-                      className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
                     >
-                      <Download className="w-5 h-5" />
+                        <Download className="w-5 h-5" />
                       {t('library.downloadVideo')}
                     </a>
-                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
+                    )}
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
                       <Sparkles className="w-5 h-5" />
                       {t('library.replicate')}
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
                     </button>
                   </div>
                 </div>
               </div>
-            ) : 'audioUrl' in selectedItem ? (
-              <div className="flex flex-col items-center gap-6">
-                <div className="w-48 h-48 rounded-2xl overflow-hidden">
-                  <img src={selectedItem.thumbnail} alt={t(selectedItem.titleKey)} className="w-full h-full object-cover" />
+            ) : ('audioUrl' in selectedItem) ? (
+              // Audio 详情
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <img src={selectedItem.thumbnail} alt={selectedItem.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <Volume2 className="w-7 h-7 text-white" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold">{t(selectedItem.titleKey)}</h2>
-                <p className="text-muted-foreground">{selectedItem.publisher} • {selectedItem.style} • {selectedItem.duration}</p>
-                <div className="flex gap-4">
-                  <span className="flex items-center gap-1"><Play className="w-4 h-4" /> {formatNumber(selectedItem.plays)}</span>
-                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.title}</h2>
+
+                  <div className="space-y-2 mb-5">
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
+                    </p>
+                    {selectedItem.style && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.style')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.style}</span>
+                      </p>
+                    )}
+                    {selectedItem.duration && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.duration')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.duration}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Play className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.plays ?? 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    {selectedItem.audioUrl && (
+                      <a
+                        href={selectedItem.audioUrl}
+                        download
+                        className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-5 h-5" />
+                        {t('library.downloadAudio')}
+                    </a>
+                  )}
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                      <Sparkles className="w-5 h-5" />
+                    {t('library.replicate')}
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
+                  </button>
                 </div>
               </div>
+            </div>
             ) : (
-              <div className="flex flex-col items-center gap-6">
-                <div className="w-48 h-64 rounded-2xl overflow-hidden">
-                  <img src={selectedItem.thumbnail} alt={selectedItem.name} className="w-full h-full object-cover" />
+              // Model 详情
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <img src={selectedItem.thumbnail} alt={selectedItem.name} className="w-full h-full object-cover" />
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold">{selectedItem.name}</h2>
-                <p className="text-muted-foreground">{selectedItem.style} • {selectedItem.gender} • {selectedItem.ethnicity}</p>
-                <div className="flex gap-4">
-                  <span className="flex items-center gap-1"><Download className="w-4 h-4" /> {formatNumber(selectedItem.downloads)}</span>
-                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.name}</h2>
+
+                  <div className="space-y-2 mb-5">
+                    {selectedItem.style && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.style')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.style}</span>
+                      </p>
+                    )}
+                    {selectedItem.gender && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.gender')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.gender}</span>
+                      </p>
+                    )}
+                    {selectedItem.ethnicity && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.ethnicity')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.ethnicity}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Download className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.downloads ?? 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                      <Sparkles className="w-5 h-5" />
+                      {t('library.replicate')}
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
