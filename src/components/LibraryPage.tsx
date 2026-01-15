@@ -30,6 +30,11 @@ const Y_OFFSETS = [0, 8, 16, 24, 30];
 const OPACITY_DROP_BY_DISTANCE = [0, 0.06, 0.12, 0.18, 0.2];
 const BLUR_PER_STEP = 0.6;
 const MAX_DISTANCE_INDEX = FAN_OFFSETS.length - 1;
+// Decouple collapsed/expanded title top positions
+const TITLE_TOP_COLLAPSED = 70;
+const TITLE_TOP_EXPANDED = 20;
+// Gap between main title and subtitle/search row (px)
+const TITLE_SUBTITLE_GAP = 1;
 
 const formatNumber = (num: number | undefined | null): string => {
   const value = num ?? 0;
@@ -40,10 +45,12 @@ const formatNumber = (num: number | undefined | null): string => {
 
 type TabType = 'video' | 'voice' | 'model';
 
+type SelectedItemType = LibraryItem | VoiceItem | ModelItem;
+
 const LibraryPage: React.FC = () => {
   const { t } = useLanguage();
 
-  const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('video');
 
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
@@ -319,7 +326,8 @@ const LibraryPage: React.FC = () => {
 
   // Only shift left once aligned; keep centered before expansion
   const titleTranslateX = alignToLeft ? titleOffsets.x * easedProgress * 0.85 + 310 : 0;
-  const titleTranslateY = titleOffsets.y * easedProgress * 0.4;
+  const titleTranslateY = 0; // vertical handled via top interpolation
+  const titleTop = TITLE_TOP_COLLAPSED + (TITLE_TOP_EXPANDED - TITLE_TOP_COLLAPSED) * easedProgress;
 
   // Subtitle fades only after expansion nearly completes
   useEffect(() => {
@@ -413,17 +421,18 @@ const LibraryPage: React.FC = () => {
     <div
       ref={containerRef}
       className="fixed inset-0 overflow-hidden bg-background"
-      style={{ touchAction: 'none', top: '64px' }}
+      style={{ touchAction: 'none', top: '60px' }}
     >
       {/* Title Container - Animates from center to top-left */}
       <div
-        className="absolute z-20 left-1/2 -translate-x-1/2 w-[92vw] max-w-5xl"
-        style={{ top: 80, opacity: titleOpacity }}
+        className="absolute z-20 left-0 right-0 px-6 sm:px-10 lg:px-16"
+        style={{ top: titleTop, opacity: titleOpacity }}
       >
         <div 
-          className={`flex flex-col gap-2 ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
+          className={`flex flex-col ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
           style={{
-            transform: `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
+            gap: `${TITLE_SUBTITLE_GAP}px`,
+            transform: alignToLeft ? 'none' : `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
             transition: 'transform 0.35s ease, opacity 0.35s ease',
           }}
         >
@@ -439,11 +448,12 @@ const LibraryPage: React.FC = () => {
           </h1>
           
           <div
-            className={`flex w-full items-center gap-6 sm:gap-8 ${alignToLeft ? 'justify-between' : 'justify-center md:justify-between'}`}
+            className="flex w-full items-center justify-between"
             style={{
               opacity: subtitleOpacity,
               transform: `translateY(6px)`,
               transition: 'opacity 0.35s ease, transform 0.35s ease',
+              marginTop: '1px',
             }}
           >
             <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
@@ -470,9 +480,11 @@ const LibraryPage: React.FC = () => {
         className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
         style={{
           top: '26%',
-          opacity: 1 - easedProgress * 2.5,
+          // Fade even faster as soon as the user starts scrolling
+          opacity: Math.max(0, 1 - easedProgress * 10),
           transform: `translateX(-50%) translateY(${easedProgress * -25}px)`,
-          pointerEvents: progress > 0.3 ? 'none' : 'auto',
+          pointerEvents: progress > 0.02 ? 'none' : 'auto',
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
         }}
       >
         <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
@@ -510,7 +522,7 @@ const LibraryPage: React.FC = () => {
       <div
         className="absolute left-0 right-0 z-30 px-6 sm:px-10 lg:px-16"
         style={{
-          top: '20vh',
+          top: '18vh',
           opacity: alignToLeft ? 1 : 0,
           transform: `translateY(${alignToLeft ? 0 : 8}px)`,
           pointerEvents: alignToLeft ? 'auto' : 'none',
@@ -855,121 +867,108 @@ const LibraryPage: React.FC = () => {
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {/* 详情内容：使用 selectedItem 的静态数据 */}
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
-                <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                    {selectedItem.type === 'video' && selectedItem.videoUrl ? (
-                      <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
-                    ) : selectedItem.type === 'audio' && selectedItem.videoUrl ? (
-                      <audio src={selectedItem.videoUrl} controls className="w-full h-full" />
-                    ) : (
-                      <img src={selectedItem.thumbnail} alt={t(selectedItem.titleKey)} className="w-full h-full object-cover" />
-                  )}
+            {'videoUrl' in selectedItem ? (
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <video src={selectedItem.videoUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.thumbnail} />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col min-w-0">
+
+                <div className="flex-1 flex flex-col min-w-0">
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{t(selectedItem.titleKey)}</h2>
-                
-                <div className="space-y-2 mb-5">
-                  <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
-                      <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
-                  </p>
-                    {selectedItem.category && (
-                  <p className="text-sm md:text-base">
-                        <span className="text-muted-foreground">{t('library.category')}: </span>
-                        <span className="text-foreground font-medium">{selectedItem.category}</span>
-                  </p>
-                    )}
-                    {selectedItem.duration && (
-                  <p className="text-sm md:text-base">
-                        <span className="text-muted-foreground">{t('library.duration')}: </span>
-                        <span className="text-foreground font-medium">{selectedItem.duration}</span>
-                      </p>
-                    )}
-                </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
-                    {selectedItem.type === 'audio' ? (
-                      /* Voice 卡片：显示 plays 和 likes */
-                      <>
-                  <div className="flex items-center gap-2">
-                          <Play className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
+                  <div className="space-y-2 mb-5">
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">Publisher: </span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.videoType')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.videoTypeKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.purpose')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.purposeKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.audience')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.audienceKey)}</span>
+                    </p>
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
+                      <span className="text-foreground font-medium">{t(selectedItem.aiAnalysisKey)}</span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                  </div>
-                      </>
-                    ) : selectedItem.type === 'template' ? (
-                      /* Model 卡片：显示 downloads 和 likes */
-                      <>
-                  <div className="flex items-center gap-2">
-                          <Download className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                  </div>
-                      </>
-                    ) : (
-                      /* Video 卡片：显示完整的统计数据 */
-                      <>
-                        <div className="flex items-center gap-2">
-                          <Eye className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.views ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Heart className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.comments ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Share2 className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-lg font-bold">{(selectedItem.shares ?? 0).toLocaleString()}</span>
-                        </div>
-                      </>
-                    )}
-                </div>
 
-                  {selectedItem.tags && selectedItem.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedItem.tags.map((tag, index) => (
-                        <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-                  )}
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.views.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.likes.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.comments.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{selectedItem.shares.toLocaleString()}</span>
+                    </div>
+                  </div>
 
-                <div className="flex gap-3">
-                    {(selectedItem.videoUrl || selectedItem.type === 'audio') && (
-                    <a 
-                        href={selectedItem.videoUrl || '#'}
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {selectedItem.tags.map((tag, index) => (
+                      <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <a
+                      href={selectedItem.videoUrl}
                       download
-                        className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Download className="w-5 h-5" />
-                        {selectedItem.type === 'audio' ? t('library.downloadAudio') : t('library.downloadVideo')}
+                      className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-5 h-5" />
+                      {t('library.downloadVideo')}
                     </a>
-                  )}
-                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2">
                       <Sparkles className="w-5 h-5" />
-                    {t('library.replicate')}
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
-                      </div>
-                  </button>
+                      {t('library.replicate')}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : 'audioUrl' in selectedItem ? (
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-48 h-48 rounded-2xl overflow-hidden">
+                  <img src={selectedItem.thumbnail} alt={t(selectedItem.titleKey)} className="w-full h-full object-cover" />
+                </div>
+                <h2 className="text-2xl font-bold">{t(selectedItem.titleKey)}</h2>
+                <p className="text-muted-foreground">{selectedItem.publisher} • {selectedItem.style} • {selectedItem.duration}</p>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1"><Play className="w-4 h-4" /> {formatNumber(selectedItem.plays)}</span>
+                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-48 h-64 rounded-2xl overflow-hidden">
+                  <img src={selectedItem.thumbnail} alt={selectedItem.name} className="w-full h-full object-cover" />
+                </div>
+                <h2 className="text-2xl font-bold">{selectedItem.name}</h2>
+                <p className="text-muted-foreground">{selectedItem.style} • {selectedItem.gender} • {selectedItem.ethnicity}</p>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1"><Download className="w-4 h-4" /> {formatNumber(selectedItem.downloads)}</span>
+                  <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {formatNumber(selectedItem.likes)}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
