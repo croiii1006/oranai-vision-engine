@@ -3,18 +3,6 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 // Import solution images
-import solutionKnow from '@/assets/solutions/solution-know.png';
-import solutionBuild from '@/assets/solutions/solution-build.png';
-import solutionManage from '@/assets/solutions/solution-manage.png';
-import solutionScale from '@/assets/solutions/solution-scale.png';
-
-const solutionImages: Record<string, string> = {
-  know: solutionKnow,
-  build: solutionBuild,
-  manage: solutionManage,
-  scale: solutionScale,
-};
-
 interface SolutionSection {
   id: string;
   titleKey: string;
@@ -28,6 +16,7 @@ const SolutionPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const descTextClass =
     'text-base md:text-lg text-muted-foreground leading-relaxed max-w-[32rem] text-left';
+  const tabDescClass = 'text-lg text-muted-foreground leading-relaxed';
 
   const sections: SolutionSection[] = [
     {
@@ -36,8 +25,9 @@ const SolutionPage: React.FC = () => {
       descKey: 'solution.knowDesc',
       tabs: [
         { labelKey: 'solution.marketInsight', contentKey: 'solution.marketInsightDesc' },
-        { labelKey: 'solution.consumerInsight', contentKey: 'solution.consumerInsight' },
-        { labelKey: 'solution.healthInsight', contentKey: 'solution.healthInsight' },
+        { labelKey: 'solution.consumerInsight', contentKey: 'solution.consumerInsightDesc' },
+        { labelKey: 'solution.brandHealthMetrics', contentKey: 'solution.brandHealthMetricsDesc' },
+        { labelKey: 'solution.industryTrends', contentKey: 'solution.industryTrendsDesc' },
       ],
     },
     {
@@ -45,9 +35,10 @@ const SolutionPage: React.FC = () => {
       titleKey: 'solution.build',
       descKey: 'solution.buildDesc',
       tabs: [
-        { labelKey: 'solution.brandPositioning', contentKey: 'solution.brandPositioning' },
-        { labelKey: 'solution.brandStory', contentKey: 'solution.brandStory' },
-        { labelKey: 'solution.contentGeneration', contentKey: 'solution.contentGeneration' },
+        { labelKey: 'solution.brandPositioningGen', contentKey: 'solution.brandPositioningGenDesc' },
+        { labelKey: 'solution.contentEngine', contentKey: 'solution.contentEngineDesc' },
+        { labelKey: 'solution.socialOps', contentKey: 'solution.socialOpsDesc' },
+        { labelKey: 'solution.crmOps', contentKey: 'solution.crmOpsDesc' },
       ],
     },
     {
@@ -55,9 +46,10 @@ const SolutionPage: React.FC = () => {
       titleKey: 'solution.manage',
       descKey: 'solution.manageDesc',
       tabs: [
-        { labelKey: 'solution.socialMedia', contentKey: 'solution.socialMedia' },
-        { labelKey: 'solution.dam', contentKey: 'solution.dam' },
-        { labelKey: 'solution.sentiment', contentKey: 'solution.sentiment' },
+        { labelKey: 'solution.dataAssetMgmt', contentKey: 'solution.dataAssetMgmtDesc' },
+        { labelKey: 'solution.sentimentMgmt', contentKey: 'solution.sentimentMgmtDesc' },
+        { labelKey: 'solution.complianceMgmt', contentKey: 'solution.complianceMgmtDesc' },
+        { labelKey: 'solution.salesServiceMgmt', contentKey: 'solution.salesServiceMgmtDesc' },
       ],
     },
     {
@@ -65,9 +57,10 @@ const SolutionPage: React.FC = () => {
       titleKey: 'solution.scale',
       descKey: 'solution.scaleDesc',
       tabs: [
-        { labelKey: 'solution.seo', contentKey: 'solution.seo' },
-        { labelKey: 'solution.ads', contentKey: 'solution.ads' },
-        { labelKey: 'solution.predictiveGrowth', contentKey: 'solution.predictiveGrowth' },
+        { labelKey: 'solution.geoSeoOpt', contentKey: 'solution.geoSeoOptDesc' },
+        { labelKey: 'solution.localizationGrowth', contentKey: 'solution.localizationGrowthDesc' },
+        { labelKey: 'solution.leadAdsOpt', contentKey: 'solution.leadAdsOptDesc' },
+        { labelKey: 'solution.trendForecast', contentKey: 'solution.trendForecastDesc' },
       ],
     },
   ];
@@ -120,63 +113,52 @@ const SolutionPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Title Section */}
-              <div className="mb-12 pb-12">
-                <div className="flex items-baseline gap-6 mb-4">
-                  <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
-                    {t(currentSection.titleKey)}
-                  </h1>
-                  <span className="text-2xl md:text-3xl font-light text-muted-foreground">
-                    {t('solution.yourBrand')}
-                  </span>
-                </div>
-                <p className={descTextClass}>
-                  {t(currentSection.descKey)}
-                </p>
-
-                {/* Tab Navigation */}
-                <div className="flex items-center gap-2 border-b border-border/30 pb-4">
-                  {currentSection.tabs.map((tab, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveTab(index)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${
-                        activeTab === index
-                          ? 'bg-muted/50 text-foreground font-medium'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <div 
-                        className={`w-2 h-2 rounded-full ${
-                          activeTab === index ? 'bg-foreground' : 'bg-muted-foreground/30'
-                        }`}
-                      />
-                      {t(tab.labelKey)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Content Area */}
               <div className="grid lg:grid-cols-2 gap-12 items-start">
-                {/* Left - Description */}
-                <div>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                {/* Left - Title & Description */}
+                <div className="space-y-6">
+                  <div className="flex items-baseline gap-6">
+                    <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
+                      {t(currentSection.titleKey)}
+                    </h1>
+                    <span className="text-2xl md:text-3xl font-light text-muted-foreground">
+                      {t('solution.yourBrand')}
+                    </span>
+                  </div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25, duration: 0.5 }}
+                    className={descTextClass}
+                  >
+                    {t(currentSection.descKey)}
+                  </motion.p>
+                </div>
+
+                {/* Right - Tabs and Content */}
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-2 border-b border-border/30 pb-4">
+                    {currentSection.tabs.map((tab, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveTab(index)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all ${
+                          activeTab === index
+                            ? 'bg-muted/50 text-foreground font-medium'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <div 
+                          className={`w-2 h-2 rounded-full ${
+                            activeTab === index ? 'bg-foreground' : 'bg-muted-foreground/30'
+                          }`}
+                        />
+                        {t(tab.labelKey)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className={tabDescClass}>
                     {t(currentSection.tabs[activeTab].contentKey)}
                   </p>
-                </div>
-
-                {/* Right - Visual */}
-                <div className="aspect-[4/3] rounded-2xl relative overflow-hidden">
-                  <motion.img
-                    key={activeSection}
-                    src={solutionImages[activeSection]}
-                    alt={t(currentSection.titleKey)}
-                    className="w-full h-full object-cover"
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  />
                 </div>
               </div>
             </motion.div>

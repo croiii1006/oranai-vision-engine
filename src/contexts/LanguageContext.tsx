@@ -49,12 +49,56 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.marketInsight": "Market Insight",
     "solution.consumerInsight": "Consumer Insight",
     "solution.healthInsight": "Health Insight",
+    "solution.brandHealthMetrics": "Brand Health Metrics",
+    "solution.industryTrends": "Industry Trends & Policy Watch",
     "solution.marketInsightDesc":
       "Continuously analyzes global social media, e-commerce, and content platforms to identify real-time hotspots, emerging trends, and competitive movements — enabling faster, more informed strategic decisions.",
     "solution.consumerInsightDesc":
       "Builds deep consumer understanding through AI-powered profiling, content interaction analysis, and interest pattern recognition — helping brands pinpoint audience preferences and behavioral signals with precision.",
     "solution.healthInsightDesc":
-      "Monitors brand sentiment, public opinion, and emotional signals across platforms in real time — enabling early risk detection, reputation management, and long-term brand health optimization.",
+      "Monitors brand sentiment, public opinion, and emotional signals across platforms in real time ???enabling early risk detection, reputation management, and long-term brand health optimization.",
+    "solution.brandHealthMetricsDesc":
+      "Builds a unified KPI system for brand health across sentiment, reputation, compliance, and risk signals with real-time monitoring and alerts.",
+    "solution.industryTrendsDesc":
+      "Tracks macro trends, competitive shifts, and policy changes to surface opportunities and guardrails for market moves.",
+    "solution.brandPositioningGen": "Brand Positioning Generation",
+    "solution.contentEngine": "Content Generation Engine",
+    "solution.socialOps": "Social & Community Ops",
+    "solution.crmOps": "Private Domain & User Ops",
+    "solution.brandPositioningGenDesc":
+      "Generate positioning drafts, differentiation routes, and messaging angles with AI-assisted strategy templates.",
+    "solution.contentEngineDesc":
+      "Spin up on-brand copy and visual ideas at scale with reusable prompts and brand guardrails.",
+    "solution.socialOpsDesc":
+      "Plan, publish, and analyze social/community content with AI-suggested topics and engagement loops.",
+    "solution.crmOpsDesc":
+      "Activate private-domain users with segmented campaigns, nurture flows, and retention playbooks powered by AI insights.",
+    "solution.dataAssetMgmt": "Data Asset Management",
+    "solution.sentimentMgmt": "Public Opinion Management",
+    "solution.complianceMgmt": "Compliance Management",
+    "solution.salesServiceMgmt": "Sales & Service Management",
+    "solution.dataAssetMgmtDesc":
+      "Organize and govern brand data assets with tagging, access control, and reuse workflows.",
+    "solution.sentimentMgmtDesc":
+      "Monitor sentiment and risks in real time, trigger alerts, and orchestrate response workflows.",
+    "solution.complianceMgmtDesc":
+      "Enforce multi-market compliance checks across content, ads, and data handling with AI guardrails.",
+    "solution.salesServiceMgmtDesc":
+      "Augment sales and support with AI copilots for response, routing, and knowledge retrieval.",
+    "solution.geoSeoOpt": "GEO & SEO Optimization",
+    "solution.localizationGrowth": "Content Localization & Global Growth",
+    "solution.leadAdsOpt": "Lead Capture & Ad Optimization",
+    "solution.trendForecast": "Trend & Revenue Forecasting",
+    "solution.geoSeoOptDesc":
+      "Optimize search and GEO presence with localized keywords, schema, and content tuning per market.",
+    "solution.localizationGrowthDesc":
+      "Localize creatives and messaging with AI translators and cultural tuning for multi-region rollout.",
+    "solution.leadAdsOptDesc":
+      "Target, launch, and iterate ads with AI-assisted audience building, creative testing, and ROI tracking.",
+    "solution.trendForecastDesc":
+      "Forecast demand, trends, and revenue with predictive models to guide budget and creative focus.",
+    "solution.industryTrendsDesc":
+      "Tracks macro trends, competitive shifts, and policy changes to surface opportunities and guardrails for market moves.",
     "solution.brandPositioning": "Brand Positioning",
     "solution.brandStory": "Brand Story",
     "solution.contentGeneration": "Content Generation",
@@ -86,9 +130,9 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.predictiveGrowthDesc":
       "Leverages data-driven models for performance forecasting, scalable growth, and long-term optimization through continuous feedback loops.",
     "solution.knowDesc": "Still lacking precise insight into consumers' real needs and the competitive landscape?",
-    "solution.buildDesc": "AI-generated Content & Storytelling",
-    "solution.manageDesc": "Assets, Campaigns & Performance Control",
-    "solution.scaleDesc": "GEO / SEO / Ads / Predictive Growth",
+    "solution.buildDesc": "Are you struggling with insufficient high-quality content output, hard cross-platform adaptation, and inefficient private-domain operations?",
+    "solution.manageDesc": "Are you worried that brand data sits idle, public-opinion crises erupt suddenly, and compliance risks are out of control?",
+    "solution.scaleDesc": "Are you stuck with global marketing that’s hard to localize, inefficient ad delivery, and ROI you can’t predict accurately?",
 
     // Models Page
     "models.title": "MODELS",
@@ -583,9 +627,37 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.marketInsight": "市场洞察",
     "solution.consumerInsight": "消费者洞察",
     "solution.healthInsight": "健康洞察",
-    "solution.marketInsightDesc": "持续分析全球社交媒体、电商及内容平台，实时捕捉热点话题、市场趋势与竞品动态——助力品牌更快、更精准地制定战略决策。",
-    "solution.consumerInsightDesc": "通过 AI 驱动的用户画像构建、内容互动分析与兴趣模式识别，深度洞察消费者——帮助品牌精准锁定受众偏好与行为信号。",
+    "solution.brandHealthMetrics": "品牌健康度指标体系",
+    "solution.industryTrends": "行业趋势与政策监测",
+    "solution.marketInsightDesc": "监控竞品动态与文化变迁，利用 AI 分析战略布局并寻找差异化蓝海机会。",
+    "solution.consumerInsightDesc": "构建动态 3D 用户画像，深度挖掘评论区痛点并利用心理模型探索驱动力。",
     "solution.healthInsightDesc": "跨平台实时监测品牌舆情、公众情绪与口碑信号——实现风险预警、声誉管理与长期品牌健康优化。",
+    "solution.brandHealthMetricsDesc": "从认知度、感知度及行为关系三大维度，实时评估品牌声量与用户资产。",
+    "solution.industryTrendsDesc": "结合宏观数据与 NLP 技术，预判行业风向、亚文化变迁及合规风险预警。",
+    "solution.brandPositioningGen": "品牌定位生成",
+    "solution.contentEngine": "内容生成引擎",
+    "solution.socialOps": "社媒与社群运营",
+    "solution.crmOps": "私域与用户运营",
+    "solution.brandPositioningGenDesc": "AI 生成定位草案、差异化路线与信息表达，快速明确品牌方向。",
+    "solution.contentEngineDesc": "通过品牌规范与可复用提示词，批量生成符合调性的文案与创意素材。",
+    "solution.socialOpsDesc": "AI 提议话题与节奏，支持社媒/社群内容排期、发布与互动分析。",
+    "solution.crmOpsDesc": "基于分层洞察的私域运营与用户培育，AI 赋能触达、转化与留存策略。",
+    "solution.dataAssetMgmt": "数据资产管理",
+    "solution.sentimentMgmt": "舆情管理",
+    "solution.complianceMgmt": "合规管理",
+    "solution.salesServiceMgmt": "销售与客服管理",
+    "solution.dataAssetMgmtDesc": "为品牌数据建立标签、权限与复用流程，沉淀可用的数据资产体系。",
+    "solution.sentimentMgmtDesc": "实时监测舆情与风险信号，触发预警并联动响应流程。",
+    "solution.complianceMgmtDesc": "多市场内容/广告/数据合规检查，AI 提供前置校验与审阅护栏。",
+    "solution.salesServiceMgmtDesc": "以 AI 助手增强销售与客服的响应、分流和知识检索能力。",
+    "solution.geoSeoOpt": "GEO & SEO 优化",
+    "solution.localizationGrowth": "内容本土化与全球化增长",
+    "solution.leadAdsOpt": "线索抓取与广告投放优化",
+    "solution.trendForecast": "趋势与收益预测",
+    "solution.geoSeoOptDesc": "按市场优化搜索与本地曝光，生成本地化关键词、结构化数据与内容调优。",
+    "solution.localizationGrowthDesc": "AI 翻译与文化适配，多地区同步落地创意与信息表达。",
+    "solution.leadAdsOptDesc": "AI 辅助人群圈选、创意测试与投放迭代，提升广告转化与 ROI。",
+    "solution.trendForecastDesc": "用预测模型评估需求、趋势与收益，引导预算与创意侧重点。",
     "solution.brandPositioning": "品牌定位",
     "solution.brandStory": "品牌故事",
     "solution.contentGeneration": "内容生成",
