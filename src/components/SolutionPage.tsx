@@ -26,6 +26,8 @@ const SolutionPage: React.FC = () => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('know');
   const [activeTab, setActiveTab] = useState(0);
+  const descTextClass =
+    'text-base md:text-lg text-muted-foreground leading-relaxed max-w-[32rem] text-left';
 
   const sections: SolutionSection[] = [
     {
@@ -119,8 +121,8 @@ const SolutionPage: React.FC = () => {
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Title Section */}
-              <div className="mb-12">
-                <div className="flex items-baseline gap-6 mb-8">
+              <div className="mb-12 pb-12">
+                <div className="flex items-baseline gap-6 mb-4">
                   <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
                     {t(currentSection.titleKey)}
                   </h1>
@@ -128,6 +130,9 @@ const SolutionPage: React.FC = () => {
                     {t('solution.yourBrand')}
                   </span>
                 </div>
+                <p className={descTextClass}>
+                  {t(currentSection.descKey)}
+                </p>
 
                 {/* Tab Navigation */}
                 <div className="flex items-center gap-2 border-b border-border/30 pb-4">
@@ -158,9 +163,6 @@ const SolutionPage: React.FC = () => {
                 <div>
                   <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                     {t(currentSection.tabs[activeTab].contentKey)}
-                  </p>
-                  <p className="text-muted-foreground/70 leading-relaxed">
-                    {t(currentSection.descKey)}
                   </p>
                 </div>
 

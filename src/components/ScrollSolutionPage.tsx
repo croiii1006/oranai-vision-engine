@@ -45,6 +45,8 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
   const [showDetail, setShowDetail] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [isAtEnd, setIsAtEnd] = useState(false);
+  const descTextClass =
+    "text-base md:text-xl lg:text-5xl text-muted-foreground/50 leading-snug max-w-[65rem] text-left font-medium";
 
   const sections: SectionData[] = [
     {
@@ -235,19 +237,19 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop }
             className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-32 pr-8 lg:pr-16"
           >
             <div className="w-full max-w-[1320px] mx-auto">
-              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 lg:gap-8">
+              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 lg:gap-8 pb-6">
                 <h1 className="text-[60px] md:text-[80px] lg:text-[120px] xl:text-[140px] font-bold tracking-tighter leading-none shrink-0">
                   {t(currentSectionData.titleKey)}
                 </h1>
-                <div className="flex flex-col gap-1 pb-2 lg:pb-4">
+                <div className="flex flex-col items-start gap-3 pb-2 lg:pb-4">
                   <span className="text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
                     {t("solution.yourBrand")}
                   </span>
-                  <p className="text-sm md:text-base lg:text-lg text-muted-foreground max-w-xs lg:max-w-sm leading-snug">
-                    {t(currentSectionData.descKey)}
-                  </p>
                 </div>
               </div>
+              <p className={descTextClass}>
+                {t(currentSectionData.descKey)}
+              </p>
             </div>
           </motion.div>
         ) : (

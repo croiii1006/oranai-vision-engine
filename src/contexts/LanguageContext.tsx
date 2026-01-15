@@ -85,7 +85,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Powers intelligent advertising with AI — audience targeting, creative optimization, and ROI-driven delivery across global platforms.",
     "solution.predictiveGrowthDesc":
       "Leverages data-driven models for performance forecasting, scalable growth, and long-term optimization through continuous feedback loops.",
-    "solution.knowDesc": "Market, Consumer & Competitive Intelligence",
+    "solution.knowDesc": "Still lacking precise insight into consumers' real needs and the competitive landscape?",
     "solution.buildDesc": "AI-generated Content & Storytelling",
     "solution.manageDesc": "Assets, Campaigns & Performance Control",
     "solution.scaleDesc": "GEO / SEO / Ads / Predictive Growth",
@@ -607,10 +607,10 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.seoDesc": "优化品牌在 AI 驱动的搜索与推荐系统中的可见度——适应从传统搜索向 AI 辅助决策的转型趋势。",
     "solution.adsDesc": "以 AI 驱动智能广告投放——精准人群定向、创意自动优化、ROI 导向的全球化投放策略。",
     "solution.predictiveGrowthDesc": "基于数据驱动的模型实现业绩预测、可规模化增长与长期优化，通过持续反馈闭环驱动业务成长。",
-    "solution.knowDesc": "市场、消费者与竞争情报",
-    "solution.buildDesc": "AI 生成内容与品牌故事",
-    "solution.manageDesc": "资产、活动与效果管控",
-    "solution.scaleDesc": "GEO / SEO / 广告 / 预测增长",
+    "solution.knowDesc": "您是否仍对消费者真实需求、市场竞争格局缺乏精准洞察？",
+    "solution.buildDesc": "您是否面临优质内容产能不足、跨平台适配难、私域运营低效的困境？",
+    "solution.manageDesc": "您是否担忧品牌数据资产沉睡、舆情危机突发、合规风险失控？",
+    "solution.scaleDesc": "您是否困扰于全球营销本土化难、广告投放低效、ROI 无法精准预测？",
 
     // Models Page
     "models.title": "模型",
