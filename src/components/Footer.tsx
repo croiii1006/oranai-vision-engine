@@ -63,14 +63,14 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
   return (
     <>
       <footer className="border-t border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-8 md:space-y-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-5 md:space-y-0">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                <span className="text-background text-sm font-bold">O</span>
+              <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
+                <span className="text-background text-xs font-bold">O</span>
               </div>
-              <span className="text-lg font-light tracking-tight">OranAI</span>
+              <span className="text-base font-light tracking-tight">OranAI</span>
             </div>
 
             {/* Links */}
@@ -88,10 +88,10 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
           </div>
 
           {/* Contact Us Section */}
-          <div className="mt-12 pt-8 border-t border-border/30">
-            <div className="flex flex-col items-end gap-6">
+          <div className="mt-8 pt-6 border-t border-border/30">
+            <div className="flex flex-col items-end gap-4">
               {/* Social Icons */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {socialLinks.map((social, index) => (
                   <a
                     key={index}
@@ -122,7 +122,7 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
           </div>
 
           {/* Copyright */}
-          <div className="mt-8 pt-8 border-t border-border/30 text-center">
+          <div className="mt-6 pt-5 border-t border-border/30 text-center">
             <p className="text-xs text-muted-foreground">
               {t('footer.copyright')}
             </p>
