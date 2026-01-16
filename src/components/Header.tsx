@@ -1,7 +1,16 @@
-import React from 'react';
-import { Menu, X, Globe, Sun, Moon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, X, Globe, Sun, Moon, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface HeaderProps {
   activeTab: string;
@@ -13,6 +22,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const tabs = [
     { id: 'solution', label: t('nav.solution') },
@@ -23,6 +35,13 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'zh' : 'en');
+  };
+
+  const handleSignIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement actual sign in logic
+    console.log('Sign in with:', email, password);
+    setSignInOpen(false);
   };
 
   return (
@@ -85,8 +104,8 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               </div>
             </nav>
             {/* Right - Actions */}
-            <div className="flex items-center space-x-4">
-            <button
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <button
                 onClick={toggleTheme}
                 className="flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
                 aria-label="Toggle theme"
@@ -103,6 +122,13 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               >
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">{language === 'en' ? 'EN' : '中文'}</span>
+              </button>
+              <button
+                onClick={() => setSignInOpen(true)}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors duration-200"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">{language === 'en' ? 'Sign In' : '登录'}</span>
               </button>
             </div>
           </div>
@@ -127,6 +153,50 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
           </div>
         </div>
       </div>
+
+      {/* Sign In Dialog */}
+      <Dialog open={signInOpen} onOpenChange={setSignInOpen}>
+        <DialogContent className="sm:max-w-[400px] bg-background border border-border">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center">
+              {language === 'en' ? 'Sign In to OranAI' : '登录 OranAI'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSignIn} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">{language === 'en' ? 'Email' : '邮箱'}</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder={language === 'en' ? 'Enter your email' : '请输入邮箱'}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">{language === 'en' ? 'Password' : '密码'}</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder={language === 'en' ? 'Enter your password' : '请输入密码'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-background border-border"
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              {language === 'en' ? 'Sign In' : '登录'}
+            </Button>
+            <div className="text-center text-sm text-muted-foreground">
+              {language === 'en' ? "Don't have an account?" : '还没有账号？'}{' '}
+              <button type="button" className="text-primary hover:underline">
+                {language === 'en' ? 'Sign Up' : '注册'}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 };
