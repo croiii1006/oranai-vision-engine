@@ -76,31 +76,21 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="text-left"
               >
-                {/* Main headline with inline emojis - serif font */}
-                <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-tight tracking-tight text-foreground">
-                  <span className="block mb-2">
-                    {language === 'en' ? 'Empower your brand through' : '通过定制化'}
-                  </span>
-                  <span className="block mb-2">
-                    {language === 'en' ? 'customized ' : ''}
-                    <HeroEmoji type="solutions" />
-                    <span className="italic"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
-                    {language === 'en' ? ', cutting-edge' : '，前沿'}
-                  </span>
-                  <span className="block mb-2">
-                    <HeroEmoji type="models" />
-                    <span className="italic"> {language === 'en' ? 'Models' : '模型'}</span>
-                    {language === 'en' ? ', versatile ' : '，多功能'}
-                    <HeroEmoji type="products" />
-                    <span className="italic"> {language === 'en' ? 'Products' : '产品'}</span>
-                    {language === 'en' ? ',' : '，'}
-                  </span>
-                  <span className="block">
-                    {language === 'en' ? 'and creative ' : '以及创意'}
-                    <HeroEmoji type="library" />
-                    <span className="italic"> {language === 'en' ? 'Library' : '素材库'}</span>
-                    {language === 'en' ? '.' : '。'}
-                  </span>
+                {/* Main headline with inline emojis - bold Inter font */}
+                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-snug tracking-tight text-foreground">
+                  {language === 'en' ? 'Empower your brand through customized ' : '通过定制化 '}
+                  <HeroEmoji type="solutions" />
+                  <span className="italic"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
+                  {language === 'en' ? ', cutting-edge ' : '，前沿 '}
+                  <HeroEmoji type="models" />
+                  <span className="italic"> {language === 'en' ? 'Models' : '模型'}</span>
+                  {language === 'en' ? ', versatile ' : '，多功能 '}
+                  <HeroEmoji type="products" />
+                  <span className="italic"> {language === 'en' ? 'Products' : '产品'}</span>
+                  {language === 'en' ? ', and creative ' : '，以及创意 '}
+                  <HeroEmoji type="library" />
+                  <span className="italic"> {language === 'en' ? 'Library' : '素材库'}</span>
+                  {language === 'en' ? '.' : '。'}
                 </h1>
 
                 {/* Subtitle */}
