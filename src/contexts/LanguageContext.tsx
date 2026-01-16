@@ -52,62 +52,60 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.brandHealthMetrics": "Brand Health Metrics",
     "solution.industryTrends": "Industry Trends & Policy Watch",
     "solution.marketInsightDesc":
-      "Continuously analyzes global social media, e-commerce, and content platforms to identify real-time hotspots, emerging trends, and competitive movements — enabling faster, more informed strategic decisions.",
+      "Monitors competitor moves and cultural shifts, using AI to analyze strategic positioning and uncover differentiated blue-ocean opportunities.",
     "solution.consumerInsightDesc":
-      "Builds deep consumer understanding through AI-powered profiling, content interaction analysis, and interest pattern recognition — helping brands pinpoint audience preferences and behavioral signals with precision.",
+      "Builds dynamic 3D user profiles, mines comment pain points, and applies psychological models to map motivations.",
     "solution.healthInsightDesc":
-      "Monitors brand sentiment, public opinion, and emotional signals across platforms in real time ???enabling early risk detection, reputation management, and long-term brand health optimization.",
+      "Tracks brand sentiment, public emotion, and word-of-mouth signals across platforms in real time to enable risk alerts, reputation management, and long-term brand health optimization.",
     "solution.brandHealthMetricsDesc":
-      "Builds a unified KPI system for brand health across sentiment, reputation, compliance, and risk signals with real-time monitoring and alerts.",
+      "Evaluates brand volume and user assets in real time across awareness, perception, and behavioral relationship dimensions.",
     "solution.industryTrendsDesc":
-      "Tracks macro trends, competitive shifts, and policy changes to surface opportunities and guardrails for market moves.",
+      "Combines macro data with NLP to forecast industry direction, subculture shifts, and compliance risks.",
     "solution.brandPositioningGen": "Brand Positioning Generation",
     "solution.contentEngine": "Content Generation Engine",
     "solution.socialOps": "Social & Community Ops",
     "solution.crmOps": "Private Domain & User Ops",
     "solution.brandPositioningGenDesc":
-      "Generate positioning drafts, differentiation routes, and messaging angles with AI-assisted strategy templates.",
+      "Surfaces brand DNA and emotional connection points, automatically deriving positioning plans with strong competitive advantages.",
     "solution.contentEngineDesc":
-      "Spin up on-brand copy and visual ideas at scale with reusable prompts and brand guardrails.",
+      "Produces multimodal marketing assets at scale, using standardized SOPs to rapidly localize content across languages.",
     "solution.socialOpsDesc":
-      "Plan, publish, and analyze social/community content with AI-suggested topics and engagement loops.",
+      "Auto-adapts to major platform algorithms to respond to trends within minutes and intelligently match KOLs/KOCs.",
     "solution.crmOpsDesc":
-      "Activate private-domain users with segmented campaigns, nurture flows, and retention playbooks powered by AI insights.",
+      "Uses long-memory AI agents to deliver predictive marketing while governing and activating private-domain assets.",
     "solution.dataAssetMgmt": "Data Asset Management",
     "solution.sentimentMgmt": "Public Opinion Management",
     "solution.complianceMgmt": "Compliance Management",
     "solution.salesServiceMgmt": "Sales & Service Management",
     "solution.dataAssetMgmtDesc":
-      "Organize and govern brand data assets with tagging, access control, and reuse workflows.",
+      "Automates cleaning, labeling, and access control across multi-source data to keep brand assets secure and compounding.",
     "solution.sentimentMgmtDesc":
-      "Monitor sentiment and risks in real time, trigger alerts, and orchestrate response workflows.",
+      "Sets up always-on risk alerts and response playbooks, guiding sentiment positively to protect brand reputation.",
     "solution.complianceMgmtDesc":
-      "Enforce multi-market compliance checks across content, ads, and data handling with AI guardrails.",
+      "Identifies legal and ethical risks upfront and uses automated checks to keep every business step compliant.",
     "solution.salesServiceMgmtDesc":
-      "Augment sales and support with AI copilots for response, routing, and knowledge retrieval.",
+      "Powers sales conversion with a dynamic knowledge base and surfaces real customer pain points from service conversations.",
     "solution.geoSeoOpt": "GEO & SEO Optimization",
     "solution.localizationGrowth": "Content Localization & Global Growth",
     "solution.leadAdsOpt": "Lead Capture & Ad Optimization",
     "solution.trendForecast": "Trend & Revenue Forecasting",
     "solution.geoSeoOptDesc":
-      "Optimize search and GEO presence with localized keywords, schema, and content tuning per market.",
+      "Improves indexing and authority in AI search engines through structured content and format optimization.",
     "solution.localizationGrowthDesc":
-      "Localize creatives and messaging with AI translators and cultural tuning for multi-region rollout.",
+      "Optimizes multilingual messaging with native context, dynamically adjusts global pricing, and avoids cultural sensitivity pitfalls.",
     "solution.leadAdsOptDesc":
-      "Target, launch, and iterate ads with AI-assisted audience building, creative testing, and ROI tracking.",
+      "Automatically captures prospect profiles and iterates on ROI to configure ad delivery precisely.",
     "solution.trendForecastDesc":
-      "Forecast demand, trends, and revenue with predictive models to guide budget and creative focus.",
-    "solution.industryTrendsDesc":
-      "Tracks macro trends, competitive shifts, and policy changes to surface opportunities and guardrails for market moves.",
+      "Simulates volume lift and conversion after marketing spend, using data-driven projections to optimize ROI.",
     "solution.brandPositioning": "Brand Positioning",
     "solution.brandStory": "Brand Story",
     "solution.contentGeneration": "Content Generation",
     "solution.brandPositioningDesc":
-      "Leverages AI-driven insights and strategy models to help brands clarify positioning, define market differentiation, and maintain consistent messaging across global markets.",
+      "Uses AI-driven insights and strategy models to clarify positioning, build differentiation, and keep brand messaging consistent worldwide.",
     "solution.brandStoryDesc":
-      "Shapes compelling brand narratives through storytelling, emotional connection, and tone of voice — transforming brand values into memorable, resonant expressions.",
+      "Crafts narratives, emotional connections, and brand tone to turn brand value into compelling, resonant expressions.",
     "solution.contentGenerationDesc":
-      "Enables scalable generation of copy, images, and videos while maintaining visual consistency and adapting content seamlessly for multiple platforms and regions.",
+      "Scales copy, image, and video production with AI while keeping visual consistency and adapting content for multiple platforms and regions.",
     "solution.socialMedia": "Social Media",
     "solution.community": "Community",
     "solution.dam": "Digital Assets",
@@ -115,24 +113,28 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.compliance": "Compliance",
     "solution.customerService": "Customer Service",
     "solution.socialMediaDesc":
-      "Unifies management of multiple social media platforms — scheduling, publishing, interaction management, and performance tracking in one streamlined workflow.",
+      "Manages multiple social platforms in one flow: scheduling, publishing, engagement, and performance tracking for efficient operations.",
     "solution.damDesc":
-      "Structures, stores, tags, and reuses brand content as long-term digital assets — improving efficiency and enabling seamless collaboration across teams.",
+      "Stores brand content in a structured, smart-tagged, highly reusable way to build a durable digital asset library and boost team collaboration.",
     "solution.sentimentDesc":
       "Analyzes public opinion and emotional trends in real time, supporting proactive response, risk control, and strategic reputation management.",
     "solution.seo": "GEO / SEO",
     "solution.ads": "Ads",
     "solution.predictiveGrowth": "Predictive Growth",
     "solution.seoDesc":
-      "Optimizes brand visibility in AI-driven search and recommendation systems — adapting strategies to the shift from traditional search to AI-assisted decision-making.",
+      "Optimizes brand visibility in AI-driven search and recommendation systems, adapting to the shift from traditional search to AI-assisted decision-making.",
     "solution.adsDesc":
-      "Powers intelligent advertising with AI — audience targeting, creative optimization, and ROI-driven delivery across global platforms.",
+      "Runs AI-driven advertising with precise audience targeting, automated creative optimization, and ROI-led global delivery.",
     "solution.predictiveGrowthDesc":
-      "Leverages data-driven models for performance forecasting, scalable growth, and long-term optimization through continuous feedback loops.",
-    "solution.knowDesc": "Still lacking precise insight into consumers' real needs and the competitive landscape?",
-    "solution.buildDesc": "Are you struggling with insufficient high-quality content output, hard cross-platform adaptation, and inefficient private-domain operations?",
-    "solution.manageDesc": "Are you worried that brand data sits idle, public-opinion crises erupt suddenly, and compliance risks are out of control?",
-    "solution.scaleDesc": "Are you stuck with global marketing that’s hard to localize, inefficient ad delivery, and ROI you can’t predict accurately?",
+      "Uses data-driven models for performance forecasting, scalable growth, and long-term optimization through continuous feedback loops.",
+    "solution.knowDesc":
+      "Do you still lack precise insight into real consumer needs and the competitive landscape?",
+    "solution.buildDesc":
+      "Are you facing insufficient high-quality content output, difficult cross-platform adaptation, and inefficient private-domain operations?",
+    "solution.manageDesc":
+      "Are you worried that brand data sits idle, crises erupt suddenly, and compliance risks slip out of control?",
+    "solution.scaleDesc":
+      "Are you stuck with global marketing that is hard to localize, inefficient ad delivery, and ROI you cannot predict accurately?",
 
     // Models Page
     "models.title": "MODELS",
