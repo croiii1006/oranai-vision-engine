@@ -44,7 +44,11 @@ type TabType = 'video' | 'voice' | 'model';
 
 type SelectedItemType = LibraryItem | VoiceItem | ModelItem;
 
-const LibraryPage: React.FC = () => {
+interface LibraryPageProps {
+  onExpandedChange?: (expanded: boolean) => void;
+}
+
+const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const { t } = useLanguage();
 
   const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
