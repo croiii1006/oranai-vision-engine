@@ -13,6 +13,8 @@ import {
   User,
   Volume2,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceItem, ModelItem } from '../data/libraryData';
@@ -28,6 +30,7 @@ const Y_OFFSETS = [0, 8, 16, 24, 30];
 const OPACITY_DROP_BY_DISTANCE = [0, 0.06, 0.12, 0.18, 0.2];
 const BLUR_PER_STEP = 0.6;
 const MAX_DISTANCE_INDEX = FAN_OFFSETS.length - 1;
+const CARD_STEP = CARD_WIDTH + CARD_GAP;
 // Decouple collapsed/expanded title top positions
 const TITLE_TOP_COLLAPSED = 70;
 const TITLE_TOP_EXPANDED = 20;
@@ -123,6 +126,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   }, []);
 
   // Compute dynamic offsets so the title moves from centered to ~24px from edges responsively
+  const computeMaxOffset = useCallback((totalCards: number) => {
+    if (typeof window === 'undefined' || totalCards === 0) return 0;
+    const totalWidth = totalCards * CARD_WIDTH + Math.max(0, totalCards - 1) * CARD_GAP;
+    return Math.max(0, (totalWidth - window.innerWidth) / 2 + 120);
+  }, []);
+
   useLayoutEffect(() => {
     const HERO_TOP = 140;
     const TARGET_TOP = 24;
@@ -141,15 +150,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         setMaxVideoOffset(0);
         return;
       }
-      const totalWidth = totalVideoCards * CARD_WIDTH + (totalVideoCards - 1) * CARD_GAP;
-      const maxOffset = Math.max(0, (totalWidth - viewportWidth) / 2 + 120);
-      setMaxVideoOffset(maxOffset);
+      setMaxVideoOffset(computeMaxOffset(totalVideoCards));
     };
 
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => window.removeEventListener('resize', updateOffsets);
-  }, [filteredVideoItems.length]);
+  }, [filteredVideoItems.length, computeMaxOffset]);
 
   // Handle wheel events for animation control
   const handleWheel = useCallback(
@@ -161,7 +168,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       if (isExpanded && activeTab === 'video' && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
         setCardOffsets((prev) => ({
           ...prev,
-          video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video + e.deltaX)),
+          // Invert trackpad delta so left swipe shows previous (matches arrow direction)
+          video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video - e.deltaX)),
         }));
         return;
       }
@@ -223,6 +231,43 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       [tab]: clampIndex(index, total),
     }));
   }, []);
+
+  const handleArrowNavigation = useCallback(
+    (tab: TabType, direction: 'prev' | 'next') => {
+      const items =
+        tab === 'video' ? filteredVideoItems : tab === 'voice' ? filteredVoiceItems : filteredModelItems;
+      if (!items.length) return;
+      const total = items.length;
+      const current = activeCardIndex[tab] ?? Math.floor(total / 2);
+      const nextIndex = clampIndex(current + (direction === 'prev' ? -1 : 1), total);
+      setActiveForTab(tab, nextIndex, total);
+
+      setCardOffsets((prev) => {
+        const currentOffset = prev[tab] ?? 0;
+        const maxOffset = tab === 'video' ? maxVideoOffset : computeMaxOffset(items.length);
+        // Move viewport opposite to the desired card direction to keep arrows intuitive
+        const delta = direction === 'prev' ? CARD_STEP : -CARD_STEP;
+        const nextOffset = Math.max(-maxOffset, Math.min(maxOffset, currentOffset + delta));
+        return { ...prev, [tab]: nextOffset };
+      });
+    },
+    [activeCardIndex, computeMaxOffset, filteredModelItems, filteredVideoItems, filteredVoiceItems, maxVideoOffset, setActiveForTab]
+  );
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (!isExpanded || selectedItem) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleArrowNavigation(activeTab, 'prev');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleArrowNavigation(activeTab, 'next');
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [activeTab, handleArrowNavigation, isExpanded, selectedItem]);
 
   // Subtitle content based on tab
   const currentTab = tabs.find((tab) => tab.id === activeTab);
@@ -488,6 +533,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Video Cards */}
         {activeTab === 'video' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {isExpanded && filteredVideoItems.length > 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Previous video"
+                  onClick={() => handleArrowNavigation('video', 'prev')}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Next video"
+                  onClick={() => handleArrowNavigation('video', 'next')}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+            )}
             {filteredVideoItems.map((item, index) => {
               const totalCards = filteredVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
@@ -590,6 +653,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Voice Cards */}
         {activeTab === 'voice' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {isExpanded && filteredVoiceItems.length > 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Previous voice"
+                  onClick={() => handleArrowNavigation('voice', 'prev')}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Next voice"
+                  onClick={() => handleArrowNavigation('voice', 'next')}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+            )}
             {filteredVoiceItems.map((item, index) => {
               const totalCards = filteredVoiceItems.length;
               const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
@@ -598,8 +679,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
               const currentHeight = 340 + easedProgress * 80;
               const isActiveCard = index === activeIndex;
 
-              const baseTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-              const hoverTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+              const offsetX = isExpanded ? cardOffsets.voice : 0;
+              const baseX = layout.currentX + offsetX;
+              const baseY = layout.currentY;
+              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
               const zIndex = isActiveCard ? 999 : layout.zIndex;
 
               return (
@@ -673,6 +757,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Model Cards */}
         {activeTab === 'model' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
+            {isExpanded && filteredModelItems.length > 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Previous model"
+                  onClick={() => handleArrowNavigation('model', 'prev')}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
+                  aria-label="Next model"
+                  onClick={() => handleArrowNavigation('model', 'next')}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+            )}
             {filteredModelItems.map((item, index) => {
               const totalCards = filteredModelItems.length;
               const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
@@ -681,8 +783,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
               const currentHeight = 340 + easedProgress * 80;
               const isActiveCard = index === activeIndex;
 
-              const baseTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-              const hoverTransform = `perspective(1200px) translateX(${layout.currentX}px) translateY(${layout.currentY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+              const offsetX = isExpanded ? cardOffsets.model : 0;
+              const baseX = layout.currentX + offsetX;
+              const baseY = layout.currentY;
+              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
               const zIndex = isActiveCard ? 999 : layout.zIndex;
 
               return (
