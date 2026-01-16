@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Globe, Sun, Moon, User } from 'lucide-react';
+import { Menu, X, Globe, Sun, Moon, User, LogOut } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
@@ -8,9 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface HeaderProps {
   activeTab: string;
@@ -19,10 +26,20 @@ interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
 }
 
+interface UserData {
+  username: string;
+  email: string;
+}
+
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const [signInOpen, setSignInOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
+  
+  // Form fields
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -37,11 +54,44 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     setLanguage(language === 'en' ? 'zh' : 'en');
   };
 
+  const resetForm = () => {
+    setUsername('');
+    setEmail('');
+    setPassword('');
+  };
+
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual sign in logic
-    console.log('Sign in with:', email, password);
-    setSignInOpen(false);
+    // Mock sign in - in real app this would call an API
+    setUser({ username: email.split('@')[0], email });
+    setDialogOpen(false);
+    resetForm();
+  };
+
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Mock sign up - in real app this would call an API
+    setUser({ username, email });
+    setDialogOpen(false);
+    resetForm();
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+  };
+
+  const openSignIn = () => {
+    setIsSignUp(false);
+    setDialogOpen(true);
+  };
+
+  const openSignUp = () => {
+    setIsSignUp(true);
+    setDialogOpen(true);
+  };
+
+  const getInitials = (name: string) => {
+    return name.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -123,13 +173,40 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">{language === 'en' ? 'EN' : '中文'}</span>
               </button>
-              <button
-                onClick={() => setSignInOpen(true)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors duration-200"
-              >
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">{language === 'en' ? 'Sign In' : '登录'}</span>
-              </button>
+              
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="focus:outline-none">
+                      <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                          {getInitials(user.username)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-2 py-1.5 text-sm font-medium text-foreground">
+                      {user.username}
+                    </div>
+                    <div className="px-2 pb-2 text-xs text-muted-foreground">
+                      {user.email}
+                    </div>
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {language === 'en' ? 'Sign Out' : '退出登录'}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <button
+                  onClick={openSignIn}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors duration-200"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">{language === 'en' ? 'Sign In' : '登录'}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -154,47 +231,103 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         </div>
       </div>
 
-      {/* Sign In Dialog */}
-      <Dialog open={signInOpen} onOpenChange={setSignInOpen}>
+      {/* Sign In / Sign Up Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[400px] bg-background border border-border">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-center">
-              {language === 'en' ? 'Sign In to OranAI' : '登录 OranAI'}
+              {isSignUp
+                ? (language === 'en' ? 'Create Account' : '创建账号')
+                : (language === 'en' ? 'Sign In to OranAI' : '登录 OranAI')
+              }
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSignIn} className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">{language === 'en' ? 'Email' : '邮箱'}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={language === 'en' ? 'Enter your email' : '请输入邮箱'}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background border-border"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{language === 'en' ? 'Password' : '密码'}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder={language === 'en' ? 'Enter your password' : '请输入密码'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-background border-border"
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              {language === 'en' ? 'Sign In' : '登录'}
-            </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              {language === 'en' ? "Don't have an account?" : '还没有账号？'}{' '}
-              <button type="button" className="text-primary hover:underline">
+          
+          {isSignUp ? (
+            <form onSubmit={handleSignUp} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">{language === 'en' ? 'Username' : '用户名'}</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder={language === 'en' ? 'Enter your username' : '请输入用户名'}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="bg-background border-border"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">{language === 'en' ? 'Email' : '邮箱'}</Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder={language === 'en' ? 'Enter your email' : '请输入邮箱'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background border-border"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">{language === 'en' ? 'Password' : '密码'}</Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  placeholder={language === 'en' ? 'Create a password' : '请设置密码'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-background border-border"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
                 {language === 'en' ? 'Sign Up' : '注册'}
-              </button>
-            </div>
-          </form>
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">
+                {language === 'en' ? 'Already have an account?' : '已有账号？'}{' '}
+                <button type="button" onClick={() => setIsSignUp(false)} className="text-primary hover:underline">
+                  {language === 'en' ? 'Sign In' : '登录'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSignIn} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="signin-email">{language === 'en' ? 'Email' : '邮箱'}</Label>
+                <Input
+                  id="signin-email"
+                  type="email"
+                  placeholder={language === 'en' ? 'Enter your email' : '请输入邮箱'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background border-border"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signin-password">{language === 'en' ? 'Password' : '密码'}</Label>
+                <Input
+                  id="signin-password"
+                  type="password"
+                  placeholder={language === 'en' ? 'Enter your password' : '请输入密码'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-background border-border"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                {language === 'en' ? 'Sign In' : '登录'}
+              </Button>
+              <div className="text-center text-sm text-muted-foreground">
+                {language === 'en' ? "Don't have an account?" : '还没有账号？'}{' '}
+                <button type="button" onClick={openSignUp} className="text-primary hover:underline">
+                  {language === 'en' ? 'Sign Up' : '注册'}
+                </button>
+              </div>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </header>
