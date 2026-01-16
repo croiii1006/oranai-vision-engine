@@ -201,10 +201,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               ) : (
                 <button
                   onClick={openSignIn}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors duration-200"
+                  className="text-sm font-medium text-foreground/70 hover:text-foreground hover:underline underline-offset-4 transition-all duration-200"
                 >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{language === 'en' ? 'Sign In' : '登录'}</span>
+                  {language === 'en' ? 'Sign In' : '登录'}
                 </button>
               )}
             </div>
