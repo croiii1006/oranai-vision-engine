@@ -87,7 +87,7 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
           </div>
 
           {/* Contact Us Section */}
-          <div className="mt-8 pt-6 border-t border-border/30">
+          <div className="mt-8 pt-6">
             <div className="flex flex-col items-end gap-4">
               {/* Social Icons */}
               <div className="flex items-center gap-3">
