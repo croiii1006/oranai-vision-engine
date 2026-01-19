@@ -5,23 +5,28 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Menu, Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
 import HeroEmoji from './HeroEmoji';
-
 interface HomePageProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-
-const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
-  const { language, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+const HomePage: React.FC<HomePageProps> = ({
+  activeTab,
+  setActiveTab
+}) => {
+  const {
+    language,
+    setLanguage
+  } = useLanguage();
+  const {
+    theme,
+    toggleTheme
+  } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
-
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'zh' : 'en');
   };
-
   const handleScrollToHero = () => {
     if (scrollLock.current) return;
     scrollLock.current = true;
@@ -31,11 +36,9 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
       scrollLock.current = false;
     }, 800);
   };
-
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (scrollLock.current) return;
-      
       if (currentView === 'hero' && e.deltaY > 0) {
         e.preventDefault();
         scrollLock.current = true;
@@ -46,10 +49,11 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
         }, 800);
       }
     };
-
     const container = containerRef.current;
     if (container && currentView === 'hero') {
-      container.addEventListener('wheel', handleWheel, { passive: false });
+      container.addEventListener('wheel', handleWheel, {
+        passive: false
+      });
       return () => container.removeEventListener('wheel', handleWheel);
     }
   }, [currentView, setActiveTab]);
@@ -62,19 +66,19 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
       setCurrentView('hero');
     }
   }, [activeTab, currentView]);
-
-  return (
-    <div ref={containerRef} className="min-h-screen">
+  return <div ref={containerRef} className="min-h-screen">
       <AnimatePresence mode="wait">
-        {currentView === 'hero' ? (
-          <motion.section
-            key="hero"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -100 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative min-h-screen overflow-hidden bg-background"
-          >
+        {currentView === 'hero' ? <motion.section key="hero" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0,
+        y: -100
+      }} transition={{
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1]
+      }} className="relative min-h-screen overflow-hidden bg-background">
             {/* Hero Header - only visible on hero */}
             <div className="absolute top-0 left-0 right-0 z-20 px-6 sm:px-10 lg:px-16 py-6">
               <div className="flex items-center justify-between">
@@ -86,17 +90,10 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
                 
                 {/* Right - Controls */}
                 <div className="flex items-center space-x-4">
-                  <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
-                    aria-label="Toggle theme"
-                  >
+                  <button onClick={toggleTheme} className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200" aria-label="Toggle theme">
                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </button>
-                  <button
-                    onClick={toggleLanguage}
-                    className="flex items-center space-x-1 p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
-                  >
+                  <button onClick={toggleLanguage} className="flex items-center space-x-1 p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200">
                     <Globe className="w-5 h-5" />
                   </button>
                   <button className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200">
@@ -108,24 +105,33 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
 
             {/* Large Logo Text */}
             <div className="absolute top-20 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="font-sans text-[15vw] sm:text-[14vw] md:text-[13vw] lg:text-[12vw] font-bold leading-none tracking-tighter text-foreground select-none"
-              >
+              <motion.h1 initial={{
+            opacity: 0,
+            y: 30
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1]
+          }} className="font-sans text-[15vw] sm:text-[14vw] md:text-[13vw] lg:text-[12vw] font-bold leading-none tracking-tighter text-foreground select-none text-center px-0">
                 oranai
               </motion.h1>
             </div>
 
             {/* Right Side Content */}
             <div className="absolute top-1/2 right-0 -translate-y-1/2 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-2xl">
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="text-left"
-              >
+              <motion.div initial={{
+            opacity: 0,
+            y: 40
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.8,
+            delay: 0.2,
+            ease: [0.16, 1, 0.3, 1]
+          }} className="text-left">
                 {/* Main headline with inline emojis */}
                 <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-relaxed tracking-tight text-foreground">
                   {language === 'en' ? 'Empower your brand through customized ' : '通过定制化 '}
@@ -147,40 +153,39 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
 
             {/* Bottom Subtitle */}
             <div className="absolute bottom-16 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="text-base sm:text-lg text-foreground text-center"
-              >
-                {language === 'en' 
-                  ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
-                  : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'
-                }
+              <motion.p initial={{
+            opacity: 0,
+            y: 20
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.8,
+            delay: 0.4,
+            ease: [0.16, 1, 0.3, 1]
+          }} className="text-base sm:text-lg text-foreground text-center">
+                {language === 'en' ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.' : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'}
               </motion.p>
             </div>
 
             {/* Scroll indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce">
-              <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-                <div className="w-1 h-2 rounded-full bg-muted-foreground/50" />
-              </div>
-            </div>
-          </motion.section>
-        ) : (
-          <motion.div
-            key="solution"
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
+            
+          </motion.section> : <motion.div key="solution" initial={{
+        opacity: 0,
+        y: 100
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} exit={{
+        opacity: 0,
+        y: 100
+      }} transition={{
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1]
+      }}>
             <ScrollSolutionPage onScrollToTop={handleScrollToHero} />
-          </motion.div>
-        )}
+          </motion.div>}
       </AnimatePresence>
-    </div>
-  );
+    </div>;
 };
-
 export default HomePage;
