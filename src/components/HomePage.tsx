@@ -4,7 +4,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Menu, Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
-import HeroEmoji from './HeroEmoji';
 interface HomePageProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -132,21 +131,17 @@ const HomePage: React.FC<HomePageProps> = ({
             delay: 0.2,
             ease: [0.16, 1, 0.3, 1]
           }} className="text-left">
-                {/* Main headline with inline emojis */}
+                {/* Main headline */}
                 <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-relaxed tracking-tight text-foreground">
-                  {language === 'en' ? 'Empower your brand through customized ' : '通过定制化 '}
-                  <HeroEmoji type="solutions" />
-                  <span className="italic font-medium"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
-                  {language === 'en' ? ', cutting-edge ' : '，前沿 '}
-                  <HeroEmoji type="models" />
-                  <span className="italic font-medium"> {language === 'en' ? 'Models' : '模型'}</span>
-                  {language === 'en' ? ', versatile ' : '，多功能 '}
-                  <HeroEmoji type="products" />
-                  <span className="italic font-medium"> {language === 'en' ? 'Products' : '产品'}</span>
-                  {language === 'en' ? ', and creative ' : '，以及创意 '}
-                  <HeroEmoji type="library" />
-                  <span className="italic font-medium"> {language === 'en' ? 'Library' : '素材库'}</span>
-                  {language === 'en' ? '.' : '。'}
+                  {language === 'en' ? 'Empower your brand through customized ' : '通过定制化'}
+                  <span className="italic font-medium">{language === 'en' ? 'Solutions' : '解决方案'}</span>
+                  {language === 'en' ? ', cutting-edge ' : '、前沿'}
+                  <span className="italic font-medium">{language === 'en' ? 'Models' : '模型'}</span>
+                  {language === 'en' ? ', versatile ' : '、多功能'}
+                  <span className="italic font-medium">{language === 'en' ? 'Products' : '产品'}</span>
+                  {language === 'en' ? ', and creative ' : '以及创意'}
+                  <span className="italic font-medium">{language === 'en' ? 'Library' : '素材库'}</span>
+                  {language === 'en' ? '.' : '，为您的品牌赋能。'}
                 </h2>
               </motion.div>
             </div>
