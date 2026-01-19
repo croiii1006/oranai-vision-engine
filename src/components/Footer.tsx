@@ -121,7 +121,7 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
           </div>
 
           {/* Copyright */}
-          <div className="mt-6 pt-5 border-t border-border/30 text-center">
+          <div className="mt-6 pt-5 text-center">
             <p className="text-xs text-muted-foreground">
               {t('footer.copyright')}
             </p>
