@@ -114,7 +114,7 @@ const HomePage: React.FC<HomePageProps> = ({
             ease: [0.16, 1, 0.3, 1]
           }} className="font-sans text-[33vw] sm:text-[30.8vw] md:text-[28.6vw] lg:text-[26.4vw] leading-none text-foreground select-none px-0 text-center font-normal" style={{
             fontFamily: 'Urbanist, Zalando Sans Expanded, sans-serif',
-            fontWeight: 500,
+            fontWeight: 400,
             letterSpacing: '0.001em'
           }}>
                 oranai
