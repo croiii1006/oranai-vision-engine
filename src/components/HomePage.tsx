@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Menu, Globe, Sun, Moon } from 'lucide-react';
+import { Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
+import logoDarkSvg from '/logo_dark.svg';
+import logoSvg from '/logo.svg';
 interface HomePageProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -81,9 +83,9 @@ const HomePage: React.FC<HomePageProps> = ({
             {/* Hero Header - only visible on hero */}
             <div className="absolute top-0 left-0 right-0 z-20 px-6 sm:px-10 lg:px-16 py-6">
               <div className="flex items-center justify-between">
-                {/* Left - Logo */}
+                {/* Left -y */}
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-muted-foreground/30" />
+                  <img src={theme === 'dark' ? logoSvg : logoDarkSvg} alt="ORANAI logo" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-semibold tracking-wide text-foreground">ORANAI</span>
                 </div>
                 
@@ -95,15 +97,12 @@ const HomePage: React.FC<HomePageProps> = ({
                   <button onClick={toggleLanguage} className="flex items-center space-x-1 p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200">
                     <Globe className="w-5 h-5" />
                   </button>
-                  <button className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200">
-                    <Menu className="w-6 h-6" />
-                  </button>
                 </div>
               </div>
             </div>
 
             {/* Large Logo Text */}
-            <div className="absolute top-0 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
+            <div className="absolute top-0 left-1/2 -translate-x-[52%] -translate-y-6 sm:-translate-y-10 z-10 w-full px-6 sm:px-10 lg:px-16 flex justify-center">
               <motion.h1 initial={{
             opacity: 0,
             y: 30
@@ -113,7 +112,10 @@ const HomePage: React.FC<HomePageProps> = ({
           }} transition={{
             duration: 0.8,
             ease: [0.16, 1, 0.3, 1]
-          }} className="font-sans text-[30vw] sm:text-[28vw] md:text-[26vw] lg:text-[24vw] leading-none tracking-tighter text-foreground select-none px-0 text-justify font-normal">
+          }} className="font-sans text-[30vw] sm:text-[28vw] md:text-[26vw] lg:text-[24vw] leading-none tracking-tighter text-foreground select-none px-0 text-center font-normal" style={{
+            fontFamily: 'Zalando Sans Expanded, sans-serif',
+            fontWeight: 500
+          }}>
                 oranai
               </motion.h1>
             </div>
