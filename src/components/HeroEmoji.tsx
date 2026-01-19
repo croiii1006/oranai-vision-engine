@@ -12,7 +12,7 @@ const HeroEmoji: React.FC<HeroEmojiProps> = ({ type, className = '' }) => {
     case 'solutions':
       // Lightbulb/puzzle icon for Solutions
       return (
-        <span className={`${baseClass} w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24`}>
+        <span className={`${baseClass} w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10`}>
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
             {/* Lightbulb base */}
             <defs>
@@ -35,7 +35,7 @@ const HeroEmoji: React.FC<HeroEmojiProps> = ({ type, className = '' }) => {
     case 'models':
       // AI/brain network icon for Models
       return (
-        <span className={`${baseClass} w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24`}>
+        <span className={`${baseClass} w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10`}>
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
             <defs>
               <linearGradient id="modelsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -67,7 +67,7 @@ const HeroEmoji: React.FC<HeroEmojiProps> = ({ type, className = '' }) => {
     case 'products':
       // App/window stack icon for Products
       return (
-        <span className={`${baseClass} w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24`}>
+        <span className={`${baseClass} w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10`}>
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
             <defs>
               <linearGradient id="productsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -98,7 +98,7 @@ const HeroEmoji: React.FC<HeroEmojiProps> = ({ type, className = '' }) => {
     case 'library':
       // Books/creative palette icon for Library
       return (
-        <span className={`${baseClass} w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24`}>
+        <span className={`${baseClass} w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10`}>
           <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
             <defs>
               <linearGradient id="libraryGradient" x1="0%" y1="0%" x2="100%" y2="100%">

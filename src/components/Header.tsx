@@ -21,6 +21,7 @@ interface HeaderProps {
   setActiveTab: (tab: string) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  isVisible?: boolean;
 }
 
 interface UserData {
@@ -28,7 +29,7 @@ interface UserData {
   email: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
+const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, isVisible = true }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -118,7 +119,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+      }`}
+    >
       <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 border-b border-foreground/10 dark:border-border/20">
         <div className="w-full px-6 sm:px-10 lg:px-16">
           <div className="relative flex items-center justify-between h-16">
