@@ -124,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
       }`}
     >
-      <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 border-b border-foreground/10 dark:border-border/20">
+      <div className="backdrop-blur-md bg-background/20 dark:bg-background/10">
         <div className="w-full px-6 sm:px-10 lg:px-16">
           <div className="relative flex items-center justify-between h-16">
             {/* Left - Logo with glassmorphism */}
