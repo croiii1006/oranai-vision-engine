@@ -277,6 +277,24 @@
     }
   }
 
+  /* Logo marquee */
+  .logo-marquee {
+    display: inline-flex;
+    gap: 3rem;
+    min-width: max-content;
+    animation: logo-marquee 36s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes logo-marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
   /* Typography */
   .heading-xl {
     @apply text-3xl md:text-4xl lg:text-7xl font-light tracking-tight leading-none;
