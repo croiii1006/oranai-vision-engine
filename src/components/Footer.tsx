@@ -61,7 +61,7 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
 
   return (
     <>
-      <footer className="border-t border-border/50">
+      <footer className="">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-5 md:space-y-0">
             {/* Logo */}
