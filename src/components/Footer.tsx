@@ -67,12 +67,12 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
             {/* Logo */}
             <div className="cursor-pointer">
               <img 
-                src="/logo.svg" 
+                src="/logo_dark.svg" 
                 alt="OranAI" 
                 className="h-6 dark:hidden"
               />
               <img 
-                src="/logo_dark.svg" 
+                src="/logo.svg" 
                 alt="OranAI" 
                 className="h-6 hidden dark:block"
               />
