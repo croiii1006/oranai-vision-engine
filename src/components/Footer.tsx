@@ -65,11 +65,25 @@ const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-5 md:space-y-0">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-7 h-7 rounded-lg bg-foreground flex items-center justify-center">
-                <span className="text-background text-xs font-bold">O</span>
-              </div>
-              <span className="text-base font-light tracking-tight">OranAI</span>
+            <div 
+              className="glass px-4 py-1.5 rounded-full cursor-pointer hover:bg-accent/50 transition-all duration-300 border border-foreground/10 dark:border-transparent"
+            >
+              <span 
+                className="text-lg font-semibold tracking-tight bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%) 30%, hsl(0 0% 60%) 50%)',
+                }}
+              >
+                <span className="dark:hidden">OranAI</span>
+              </span>
+              <span 
+                className="hidden dark:inline text-lg font-semibold tracking-tight bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, hsl(0 0% 40%), hsl(0 0% 70%) 30%, hsl(0 0% 100%) 60%, hsl(0 0% 100%))',
+                }}
+              >
+                OranAI
+              </span>
             </div>
 
             {/* Links */}
