@@ -114,7 +114,7 @@ const HomePage: React.FC<HomePageProps> = ({
           }} transition={{
             duration: 0.8,
             ease: [0.16, 1, 0.3, 1]
-          }} className="font-sans text-[15vw] sm:text-[14vw] md:text-[13vw] lg:text-[12vw] font-bold leading-none tracking-tighter text-foreground select-none text-center px-0">
+          }} className="font-sans text-[15vw] sm:text-[14vw] md:text-[13vw] font-bold leading-none tracking-tighter text-foreground select-none text-center px-0 lg:text-9xl">
                 oranai
               </motion.h1>
             </div>
