@@ -12,6 +12,9 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [libraryFooterVisible, setLibraryFooterVisible] = useState(false);
 
+  // Check if header should be visible (not on hero view)
+  const isHeroView = activeTab === 'home' || activeTab === 'hero';
+
   const renderContent = () => {
     switch (activeTab) {
       case 'models':
@@ -37,6 +40,7 @@ const Index = () => {
         setActiveTab={setActiveTab}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        isVisible={!isHeroView}
       />
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

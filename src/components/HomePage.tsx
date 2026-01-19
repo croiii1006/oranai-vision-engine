@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Menu, Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
 import HeroEmoji from './HeroEmoji';
 
@@ -10,10 +12,15 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'zh' : 'en');
+  };
 
   const handleScrollToHero = () => {
     if (scrollLock.current) return;
@@ -66,50 +73,95 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background"
+            className="relative min-h-screen overflow-hidden bg-background"
           >
-            {/* Content */}
-            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Hero Header - only visible on hero */}
+            <div className="absolute top-0 left-0 right-0 z-20 px-6 sm:px-10 lg:px-16 py-6">
+              <div className="flex items-center justify-between">
+                {/* Left - Logo */}
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-muted-foreground/30" />
+                  <span className="text-sm font-semibold tracking-wide text-foreground">ORANAI</span>
+                </div>
+                
+                {/* Right - Controls */}
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={toggleLanguage}
+                    className="flex items-center space-x-1 p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
+                  >
+                    <Globe className="w-5 h-5" />
+                  </button>
+                  <button className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200">
+                    <Menu className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Large Logo Text */}
+            <div className="absolute top-20 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="font-sans text-[15vw] sm:text-[14vw] md:text-[13vw] lg:text-[12vw] font-bold leading-none tracking-tighter text-foreground select-none"
+              >
+                oranai
+              </motion.h1>
+            </div>
+
+            {/* Right Side Content */}
+            <div className="absolute top-1/2 right-0 -translate-y-1/2 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-2xl">
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="text-left"
               >
-                {/* Main headline with inline emojis - bold Inter font */}
-                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-snug tracking-tight text-foreground">
+                {/* Main headline with inline emojis */}
+                <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal leading-relaxed tracking-tight text-foreground">
                   {language === 'en' ? 'Empower your brand through customized ' : '通过定制化 '}
                   <HeroEmoji type="solutions" />
-                  <span className="italic"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
+                  <span className="italic font-medium"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
                   {language === 'en' ? ', cutting-edge ' : '，前沿 '}
                   <HeroEmoji type="models" />
-                  <span className="italic"> {language === 'en' ? 'Models' : '模型'}</span>
+                  <span className="italic font-medium"> {language === 'en' ? 'Models' : '模型'}</span>
                   {language === 'en' ? ', versatile ' : '，多功能 '}
                   <HeroEmoji type="products" />
-                  <span className="italic"> {language === 'en' ? 'Products' : '产品'}</span>
+                  <span className="italic font-medium"> {language === 'en' ? 'Products' : '产品'}</span>
                   {language === 'en' ? ', and creative ' : '，以及创意 '}
                   <HeroEmoji type="library" />
-                  <span className="italic"> {language === 'en' ? 'Library' : '素材库'}</span>
+                  <span className="italic font-medium"> {language === 'en' ? 'Library' : '素材库'}</span>
                   {language === 'en' ? '.' : '。'}
-                </h1>
-
-                {/* Subtitle */}
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-12 text-lg sm:text-xl text-muted-foreground max-w-2xl"
-                >
-                  {language === 'en' 
-                    ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
-                    : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'
-                  }
-                </motion.p>
+                </h2>
               </motion.div>
             </div>
 
+            {/* Bottom Subtitle */}
+            <div className="absolute bottom-16 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="text-base sm:text-lg text-foreground text-center"
+              >
+                {language === 'en' 
+                  ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
+                  : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'
+                }
+              </motion.p>
+            </div>
+
             {/* Scroll indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce">
               <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
                 <div className="w-1 h-2 rounded-full bg-muted-foreground/50" />
               </div>
