@@ -2,31 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// KNOW section images
-import knowMarketInsight from "@/assets/solutions/know-market-insight.png";
-import knowConsumerInsight from "@/assets/solutions/know-consumer-insight.png";
-import knowHealthInsight from "@/assets/solutions/know-health-insight.png";
-
-// BUILD section images
-import buildBrandPositioning from "@/assets/solutions/build-brand-positioning.png";
-import buildBrandStory from "@/assets/solutions/build-brand-story.png";
-import buildContentGeneration from "@/assets/solutions/build-content-generation.png";
-
-// MANAGE section images
-import manageSocialMedia from "@/assets/solutions/manage-social-media.png";
-import manageDam from "@/assets/solutions/manage-dam.png";
-import manageSentiment from "@/assets/solutions/manage-sentiment.png";
-
-// SCALE section images
-import scaleSeo from "@/assets/solutions/scale-seo.png";
-import scaleAds from "@/assets/solutions/scale-ads.png";
-import scaleGrowth from "@/assets/solutions/scale-growth.png";
-
 interface SectionData {
   id: string;
   titleKey: string;
   descKey: string;
-  images?: string[];
   tabs: {
     labelKey: string;
     contentKey: string;
@@ -45,8 +24,14 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   const [currentSection, setCurrentSection] = useState(0);
   const [currentTab, setCurrentTab] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
-  const [imageIndex, setImageIndex] = useState(0);
   const [isAtEnd, setIsAtEnd] = useState(false);
+  // Title-level descriptions (intro and detail) use separate class handles for easy tuning.
+  const introDescClass =
+    "text-base md:text-xl lg:text-5xl text-muted-foreground/50 leading-snug max-w-[65rem] text-left font-medium";
+  const detailDescClass =
+    "text-base md:text-lg lg:text-4xl text-muted-foreground leading-snug max-w-[30rem] text-left font-normal";
+  const tabDescClass =
+    "text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl min-h-[120px]";
 
   // 滚动控制
   const scrollLock = useRef(false);
@@ -63,57 +48,49 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
       id: "know",
       titleKey: "solution.know",
       descKey: "solution.knowDesc",
-      images: [knowMarketInsight, knowConsumerInsight, knowHealthInsight],
       tabs: [
         { labelKey: "solution.marketInsight", contentKey: "solution.marketInsightDesc" },
         { labelKey: "solution.consumerInsight", contentKey: "solution.consumerInsightDesc" },
-        { labelKey: "solution.healthInsight", contentKey: "solution.healthInsightDesc" },
+        { labelKey: "solution.brandHealthMetrics", contentKey: "solution.brandHealthMetricsDesc" },
+        { labelKey: "solution.industryTrends", contentKey: "solution.industryTrendsDesc" },
       ],
     },
     {
       id: "build",
       titleKey: "solution.build",
       descKey: "solution.buildDesc",
-      images: [buildBrandPositioning, buildBrandStory, buildContentGeneration],
       tabs: [
-        { labelKey: "solution.brandPositioning", contentKey: "solution.brandPositioningDesc" },
-        { labelKey: "solution.brandStory", contentKey: "solution.brandStoryDesc" },
-        { labelKey: "solution.contentGeneration", contentKey: "solution.contentGenerationDesc" },
+        { labelKey: "solution.brandPositioningGen", contentKey: "solution.brandPositioningGenDesc" },
+        { labelKey: "solution.contentEngine", contentKey: "solution.contentEngineDesc" },
+        { labelKey: "solution.socialOps", contentKey: "solution.socialOpsDesc" },
+        { labelKey: "solution.crmOps", contentKey: "solution.crmOpsDesc" },
       ],
     },
     {
       id: "manage",
       titleKey: "solution.manage",
       descKey: "solution.manageDesc",
-      images: [manageSocialMedia, manageDam, manageSentiment],
       tabs: [
-        { labelKey: "solution.socialMedia", contentKey: "solution.socialMediaDesc" },
-        { labelKey: "solution.dam", contentKey: "solution.damDesc" },
-        { labelKey: "solution.sentiment", contentKey: "solution.sentimentDesc" },
+        { labelKey: "solution.dataAssetMgmt", contentKey: "solution.dataAssetMgmtDesc" },
+        { labelKey: "solution.sentimentMgmt", contentKey: "solution.sentimentMgmtDesc" },
+        { labelKey: "solution.complianceMgmt", contentKey: "solution.complianceMgmtDesc" },
+        { labelKey: "solution.salesServiceMgmt", contentKey: "solution.salesServiceMgmtDesc" },
       ],
     },
     {
       id: "scale",
       titleKey: "solution.scale",
       descKey: "solution.scaleDesc",
-      images: [scaleSeo, scaleAds, scaleGrowth],
       tabs: [
-        { labelKey: "solution.seo", contentKey: "solution.seoDesc" },
-        { labelKey: "solution.ads", contentKey: "solution.adsDesc" },
-        { labelKey: "solution.predictiveGrowth", contentKey: "solution.predictiveGrowthDesc" },
+        { labelKey: "solution.geoSeoOpt", contentKey: "solution.geoSeoOptDesc" },
+        { labelKey: "solution.localizationGrowth", contentKey: "solution.localizationGrowthDesc" },
+        { labelKey: "solution.leadAdsOpt", contentKey: "solution.leadAdsOptDesc" },
+        { labelKey: "solution.trendForecast", contentKey: "solution.trendForecastDesc" },
       ],
     },
   ];
 
   const currentSectionData = sections[currentSection];
-
-  // Auto rotate images
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setImageIndex((prev) => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Handle wheel events for custom scrolling
   useEffect(() => {
@@ -284,19 +261,24 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
             className="min-h-[calc(100vh-64px)] flex items-center justify-center pl-24 lg:pl-32 pr-8 lg:pr-16"
           >
             <div className="w-full max-w-[1320px] mx-auto">
-              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 lg:gap-8">
+              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 lg:gap-8 pb-6">
                 <h1 className="text-[60px] md:text-[80px] lg:text-[120px] xl:text-[140px] font-bold tracking-tighter leading-none shrink-0">
                   {t(currentSectionData.titleKey)}
                 </h1>
-                <div className="flex flex-col gap-1 pb-2 lg:pb-4">
+                <div className="flex flex-col items-start gap-3 pb-2 lg:pb-4">
                   <span className="text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
                     {t("solution.yourBrand")}
                   </span>
-                  <p className="text-sm md:text-base lg:text-lg text-muted-foreground max-w-xs lg:max-w-sm leading-snug">
-                    {t(currentSectionData.descKey)}
-                  </p>
                 </div>
               </div>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className={introDescClass}
+              >
+                {t(currentSectionData.descKey)}
+              </motion.p>
             </div>
           </motion.div>
         ) : (
@@ -310,27 +292,33 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
             className="min-h-[calc(100vh-64px)] flex items-center pl-24 lg:pl-40 pr-8 lg:pr-16"
           >
             <div className="w-full max-w-[1320px] mx-auto pt-24">
-              {/* Section title - MANAGE + your brand on the same line */}
-              <div className="flex items-baseline gap-4 mb-12">
-                <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
-                  {t(currentSectionData.titleKey)}
-                </h2>
-                <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
-                  {t("solution.yourBrand")}
-                </span>
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+                <div className="space-y-6">
+                  <div className="flex items-baseline gap-4">
+                    <h2 className="text-[60px] md:text-[80px] lg:text-[100px] font-bold tracking-tighter leading-none">
+                      {t(currentSectionData.titleKey)}
+                    </h2>
+                    <span className="text-2xl md:text-3xl lg:text-4xl font-light text-muted-foreground whitespace-nowrap">
+                      {t("solution.yourBrand")}
+                    </span>
+                  </div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25, duration: 0.5 }}
+                    className={detailDescClass}
+                  >
+                    {t(currentSectionData.descKey)}
+                  </motion.p>
+                </div>
 
-              {/* Content grid - tabs on left, image on right */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-start">
-                {/* Left content */}
                 <div className="flex flex-col">
-                  {/* Tabs with separator lines */}
-                  <div className="space-y-0 mb-10">
+                  <div className="space-y-0 mb-10 border-b border-border/30 pb-2">
                     {currentSectionData.tabs.map((tab, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentTab(index)}
-                        className={`flex items-center justify-between w-full text-left py-3 border-b border-border/30 transition-all duration-300 ${
+                        className={`group flex items-center justify-between w-full text-left py-3 transition-all duration-300 ${
                           currentTab === index ? "" : "opacity-40 hover:opacity-60"
                         }`}
                       >
@@ -341,66 +329,38 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
                         >
                           {t(tab.labelKey)}
                         </span>
-                        <div
-                          className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                            currentTab === index ? "bg-foreground" : "bg-muted-foreground/20"
+                        <svg
+                          className={`w-6 h-6 transition-all duration-300 ${
+                            currentTab === index
+                              ? "text-foreground translate-x-1 opacity-100"
+                              : "text-muted-foreground/40 opacity-60 group-hover:text-muted-foreground/70 group-hover:opacity-90"
                           }`}
-                        />
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
                       </button>
                     ))}
                   </div>
 
-                  {/* Description */}
                   <AnimatePresence mode="wait">
                     <motion.p
                       key={currentTab}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className={tabDescClass}
                     >
                       {t(currentSectionData.tabs[currentTab].contentKey)}
                     </motion.p>
                   </AnimatePresence>
-                </div>
-
-                {/* Right - Image area with indicators, aligned with text content */}
-                <div className="relative flex items-start justify-center">
-                  <div className="relative w-full aspect-[4/3] bg-muted/10 rounded-xl overflow-hidden border border-border/10">
-                    {/* Section images - show current tab image if available */}
-                    {currentSectionData.images && currentSectionData.images.length > 0 ? (
-                      <AnimatePresence mode="wait">
-                        <motion.img
-                          key={currentTab}
-                          src={currentSectionData.images[currentTab] || currentSectionData.images[0]}
-                          alt=""
-                          initial={{ opacity: 0, scale: 1.05 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.4 }}
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      </AnimatePresence>
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-muted/5" />
-                    )}
-
-                    {/* Image indicators (right side inside card) - only show if images exist */}
-                    {currentSectionData.images && currentSectionData.images.length > 1 && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-                        {currentSectionData.images.map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentTab(i)}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                              currentTab === i ? "bg-foreground" : "bg-foreground/20 hover:bg-foreground/40"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>

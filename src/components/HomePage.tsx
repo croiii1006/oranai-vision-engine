@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import InteractiveParticles from './InteractiveParticles';
-import AnimatedHeadline from './AnimatedHeadline';
 import ScrollSolutionPage from './ScrollSolutionPage';
+import HeroEmoji from './HeroEmoji';
 
 interface HomePageProps {
   activeTab: string;
@@ -13,7 +12,7 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollToFooter, onHideFooter }) => {
-  const { t } = useLanguage();
+  const { language } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
@@ -95,49 +94,46 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="dark relative min-h-screen flex items-center justify-center overflow-hidden"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background"
           >
-            {/* Dark background base - forced dark */}
-            <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
-            
-            {/* Interactive particles with mouse glow */}
-            <InteractiveParticles />
-            
-            {/* Subtle noise texture */}
-            <div className="absolute inset-0 noise pointer-events-none" />
-            
-            {/* Radial gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/60 pointer-events-none" />
-
             {/* Content */}
-            <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-              <div className="animate-fade-in-up">
-                {/* Main headline with stronger gradient */}
-                <AnimatedHeadline
-                  text={t('hero.title')}
-                  as="h1"
-                  className="heading-xl mb-6"
-                  charClassName="bg-clip-text text-transparent"
-                  charStyle={{
-                    backgroundImage: 'linear-gradient(90deg, hsl(0 0% 40%), hsl(0 0% 70%) 30%, hsl(0 0% 100%) 60%, hsl(0 0% 100%))',
-                    fontFamily: "'Century Gothic', sans-serif",
-                  }}
-                />
-                
-                {/* Subtitle */}
-                <h2 className="heading-md text-muted-foreground mb-6" style={{ fontSize: '162%' }}>
-                  {t('hero.subtitle')}
-                </h2>
-                
-                {/* Description */}
-                <p className="body-lg max-w-2xl mx-auto mb-12">
-                  {t('hero.description')}
-                </p>
-              </div>
+            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-left"
+              >
+                {/* Main headline with inline emojis - bold Inter font */}
+                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-snug tracking-tight text-foreground">
+                  {language === 'en' ? 'Empower your brand through customized ' : '通过定制化 '}
+                  <HeroEmoji type="solutions" />
+                  <span className="italic"> {language === 'en' ? 'Solutions' : '解决方案'}</span>
+                  {language === 'en' ? ', cutting-edge ' : '，前沿 '}
+                  <HeroEmoji type="models" />
+                  <span className="italic"> {language === 'en' ? 'Models' : '模型'}</span>
+                  {language === 'en' ? ', versatile ' : '，多功能 '}
+                  <HeroEmoji type="products" />
+                  <span className="italic"> {language === 'en' ? 'Products' : '产品'}</span>
+                  {language === 'en' ? ', and creative ' : '，以及创意 '}
+                  <HeroEmoji type="library" />
+                  <span className="italic"> {language === 'en' ? 'Library' : '素材库'}</span>
+                  {language === 'en' ? '.' : '。'}
+                </h1>
 
-              {/* Decorative elements */}
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-3xl animate-pulse" />
-              <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-foreground/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+                {/* Subtitle */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-12 text-lg sm:text-xl text-muted-foreground max-w-2xl"
+                >
+                  {language === 'en' 
+                    ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
+                    : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'
+                  }
+                </motion.p>
+              </motion.div>
             </div>
 
             {/* Scroll indicator */}
