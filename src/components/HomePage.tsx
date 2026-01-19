@@ -104,7 +104,7 @@ const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Large Logo Text */}
-            <div className="absolute top-20 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
+            <div className="absolute top-0 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
               <motion.h1 initial={{
             opacity: 0,
             y: 30
