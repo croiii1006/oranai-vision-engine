@@ -96,6 +96,14 @@
     font-display: swap;
   }
 
+  @font-face {
+    font-family: 'Urbanist';
+    src: url('/fonts/urbanist-variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-light;
     scrollbar-width: none; /* Firefox */
@@ -126,6 +134,15 @@
 }
 
 @layer components {
+  /* Homepage hero gradient */
+  .hero-gradient {
+    background: linear-gradient(to bottom, #ffffff, #999999);
+  }
+
+  .dark .hero-gradient {
+    background: linear-gradient(to bottom, #000000, #454545);
+  }
+
   /* Glassmorphism */
   .glass {
     @apply backdrop-blur-xl border;
