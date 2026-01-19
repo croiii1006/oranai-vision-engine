@@ -4,9 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
+import FeatureCards from './FeatureCards';
 import logoDarkSvg from '/logo_dark.svg';
 import logoSvg from '/logo.svg';
-
 const marqueeLogos = [
   { src: '/partners/funny-fuzzy.png', alt: 'FUNNY FUZZY' },
   { src: '/partners/plug-and-play.png', alt: 'Plug and Play China' },
@@ -156,6 +156,9 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
                 </h2>
               </motion.div>
             </div>
+
+            {/* Feature Cards with drop animation */}
+            <FeatureCards setActiveTab={setActiveTab} />
 
             {/* Bottom Subtitle + Logo marquee */}
             <div className="absolute inset-x-0 bottom-0 z-10">
