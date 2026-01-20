@@ -88,12 +88,40 @@
     @apply border-border;
   }
 
+  @font-face {
+    font-family: 'Zalando Sans Expanded';
+    src: url('/fonts/zalando-sans-expanded.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Urbanist';
+    src: url('/fonts/urbanist-variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-light;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  body::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
   html {
     scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
   /* Theme transition */
@@ -106,6 +134,15 @@
 }
 
 @layer components {
+  /* Homepage hero gradient */
+  .hero-gradient {
+    background: linear-gradient(to bottom, #ffffff, #999999);
+  }
+
+  .dark .hero-gradient {
+    background: linear-gradient(to bottom, #000000, #454545);
+  }
+
   /* Glassmorphism */
   .glass {
     @apply backdrop-blur-xl border;
