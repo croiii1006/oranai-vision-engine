@@ -880,7 +880,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-              </div>
+                  </div>
             )}
             {filteredModelItems.map((item, index) => {
               const totalCards = filteredModelItems.length;
