@@ -11,6 +11,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [libraryFooterVisible, setLibraryFooterVisible] = useState(false);
+  // 首页 footer 只在滚动到 "Trend & Revenue Forecasting" 模块时显示，初始隐藏
   const [showFooterInSolution, setShowFooterInSolution] = useState(false);
 
   const handleScrollToFooter = () => {

@@ -24,7 +24,6 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   const [currentSection, setCurrentSection] = useState(0);
   const [currentTab, setCurrentTab] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
-  const [isAtEnd, setIsAtEnd] = useState(false);
   // Title-level descriptions (intro and detail) use separate class handles for easy tuning.
   const introDescClass =
     "text-base md:text-xl lg:text-5xl text-muted-foreground/50 leading-snug max-w-[65rem] text-left font-medium";
@@ -129,9 +128,23 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
       scrollLock.current = true;
 
       const currentSectionData = sections[currentSection];
+      
+      // 检查是否在最后一个 section 的最后一个 tab (Trend & Revenue Forecasting)
+      const isLastSection = currentSection === sections.length - 1;
+      const isLastTab = currentTab === currentSectionData.tabs.length - 1;
+      const isAtTrendForecastModule = isLastSection && showDetail && isLastTab;
 
       if (delta > 0) {
         // Scrolling down
+        // 如果已经在 "Trend & Revenue Forecasting" 模块，禁止向下滚动
+        if (isAtTrendForecastModule) {
+          e.preventDefault();
+          // 重置累积器，但不执行任何操作
+          scrollAccumulator.current = 0;
+          scrollLock.current = false;
+          return;
+        }
+        
         if (!showDetail) {
           e.preventDefault();
           setShowDetail(true);
@@ -143,9 +156,6 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
           setCurrentSection((prev) => prev + 1);
           setCurrentTab(0);
           setShowDetail(false);
-        } else {
-          // At the last section and last tab, allow normal scroll to footer
-          setIsAtEnd(true);
         }
       } else {
         // Scrolling up
@@ -180,14 +190,19 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
     }
   }, [showDetail, currentTab, currentSection, onScrollToTop, onScrollToFooter]);
 
-  // 检测是否为最后一步，并控制footer显示
+  // 检测是否到达 "Trend & Revenue Forecasting" 模块，并控制footer显示
+  // "Trend & Revenue Forecasting" 是最后一个 section (scale) 的最后一个 tab
   useEffect(() => {
-    const isLastStep = 
-      currentSection === sections.length - 1 &&
-      showDetail &&
-      currentTab === sections[sections.length - 1].tabs.length - 1;
+    const lastSectionIndex = sections.length - 1;
+    const lastTabIndex = sections[lastSectionIndex]?.tabs.length - 1;
     
-    if (isLastStep) {
+    // 检查当前是否在 "Trend & Revenue Forecasting" 模块
+    const isAtTrendForecastModule = 
+      currentSection === lastSectionIndex &&
+      showDetail &&
+      currentTab === lastTabIndex;
+    
+    if (isAtTrendForecastModule) {
       onScrollToFooter?.();
     } else {
       onHideFooter?.();
@@ -195,11 +210,11 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   }, [currentSection, currentTab, showDetail, onScrollToFooter, onHideFooter]);
 
   // Calculate progress
-  const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0);
+  const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0) - 1;
   const currentStep =
     sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) +
     (showDetail ? currentTab + 1 : 0);
-  const progress = isAtEnd ? 100 : (currentStep / totalSteps) * 100;
+  const progress = (currentStep / totalSteps) * 100;
 
   return (
     <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative">
@@ -213,8 +228,8 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
         />
       </div>
 
-      {/* Left sidebar navigation - compact centered, hide when at end */}
-      <div className={`fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24 transition-opacity duration-300 ${isAtEnd ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      {/* Left sidebar navigation - compact centered, always visible */}
+      <div className="fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24">
         <div className="flex flex-col gap-20">
           {sections.map((section, index) => (
             <button

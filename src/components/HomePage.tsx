@@ -14,7 +14,10 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollToFooter, onHideFooter }) => {
-  const { language, setLanguage } = useLanguage();
+  const {
+    language,
+    setLanguage
+  } = useLanguage();
   const {
     theme,
     toggleTheme
@@ -62,12 +65,12 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
         
         // 只有累积滚动量超过阈值才触发切换
         if (scrollAccumulator.current >= SCROLL_THRESHOLD) {
-        scrollLock.current = true;
+          scrollLock.current = true;
           scrollAccumulator.current = 0;
-        setCurrentView('solution');
-        setActiveTab('solution');
-        setTimeout(() => {
-          scrollLock.current = false;
+          setCurrentView('solution');
+          setActiveTab('solution');
+          setTimeout(() => {
+            scrollLock.current = false;
           }, SCROLL_LOCK_DURATION);
         }
       } else if (e.deltaY < 0) {
@@ -92,19 +95,29 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
       setCurrentView('hero');
     }
   }, [activeTab, currentView]);
-  return <div ref={containerRef} className="min-h-screen">
+
+  return (
+    <div ref={containerRef} className="min-h-screen">
       <AnimatePresence mode="wait">
-        {currentView === 'hero' ? <motion.section key="hero" initial={{
-        opacity: 0
-      }} animate={{
-        opacity: 1
-      }} exit={{
-        opacity: 0,
-        y: -100
-      }} transition={{
-        duration: 0.6,
-        ease: [0.16, 1, 0.3, 1]
-      }} className="relative min-h-screen overflow-hidden hero-gradient">
+        {currentView === 'hero' ? (
+          <motion.section
+            key="hero"
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: -100,
+            }}
+            transition={{
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="relative min-h-screen overflow-hidden hero-gradient"
+          >
             {/* Hero Header - only visible on hero */}
             <div className="absolute top-0 left-0 right-0 z-20 px-6 sm:px-10 lg:px-16 py-6">
               <div className="flex items-center justify-between">
@@ -176,39 +189,42 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
 
             {/* Bottom Subtitle */}
             <div className="absolute bottom-16 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
-              <motion.p initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.8,
-            delay: 0.4,
-            ease: [0.16, 1, 0.3, 1]
-          }} className="text-[1.2rem] sm:text-[1.35rem] text-foreground text-center font-sans font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {language === 'en' ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.' : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'}
+              <motion.p
+                initial={{
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.4,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="text-[1.2rem] sm:text-[1.35rem] text-foreground text-center font-sans font-semibold"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                {language === 'en'
+                  ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
+                  : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'}
               </motion.p>
             </div>
-
-            {/* Scroll indicator */}
-            
-          </motion.section> : <motion.div key="solution" initial={{
-        opacity: 0,
-        y: 100
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} exit={{
-        opacity: 0,
-        y: 100
-      }} transition={{
-        duration: 0.6,
-        ease: [0.16, 1, 0.3, 1]
-      }}>
-            <ScrollSolutionPage onScrollToTop={handleScrollToHero} />
-          </motion.div>}
+          </motion.section>
+        ) : (
+          <motion.div
+            key="solution"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <ScrollSolutionPage onScrollToTop={handleScrollToHero} onScrollToFooter={onScrollToFooter} onHideFooter={onHideFooter} />
+          </motion.div>
+        )}
       </AnimatePresence>
-    </div>;
+    </div>
+  );
 };
 export default HomePage;
