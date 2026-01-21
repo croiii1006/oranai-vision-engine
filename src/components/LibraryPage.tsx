@@ -70,6 +70,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const { t } = useLanguage();
 
   const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('video');
 
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
@@ -96,6 +98,88 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
   const searchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 处理音频自动播放和停止
+  useEffect(() => {
+    // 当 selectedItem 是 Audio 类型且有 audioUrl 时，自动播放
+    if (selectedItem && 'audioUrl' in selectedItem && selectedItem.audioUrl) {
+      // 创建或更新 audio 元素
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+      }
+      
+      audioRef.current.src = selectedItem.audioUrl;
+      audioRef.current.load();
+      
+      // 自动播放
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsAudioPlaying(true);
+          })
+          .catch((error) => {
+            console.error('Audio autoplay failed:', error);
+            setIsAudioPlaying(false);
+          });
+      }
+      
+      // 监听播放结束
+      const handleEnded = () => {
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      };
+      
+      // 监听播放错误
+      const handleError = () => {
+        console.error('Audio playback error');
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      };
+      
+      // 监听时间更新，更新进度条
+      const handleTimeUpdate = () => {
+        if (audioRef.current && audioRef.current.duration) {
+          const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+          setAudioProgress(progress);
+        }
+      };
+      
+      // 监听播放状态变化
+      const handlePlay = () => setIsAudioPlaying(true);
+      const handlePause = () => setIsAudioPlaying(false);
+      
+      audioRef.current.addEventListener('ended', handleEnded);
+      audioRef.current.addEventListener('error', handleError);
+      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      audioRef.current.addEventListener('play', handlePlay);
+      audioRef.current.addEventListener('pause', handlePause);
+      
+      // 清理函数：移除事件监听器并停止播放
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('ended', handleEnded);
+          audioRef.current.removeEventListener('error', handleError);
+          audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+          audioRef.current.removeEventListener('play', handlePlay);
+          audioRef.current.removeEventListener('pause', handlePause);
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          setIsAudioPlaying(false);
+          setAudioProgress(0);
+        }
+      };
+    } else {
+      // 当弹窗关闭或不是 Audio 类型时，停止播放
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      }
+    }
+  }, [selectedItem]);
 
   // 获取 AI 视频列表数据（只在初始加载时获取，不依赖搜索和分类）
   const { data: videoListData } = useQuery({
@@ -1144,6 +1228,54 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                     </div>
                   </div>
 
+                  {/* 音频播放控件 */}
+                  {selectedItem.audioUrl && (
+                    <div className="mb-6 p-4 rounded-xl bg-muted/30 border border-border/30">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            if (audioRef.current) {
+                              if (isAudioPlaying) {
+                                audioRef.current.pause();
+                                setIsAudioPlaying(false);
+                              } else {
+                                audioRef.current.play().catch((error) => {
+                                  console.error('Audio play failed:', error);
+                                });
+                                setIsAudioPlaying(true);
+                              }
+                            }
+                          }}
+                          className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 transition-colors"
+                          aria-label={isAudioPlaying ? 'Pause' : 'Play'}
+                        >
+                          {isAudioPlaying ? (
+                            <div className="w-5 h-5 flex items-center justify-center gap-1">
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                            </div>
+                          ) : (
+                            <Play className="w-5 h-5 ml-0.5" />
+                          )}
+                        </button>
+                        <div className="flex-1">
+                          <div className="text-sm text-muted-foreground mb-1">
+                            {isAudioPlaying ? t('library.playing') || 'Playing...' : t('library.paused') || 'Paused'}
+                          </div>
+                          <div className="h-1 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-foreground transition-all duration-100"
+                              style={{
+                                width: `${audioProgress}%`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex gap-3">
                     {selectedItem.audioUrl && (
                       <a
@@ -1153,16 +1285,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                       >
                         <Download className="w-5 h-5" />
                         {t('library.downloadAudio')}
-                    </a>
-                  )}
+                      </a>
+                    )}
                     <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
                       <Sparkles className="w-5 h-5" />
-                    {t('library.replicate')}
+                      {t('library.replicate')}
                       <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
                       </div>
-                  </button>
-                </div>
+                    </button>
+                  </div>
               </div>
             </div>
             ) : (
