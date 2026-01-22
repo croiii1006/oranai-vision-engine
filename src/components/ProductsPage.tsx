@@ -3,17 +3,9 @@ import { ArrowUp, Globe, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-// Import thumbnail images
-import imageGenThumb from '@/assets/products/image-gen-thumb.png';
-import videoGenThumb from '@/assets/products/video-gen-thumb.png';
-import digitalHumanThumb from '@/assets/products/digital-human-thumb.png';
-import geoMonitorThumb from '@/assets/products/geo-monitor-thumb.png';
-import brandHealthThumb from '@/assets/products/brand-health-thumb.png';
-import brandStrategyThumb from '@/assets/products/brand-strategy-thumb.png';
 interface SubTab {
   id: string;
   labelKey: string;
-  image: string;
   url?: string; // URL to navigate to when clicked
 }
 interface TabConfig {
@@ -28,7 +20,7 @@ const ProductsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('material');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
-const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
   
   const modelOptions = [
@@ -66,12 +58,10 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
     subTabs: [{
       id: 'geoMonitor',
       labelKey: 'products.geoMonitor',
-      image: geoMonitorThumb,
       url: 'https://geo.photog.art/ai'
     }, {
       id: 'brandHealth',
       labelKey: 'products.brandHealth',
-      image: brandHealthThumb,
       url: '' // TODO: Add Brand Health URL
     }]
   }, {
@@ -80,7 +70,6 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
     subTabs: [{
       id: 'brandStrategy',
       labelKey: 'products.brandStrategy',
-      image: brandStrategyThumb,
       url: '' // TODO: Add Brand Strategy URL
     }]
   }, {
@@ -89,17 +78,14 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
     subTabs: [{
       id: 'imageGen',
       labelKey: 'products.imageGen',
-      image: imageGenThumb,
       url: 'https://tools.photog.art/'
     }, {
       id: 'videoGen',
       labelKey: 'products.videoGen',
-      image: videoGenThumb,
       url: 'https://tools.photog.art/'
     }, {
       id: 'digitalHuman',
       labelKey: 'products.digitalHuman',
-      image: digitalHumanThumb,
       url: '' // TODO: Add Digital Human URL
     }]
   }, {
@@ -108,11 +94,12 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
     subTabs: [{
       id: 'b2bLead',
       labelKey: 'products.b2bLead',
-      image: brandStrategyThumb,
       url: ''
     }]
   }];
   const currentTabConfig = tabsConfig.find(tab => tab.id === activeTab);
+  const currentSubTabs = currentTabConfig?.subTabs || [];
+  const currentSubTab = currentSubTabs.find(s => s.id === activeSubTab);
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     const tab = tabsConfig.find(t => t.id === tabId);
@@ -162,7 +149,7 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
           {/* Bottom Action Bar */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               {/* Web Search Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -207,6 +194,33 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Feature selection Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${currentSubTab ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{currentSubTab ? t(currentSubTab.labelKey) : t('products.selectFeature')}</span>
+                    <ChevronDown className="w-2.5 h-2.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[160px]">
+                  {currentSubTabs.map(subTab => {
+                    const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
+                    return (
+                      <DropdownMenuItem
+                        key={subTab.id}
+                        disabled={isComingSoon}
+                        onClick={() => setActiveSubTab(subTab.id)}
+                        className={activeSubTab === subTab.id ? 'bg-primary/10 text-primary' : ''}
+                      >
+                        <span className="flex-1">{t(subTab.labelKey)}</span>
+                        {isComingSoon && <span className="text-[11px] text-muted-foreground ml-2">{t('products.comingSoon')}</span>}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Send Button */}
@@ -219,36 +233,6 @@ const [selectedModel, setSelectedModel] = useState<string | null>(null);
           </div>
         </div>
 
-        {/* Sub Tab Navigation with Images */}
-        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
-            {currentTabConfig.subTabs.map(subTab => {
-              const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
-              return (
-                <button key={subTab.id} onClick={() => {
-                    setActiveSubTab(subTab.id);
-                    if (subTab.url && !isComingSoon) {
-                      window.open(subTab.url, '_blank');
-                    }
-                  }} className={`group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md ${isComingSoon ? 'cursor-default' : ''}`}>
-                    {/* Coming Soon Overlay */}
-                    {isComingSoon && (
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="text-sm font-medium text-foreground">{t('products.comingSoon')}</span>
-                      </div>
-                    )}
-                    {/* Text content */}
-                    <span className="relative z-10 flex-shrink-0">{t(subTab.labelKey)}</span>
-                    
-                    {/* Tilted thumbnail image */}
-                    <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
-                      <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-lg overflow-hidden shadow-lg">
-                        <img src={subTab.image} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    </div>
-                  </button>
-              );
-            })}
-          </div>}
       </div>
     </div>;
 };

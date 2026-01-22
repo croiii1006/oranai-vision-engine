@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ArrowUp } from 'lucide-react';
 
 // Import solution images
 interface SolutionSection {
@@ -185,6 +186,14 @@ const SolutionPage: React.FC = () => {
           </main>
         </div>
       </div>
+
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-20 right-5 lg:bottom-10 lg:right-10 z-50 w-12 h-12 rounded-full bg-background/70 backdrop-blur-lg border border-border/40 text-foreground shadow-lg hover:bg-background/90 transition-colors flex items-center justify-center"
+        aria-label={t('solution.backToTop')}
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
     </div>
   );
 };

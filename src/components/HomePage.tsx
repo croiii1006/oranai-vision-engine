@@ -28,12 +28,15 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentView, setCurrentView] = useState<'hero' | 'solution'>('hero');
   const scrollLock = useRef(false);
+  const scrollDeltaRef = useRef(0);
+  const HERO_SCROLL_THRESHOLD = 200; // reduce accidental switches on light trackpad flicks
 
   const toggleLanguage = () => setLanguage(language === 'en' ? 'zh' : 'en');
 
   const handleScrollToHero = () => {
     if (scrollLock.current) return;
     scrollLock.current = true;
+    scrollDeltaRef.current = 0;
     setCurrentView('hero');
     setActiveTab('home');
     setTimeout(() => {
@@ -46,6 +49,10 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
       if (scrollLock.current) return;
       if (currentView === 'hero' && e.deltaY > 0) {
         e.preventDefault();
+        scrollDeltaRef.current += e.deltaY;
+        if (scrollDeltaRef.current < HERO_SCROLL_THRESHOLD) return;
+
+        scrollDeltaRef.current = 0;
         scrollLock.current = true;
         setCurrentView('solution');
         setActiveTab('solution');
@@ -126,7 +133,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
                   letterSpacing: '0.001em'
                 }}
               >
-                oranai
+                oranAI
               </motion.h1>
             </div>
 
@@ -143,16 +150,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab }) => {
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   {language === 'en'
-                    ? 'Empower your brand through customized '
-                    : '通过定制化的 '}
-                  <span className="italic font-medium">{language === 'en' ? 'Solutions' : '解决方案'}</span>
-                  {language === 'en' ? ', cutting-edge ' : '、前沿的 '}
-                  <span className="italic font-medium">{language === 'en' ? 'Models' : '模型'}</span>
-                  {language === 'en' ? ', versatile ' : '、多功能的 '}
-                  <span className="italic font-medium">{language === 'en' ? 'Products' : '产品'}</span>
-                  {language === 'en' ? ', and creative ' : '，以及创意的 '}
-                  <span className="italic font-medium">{language === 'en' ? 'Library' : '素材库'}</span>
-                  {language === 'en' ? '.' : '，为您的品牌赋能。'}
+                    ? 'Integrate cutting-edge models, product matrices and creative asset libraries to build a one-stop marketing solution, empowering the growth of global brands.'
+                    : '整合前沿模型、产品矩阵和创意素材库，打造一站式营销解决方案，赋能全球品牌增长。'}
                 </h2>
               </motion.div>
             </div>

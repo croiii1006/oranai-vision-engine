@@ -135,6 +135,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Are you worried that brand data sits idle, crises erupt suddenly, and compliance risks slip out of control?",
     "solution.scaleDesc":
       "Are you stuck with global marketing that is hard to localize, inefficient ad delivery, and ROI you cannot predict accurately?",
+    "solution.backToTop": "Back to top",
 
     // Models Page
     "models.title": "MODELS",
@@ -157,6 +158,12 @@ const translations: Record<Language, Record<string, string>> = {
     "models.expand": "Show more",
     "models.collapse": "Collapse",
     "models.unknownSupplier": "Unknown",
+    "models.bytedance": "ByteDance",
+    "models.kuaishou": "Kuaishou",
+    "models.zhipu": "Zhipu AI",
+    "models.tencent": "Tencent",
+    "models.alibaba": "Alibaba",
+    "models.lingyiwanwu": "01.AI",
 
     // Products Page
     "products.title": "PHOTOG",
@@ -181,6 +188,7 @@ const translations: Record<Language, Record<string, string>> = {
     "products.tiktok": "TikTok",
     "products.amazon": "Amazon",
     "products.semrush": "Semrush",
+    "products.selectFeature": "Select feature",
     "products.b2bLead": "B2B Lead Generation",
     "products.comingSoon": "Coming Soon",
     "products.modelClaude": "Claude",
@@ -685,6 +693,7 @@ const translations: Record<Language, Record<string, string>> = {
     "solution.buildDesc": "您是否面临优质内容产能不足、跨平台适配难、私域运营低效的困境？",
     "solution.manageDesc": "您是否担忧品牌数据资产沉睡、舆情危机突发、合规风险失控？",
     "solution.scaleDesc": "您是否困扰于全球营销本土化难、广告投放低效、ROI 无法精准预测？",
+    "solution.backToTop": "回到顶部",
 
     // Models Page
     "models.title": "模型",
@@ -707,6 +716,12 @@ const translations: Record<Language, Record<string, string>> = {
     "models.expand": "展开更多",
     "models.collapse": "收起",
     "models.unknownSupplier": "未知供应商",
+    "models.bytedance": "字节跳动",
+    "models.kuaishou": "快手",
+    "models.zhipu": "智谱",
+    "models.tencent": "腾讯",
+    "models.alibaba": "阿里巴巴",
+    "models.lingyiwanwu": "零一万物",
 
     // Products Page
     "products.title": "PHOTOG",
@@ -731,6 +746,7 @@ const translations: Record<Language, Record<string, string>> = {
     "products.tiktok": "TikTok",
     "products.amazon": "Amazon",
     "products.semrush": "Semrush",
+    "products.selectFeature": "选择功能",
     "products.b2bLead": "B2B线索获客",
     "products.comingSoon": "即将上线",
     "products.modelClaude": "Claude",

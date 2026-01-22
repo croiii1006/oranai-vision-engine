@@ -104,27 +104,27 @@ const ModelsPage: React.FC = () => {
     icon: Zap
   }, {
     id: 'bytedance',
-    labelKey: '字节跳动',
+    labelKey: 'models.bytedance',
     icon: Play
   }, {
     id: 'kuaishou',
-    labelKey: '快手',
+    labelKey: 'models.kuaishou',
     icon: Video
   }, {
     id: 'zhipu',
-    labelKey: '智谱',
+    labelKey: 'models.zhipu',
     icon: Grid3X3
   }, {
     id: 'tencent',
-    labelKey: '腾讯',
+    labelKey: 'models.tencent',
     icon: MessageCircle
   }, {
     id: 'alibaba',
-    labelKey: '阿里巴巴',
+    labelKey: 'models.alibaba',
     icon: ShoppingBag
   }, {
     id: 'lingyiwanwu',
-    labelKey: '零一万物',
+    labelKey: 'models.lingyiwanwu',
     icon: Bot
   }, {
     id: 'unknown',
@@ -297,7 +297,7 @@ const ModelsPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* 供应商 Section */}
+              {/* Supplier Section */}
               <div className="mb-6 border-t border-border/30 pt-4">
                 <h4 className="text-sm font-medium mb-3 text-left">{t('models.supplier')}</h4>
                 <div className="flex flex-col gap-2">
@@ -345,7 +345,7 @@ const ModelsPage: React.FC = () => {
 
           {/* Main Content - Model Grid */}
           <main className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
               {filteredModels.map((model, index) => <div key={model.id} onClick={() => setSelectedModel(model)} className={`group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative min-h-[420px] ${gradients[index % gradients.length]}`}>
                   {/* Hover overlay with Learn more */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
