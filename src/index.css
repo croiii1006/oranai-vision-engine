@@ -341,4 +341,35 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
   }
+
+  /* 音频播放动画 */
+  @keyframes audio-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes audio-ripple {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .audio-playing {
+    animation: audio-pulse 1.5s ease-in-out infinite;
+  }
+
+  .audio-ripple {
+    animation: audio-ripple 1.5s ease-out infinite;
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, Globe, Sun, Moon, LogOut, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -14,7 +14,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { login, register, getUserInfo, sendCaptcha, getGoogleOAuthUrl } from '@/lib/api/auth';
+import { encryptPassword } from '@/lib/utils/rsa';
+import { saveToken, saveUserInfo, clearAuth, getUserInfo as getCachedUserInfo, getToken } from '@/lib/utils/auth-storage';
+import type { UserInfo } from '@/lib/api/auth';
 
 interface HeaderProps {
   activeTab: string;
@@ -27,6 +31,8 @@ interface HeaderProps {
 interface UserData {
   username: string;
   email: string;
+  nickname?: string;
+  avatar?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, isVisible = true }) => {
@@ -45,6 +51,26 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
   // Password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [codeCountdown, setCodeCountdown] = useState(0);
+  
+  // 从缓存加载用户信息
+  useEffect(() => {
+    const cachedUser = getCachedUserInfo();
+    const token = getToken();
+    if (cachedUser && token) {
+      setUser({
+        username: cachedUser.username,
+        email: cachedUser.email,
+        nickname: cachedUser.nickname,
+        avatar: cachedUser.avatar,
+      });
+    }
+  }, []);
 
   const tabs = [
     { id: 'solution', label: t('nav.solution') },
@@ -64,29 +90,128 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     setVerificationCode('');
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setError(null);
+    setCodeCountdown(0);
   };
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock sign in - in real app this would call an API
-    setUser({ username: email.split('@')[0], email });
-    setDialogOpen(false);
-    resetForm();
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      // 加密密码
+      const encryptedPassword = await encryptPassword(password);
+      
+      // 调用登录接口
+      const response = await login({
+        clientId: 'portal-a',
+        authType: 'EMAIL_PASSWORD',
+        email: email.trim(),
+        password: encryptedPassword,
+      });
+      
+      // 保存 token
+      saveToken(response.data.token);
+      
+      // 获取用户信息
+      const userInfoResponse = await getUserInfo(response.data.token);
+      
+      // 保存用户信息到缓存
+      saveUserInfo(userInfoResponse.data);
+      
+      // 更新 UI 状态
+      setUser({
+        username: userInfoResponse.data.username,
+        email: userInfoResponse.data.email,
+        nickname: userInfoResponse.data.nickname,
+        avatar: userInfoResponse.data.avatar,
+      });
+      
+      setDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Login failed:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : (language === 'en' ? 'Login failed. Please try again.' : '登录失败，请重试。')
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock sign up - in real app this would call an API
+    setError(null);
+    
+    // 验证密码匹配
     if (password !== confirmPassword) {
-      alert(language === 'en' ? 'Passwords do not match' : '两次密码不一致');
+      setError(language === 'en' ? 'Passwords do not match' : '两次密码不一致');
       return;
     }
-    setUser({ username: email.split('@')[0], email });
-    setDialogOpen(false);
-    resetForm();
+    
+    // 验证验证码
+    if (!verificationCode || verificationCode.trim() === '') {
+      setError(language === 'en' ? 'Please enter verification code' : '请输入验证码');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // 加密密码
+      const encryptedPassword = await encryptPassword(password);
+      
+      // 调用注册接口
+      await register({
+        email: email.trim(),
+        password: encryptedPassword,
+        captcha: verificationCode.trim(),
+      });
+      
+      // 注册成功后，自动登录
+      const loginResponse = await login({
+        clientId: 'portal-a',
+        authType: 'EMAIL_PASSWORD',
+        email: email.trim(),
+        password: encryptedPassword,
+      });
+      
+      // 保存 token
+      saveToken(loginResponse.data.token);
+      
+      // 获取用户信息
+      const userInfoResponse = await getUserInfo(loginResponse.data.token);
+      
+      // 保存用户信息到缓存
+      saveUserInfo(userInfoResponse.data);
+      
+      // 更新 UI 状态
+      setUser({
+        username: userInfoResponse.data.username,
+        email: userInfoResponse.data.email,
+        nickname: userInfoResponse.data.nickname,
+        avatar: userInfoResponse.data.avatar,
+      });
+      
+      setDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Register failed:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : (language === 'en' ? 'Registration failed. Please try again.' : '注册失败，请重试。')
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignOut = () => {
+    clearAuth();
     setUser(null);
   };
 
@@ -102,16 +227,67 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     setDialogOpen(true);
   };
 
-  const handleSendCode = () => {
-    // Mock send verification code
-    alert(language === 'en' ? 'Verification code sent!' : '验证码已发送！');
+  const handleSendCode = async () => {
+    // 验证邮箱
+    if (!email || !email.trim()) {
+      setError(language === 'en' ? 'Please enter your email address' : '请输入邮箱地址');
+      return;
+    }
+
+    // 验证邮箱格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError(language === 'en' ? 'Please enter a valid email address' : '请输入有效的邮箱地址');
+      return;
+    }
+
+    // 如果正在倒计时，不允许重复发送
+    if (codeCountdown > 0) {
+      return;
+    }
+
+    setIsSendingCode(true);
+    setError(null);
+
+    try {
+      await sendCaptcha({ email: email.trim() });
+      
+      // 开始倒计时（60秒）
+      setCodeCountdown(60);
+      const countdownInterval = setInterval(() => {
+        setCodeCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error('Send captcha failed:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : (language === 'en' ? 'Failed to send verification code. Please try again.' : '发送验证码失败，请重试。')
+      );
+    } finally {
+      setIsSendingCode(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Mock Google login
-    setUser({ username: 'GoogleUser', email: 'user@gmail.com' });
-    setDialogOpen(false);
-    resetForm();
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await getGoogleOAuthUrl();
+      const authorizeUrl = response.data.authorizeUrl;
+      console.log(authorizeUrl);
+    } catch (error) {
+      console.error('Get Google OAuth URL failed:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : (language === 'en' ? 'Failed to get Google login URL. Please try again.' : '获取 Google 登录链接失败，请重试。')
+      );
+    }
   };
 
   const getInitials = (name: string) => {
@@ -207,15 +383,18 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                   <DropdownMenuTrigger asChild>
                     <button className="focus:outline-none">
                       <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+                        {user.avatar && (
+                          <AvatarImage src={user.avatar} alt={user.username || user.nickname} />
+                        )}
                         <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                          {getInitials(user.username)}
+                          {getInitials(user.username || user.nickname)}
                         </AvatarFallback>
                       </Avatar>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <div className="px-2 py-1.5 text-sm font-medium text-foreground">
-                      {user.username}
+                      {user.username || user.nickname}
                     </div>
                     <div className="px-2 pb-2 text-xs text-muted-foreground">
                       {user.email}
@@ -227,13 +406,12 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                // <button
-                //   onClick={openSignIn}
-                //   className="text-sm font-light text-foreground/70 hover:text-foreground hover:underline underline-offset-4 transition-all duration-200"
-                // >
-                //   {language === 'en' ? 'Sign In' : '登录'}
-                // </button>
-                <></>
+                <button
+                  onClick={openSignIn}
+                  className="text-sm font-light text-foreground/70 hover:text-foreground hover:underline underline-offset-4 transition-all duration-200"
+                >
+                  {language === 'en' ? 'Sign In' : '登录'}
+                </button>
               )}
             </div>
           </div>
@@ -270,14 +448,25 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               </h2>
               
               <form onSubmit={handleSignUp} className="space-y-4">
+                {/* Error Message */}
+                {error && (
+                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    {error}
+                  </div>
+                )}
+                
                 {/* Email */}
                 <Input
                   type="email"
                   placeholder={language === 'en' ? 'Email' : '邮箱'}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
                   className="h-12 rounded-2xl bg-muted/50 border-0 px-4"
                   required
+                  disabled={isLoading}
                 />
                 
                 {/* Password */}
@@ -286,9 +475,13 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                     type={showPassword ? 'text' : 'password'}
                     placeholder={language === 'en' ? 'Password' : '密码'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError(null);
+                    }}
                     className="h-12 rounded-2xl bg-muted/50 border-0 px-4 pr-12"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -305,9 +498,13 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder={language === 'en' ? 'Confirm' : '确认密码'}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setError(null);
+                    }}
                     className="h-12 rounded-2xl bg-muted/50 border-0 px-4 pr-12"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -324,31 +521,52 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                     type="text"
                     placeholder={language === 'en' ? 'Verification Code' : '验证码'}
                     value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
+                    onChange={(e) => {
+                      setVerificationCode(e.target.value);
+                      setError(null);
+                    }}
                     className="h-12 rounded-2xl bg-muted/50 border-0 px-4 flex-1"
                     required
+                    disabled={isLoading}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={handleSendCode}
-                    className="h-12 px-4 text-primary hover:text-primary/80 hover:bg-transparent font-medium"
+                    className="h-12 px-4 text-primary hover:text-primary/80 hover:bg-transparent font-medium whitespace-nowrap"
+                    disabled={isLoading || isSendingCode || codeCountdown > 0}
                   >
-                    {language === 'en' ? 'Send Code' : '发送验证码'}
+                    {isSendingCode 
+                      ? (language === 'en' ? 'Sending...' : '发送中...')
+                      : codeCountdown > 0
+                      ? `${codeCountdown}s`
+                      : (language === 'en' ? 'Send Code' : '发送验证码')
+                    }
                   </Button>
                 </div>
                 
                 {/* Already have account */}
                 <div className="text-sm text-muted-foreground">
                   {language === 'en' ? 'Already have an account?' : '已有账号？'}{' '}
-                  <button type="button" onClick={() => setIsSignUp(false)} className="text-primary hover:underline font-medium">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setError(null);
+                    }} 
+                    className="text-primary hover:underline font-medium"
+                  >
                     {language === 'en' ? 'Login' : '登录'}
                   </button>
                 </div>
                 
                 {/* Sign Up Button */}
-                <Button type="submit" className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium">
-                  {language === 'en' ? 'Sign Up' : '注册'}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (language === 'en' ? 'Signing up...' : '注册中...') : (language === 'en' ? 'Sign Up' : '注册')}
                 </Button>
               </form>
               
@@ -401,14 +619,25 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
               </p>
               
               <form onSubmit={handleSignIn} className="space-y-4">
+                {/* Error Message */}
+                {error && (
+                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    {error}
+                  </div>
+                )}
+                
                 {/* Email */}
                 <Input
                   type="email"
                   placeholder={language === 'en' ? 'Email' : '邮箱'}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
                   className="h-12 rounded-2xl bg-muted/50 border-0 px-4"
                   required
+                  disabled={isLoading}
                 />
                 
                 {/* Password */}
@@ -417,9 +646,13 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                     type={showPassword ? 'text' : 'password'}
                     placeholder={language === 'en' ? 'Password' : '密码'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError(null);
+                    }}
                     className="h-12 rounded-2xl bg-muted/50 border-0 px-4 pr-12"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -431,8 +664,12 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 </div>
                 
                 {/* Login Button */}
-                <Button type="submit" className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium">
-                  {language === 'en' ? 'Login' : '登录'}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (language === 'en' ? 'Logging in...' : '登录中...') : (language === 'en' ? 'Login' : '登录')}
                 </Button>
               </form>
               

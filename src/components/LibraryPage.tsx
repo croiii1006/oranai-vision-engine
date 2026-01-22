@@ -1188,8 +1188,19 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                   <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
                     <img src={selectedItem.thumbnail} alt={selectedItem.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
-                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                        <Volume2 className="w-7 h-7 text-white" />
+                      <div className="relative w-14 h-14 flex items-center justify-center">
+                        {/* 涟漪效果 */}
+                        {isAudioPlaying && (
+                          <>
+                            <div className="absolute inset-0 rounded-full bg-white/20 audio-ripple" />
+                            <div className="absolute inset-0 rounded-full bg-white/15 audio-ripple" style={{ animationDelay: '0.5s' }} />
+                            <div className="absolute inset-0 rounded-full bg-white/10 audio-ripple" style={{ animationDelay: '1s' }} />
+                          </>
+                        )}
+                        {/* 图标容器 */}
+                        <div className={`relative w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 transition-all duration-300 ${isAudioPlaying ? 'audio-playing' : ''}`}>
+                          <Volume2 className={`w-7 h-7 text-white transition-all duration-300 ${isAudioPlaying ? 'audio-playing' : ''}`} />
+                        </div>
                       </div>
                     </div>
                   </div>

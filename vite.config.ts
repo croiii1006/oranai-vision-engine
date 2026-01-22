@@ -12,6 +12,49 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: true,
     },
+    // 代理配置，解决跨域问题
+    proxy: {
+      // 模型页面 API 代理（匹配 /api/pricing 等路径）
+      '/api/pricing': {
+        target: 'http://119.12.161.54:3000',
+        changeOrigin: true,
+      },
+      // 模型页面其他 API 代理
+      '/api/models': {
+        target: 'http://119.12.161.54:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/models/, ''),
+      },
+      // LIBRARY 页面 API 代理（匹配 /api/app 路径）
+      '/api/app': {
+        target: 'http://192.168.112.253:8080',
+        changeOrigin: true,
+      },
+      // AUTH 相关 API 代理
+      '/auth': {
+        target: 'http://192.168.112.253:8000',
+        changeOrigin: true,
+      },
+      // OAuth 相关 API 代理
+      '/oauth': {
+        target: 'http://192.168.112.253:8000',
+        changeOrigin: true,
+      },
+      '/oauth2': {
+        target: 'http://192.168.112.253:8000',
+        changeOrigin: true,
+      },
+      // 验证码 API 代理
+      '/captcha': {
+        target: 'http://192.168.112.253:8000',
+        changeOrigin: true,
+      },
+      // 注册 API 代理
+      '/api/register': {
+        target: 'http://192.168.112.253:8000',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
