@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
+﻿import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   Play,
   Download,
@@ -109,6 +109,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     });
   }, [previewModelItems, normalizedQuery]);
 
+  const visibleVideoItems = useMemo(() => filteredVideoItems.slice(0, 6), [filteredVideoItems]);
+
   const clampIndex = (index: number, total: number) => Math.max(0, Math.min(total - 1, index));
   const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
@@ -145,7 +147,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       setTitleOffsets({ x: centerToLeftX, y: centerToTopY });
 
       // Update max horizontal offset for video carousel so we can scroll all cards
-      const totalVideoCards = filteredVideoItems.length;
+      const totalVideoCards = visibleVideoItems.length;
       if (totalVideoCards === 0) {
         setMaxVideoOffset(0);
         return;
@@ -156,7 +158,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => window.removeEventListener('resize', updateOffsets);
-  }, [filteredVideoItems.length, computeMaxOffset]);
+  }, [visibleVideoItems.length, computeMaxOffset]);
 
   // Handle wheel events for animation control
   const handleWheel = useCallback(
@@ -235,7 +237,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const handleArrowNavigation = useCallback(
     (tab: TabType, direction: 'prev' | 'next') => {
       const items =
-        tab === 'video' ? filteredVideoItems : tab === 'voice' ? filteredVoiceItems : filteredModelItems;
+        tab === 'video' ? visibleVideoItems : tab === 'voice' ? filteredVoiceItems : filteredModelItems;
       if (!items.length) return;
       const total = items.length;
       const current = activeCardIndex[tab] ?? Math.floor(total / 2);
@@ -251,7 +253,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         return { ...prev, [tab]: nextOffset };
       });
     },
-    [activeCardIndex, computeMaxOffset, filteredModelItems, filteredVideoItems, filteredVoiceItems, maxVideoOffset, setActiveForTab]
+    [activeCardIndex, computeMaxOffset, filteredModelItems, visibleVideoItems, filteredVoiceItems, maxVideoOffset, setActiveForTab]
   );
 
   useEffect(() => {
@@ -317,7 +319,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   // Initialize active cards to the middle item of each tab
   useEffect(() => {
     setActiveCardIndex({
-      video: clampIndex(Math.floor(filteredVideoItems.length / 2), filteredVideoItems.length),
+      video: clampIndex(Math.floor(visibleVideoItems.length / 2), visibleVideoItems.length),
       voice: clampIndex(Math.floor(filteredVoiceItems.length / 2), filteredVoiceItems.length),
       model: clampIndex(Math.floor(filteredModelItems.length / 2), filteredModelItems.length),
     });
@@ -326,11 +328,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
   useEffect(() => {
     setActiveCardIndex((prev) => ({
-      video: clampIndex(prev.video ?? 0, filteredVideoItems.length),
+      video: clampIndex(prev.video ?? 0, visibleVideoItems.length),
       voice: clampIndex(prev.voice ?? 0, filteredVoiceItems.length),
       model: clampIndex(prev.model ?? 0, filteredModelItems.length),
     }));
-  }, [filteredVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
+    }, [visibleVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
 
   const buildFanLayout = useCallback(
     (index: number, totalCards: number, activeIndex: number) => {
@@ -533,8 +535,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Video Cards */}
         {activeTab === 'video' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredVideoItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
+              {isExpanded && visibleVideoItems.length > 0 && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
                 <button
                   className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
                   aria-label="Previous video"
@@ -551,8 +553,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                 </button>
               </div>
             )}
-            {filteredVideoItems.map((item, index) => {
-              const totalCards = filteredVideoItems.length;
+              {visibleVideoItems.map((item, index) => {
+                const totalCards = visibleVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
               const layout = buildFanLayout(index, totalCards, activeIndex);
 

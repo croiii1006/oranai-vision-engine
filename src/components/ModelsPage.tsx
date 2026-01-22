@@ -297,7 +297,7 @@ const ModelsPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Supplier Section */}
+              {/* 供应商 Section */}
               <div className="mb-6 border-t border-border/30 pt-4">
                 <h4 className="text-sm font-medium mb-3 text-left">{t('models.supplier')}</h4>
                 <div className="flex flex-col gap-2">
@@ -345,7 +345,7 @@ const ModelsPage: React.FC = () => {
 
           {/* Main Content - Model Grid */}
           <main className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredModels.map((model, index) => <div key={model.id} onClick={() => setSelectedModel(model)} className={`group rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300 relative min-h-[420px] ${gradients[index % gradients.length]}`}>
                   {/* Hover overlay with Learn more */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
