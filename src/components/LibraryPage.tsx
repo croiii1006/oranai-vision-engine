@@ -13,8 +13,6 @@ import {
   User,
   Volume2,
   Search,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceItem, ModelItem } from '../data/libraryData';
@@ -73,7 +71,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     voice: 0,
     model: 0,
   });
-  const [maxVideoOffset, setMaxVideoOffset] = useState(800);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -127,13 +124,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     setAnimationProgress(clamped);
   }, []);
 
-  // Compute dynamic offsets so the title moves from centered to ~24px from edges responsively
-  const computeMaxOffset = useCallback((totalCards: number) => {
-    if (typeof window === 'undefined' || totalCards === 0) return 0;
-    const totalWidth = totalCards * CARD_WIDTH + Math.max(0, totalCards - 1) * CARD_GAP;
-    return Math.max(0, (totalWidth - window.innerWidth) / 2 + 120);
-  }, []);
-
   useLayoutEffect(() => {
     const HERO_TOP = 140;
     const TARGET_TOP = 24;
@@ -145,36 +135,18 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       const centerToLeftX = -(viewportWidth / 2 - LEFT_PADDING);
       const centerToTopY = TARGET_TOP - HERO_TOP;
       setTitleOffsets({ x: centerToLeftX, y: centerToTopY });
-
-      // Update max horizontal offset for video carousel so we can scroll all cards
-      const totalVideoCards = visibleVideoItems.length;
-      if (totalVideoCards === 0) {
-        setMaxVideoOffset(0);
-        return;
-      }
-      setMaxVideoOffset(computeMaxOffset(totalVideoCards));
     };
 
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => window.removeEventListener('resize', updateOffsets);
-  }, [visibleVideoItems.length, computeMaxOffset]);
+  }, [visibleVideoItems.length]);
 
-  // Handle wheel events for animation control
+  // Handle wheel events for animation control (only vertical)
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if (selectedItem) return; // Don't animate when modal is open
       e.preventDefault();
-
-      // When expanded and on video tab, allow horizontal scroll of cards
-      if (isExpanded && activeTab === 'video' && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        setCardOffsets((prev) => ({
-          ...prev,
-          // Invert trackpad delta so left swipe shows previous (matches arrow direction)
-          video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video - e.deltaX)),
-        }));
-        return;
-      }
 
       const delta = e.deltaY;
       const sensitivity = 0.012;
@@ -182,7 +154,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       const target = current + delta * sensitivity;
       setProgressClamped(target);
     },
-    [selectedItem, setProgressClamped, isExpanded, activeTab, maxVideoOffset]
+    [selectedItem, setProgressClamped]
   );
 
   // Handle touch events for mobile
@@ -233,43 +205,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       [tab]: clampIndex(index, total),
     }));
   }, []);
-
-  const handleArrowNavigation = useCallback(
-    (tab: TabType, direction: 'prev' | 'next') => {
-      const items =
-        tab === 'video' ? visibleVideoItems : tab === 'voice' ? filteredVoiceItems : filteredModelItems;
-      if (!items.length) return;
-      const total = items.length;
-      const current = activeCardIndex[tab] ?? Math.floor(total / 2);
-      const nextIndex = clampIndex(current + (direction === 'prev' ? -1 : 1), total);
-      setActiveForTab(tab, nextIndex, total);
-
-      setCardOffsets((prev) => {
-        const currentOffset = prev[tab] ?? 0;
-        const maxOffset = tab === 'video' ? maxVideoOffset : computeMaxOffset(items.length);
-        // Move viewport opposite to the desired card direction to keep arrows intuitive
-        const delta = direction === 'prev' ? CARD_STEP : -CARD_STEP;
-        const nextOffset = Math.max(-maxOffset, Math.min(maxOffset, currentOffset + delta));
-        return { ...prev, [tab]: nextOffset };
-      });
-    },
-    [activeCardIndex, computeMaxOffset, filteredModelItems, visibleVideoItems, filteredVoiceItems, maxVideoOffset, setActiveForTab]
-  );
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (!isExpanded || selectedItem) return;
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        handleArrowNavigation(activeTab, 'prev');
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        handleArrowNavigation(activeTab, 'next');
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [activeTab, handleArrowNavigation, isExpanded, selectedItem]);
 
   // Subtitle content based on tab
   const currentTab = tabs.find((tab) => tab.id === activeTab);
@@ -535,24 +470,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Video Cards */}
         {activeTab === 'video' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-              {isExpanded && visibleVideoItems.length > 0 && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous video"
-                  onClick={() => handleArrowNavigation('video', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next video"
-                  onClick={() => handleArrowNavigation('video', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
               {visibleVideoItems.map((item, index) => {
                 const totalCards = visibleVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
@@ -655,24 +572,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Voice Cards */}
         {activeTab === 'voice' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredVoiceItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous voice"
-                  onClick={() => handleArrowNavigation('voice', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next voice"
-                  onClick={() => handleArrowNavigation('voice', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
             {filteredVoiceItems.map((item, index) => {
               const totalCards = filteredVoiceItems.length;
               const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
@@ -759,24 +658,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         {/* Model Cards */}
         {activeTab === 'model' && (
           <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredModelItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous model"
-                  onClick={() => handleArrowNavigation('model', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next model"
-                  onClick={() => handleArrowNavigation('model', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
             {filteredModelItems.map((item, index) => {
               const totalCards = filteredModelItems.length;
               const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
