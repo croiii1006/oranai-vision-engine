@@ -20,6 +20,7 @@ import { mockLibraryItems, mockModelItems, mockVoiceItems, LibraryItem, VoiceIte
 // Shared layout constants for the carousel fan
 const CARD_WIDTH = 210;
 const CARD_GAP = 28;
+const GRID_GAP = 24; // matches tailwind gap-6 for overflow grid rows
 // Fan/stack tuning for up to 8 cards (distance 0-4), wider spread to fill width
 const FAN_OFFSETS = [0, 130, 240, 340, 440];
 const SCALE_BY_DISTANCE = [1, 0.92, 0.84, 0.76, 0.74];
@@ -106,7 +107,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     });
   }, [previewModelItems, normalizedQuery]);
 
-  const visibleVideoItems = useMemo(() => filteredVideoItems.slice(0, 6), [filteredVideoItems]);
+  const fanVideoItems = useMemo(() => filteredVideoItems.slice(0, 6), [filteredVideoItems]);
+  const overflowVideoItems = useMemo(() => filteredVideoItems.slice(6), [filteredVideoItems]);
 
   const clampIndex = (index: number, total: number) => Math.max(0, Math.min(total - 1, index));
   const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -140,7 +142,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => window.removeEventListener('resize', updateOffsets);
-  }, [visibleVideoItems.length]);
+  }, [fanVideoItems.length]);
 
   // Handle wheel events for animation control (only vertical)
   const handleWheel = useCallback(
@@ -213,6 +215,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   // Easing function for smoother animations
   const easeOutCubic = (tt: number) => 1 - Math.pow(1 - tt, 3);
   const easedProgress = easeOutCubic(animationProgress);
+  const videoCardHeight = 340 + easedProgress * 80;
 
   // Title fade logic: fade out mid-way, then fade back in
   const fadeOut = clamp01((progress - 0.1) / 0.25);
@@ -254,7 +257,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   // Initialize active cards to the middle item of each tab
   useEffect(() => {
     setActiveCardIndex({
-      video: clampIndex(Math.floor(visibleVideoItems.length / 2), visibleVideoItems.length),
+      video: clampIndex(Math.floor(fanVideoItems.length / 2), fanVideoItems.length),
       voice: clampIndex(Math.floor(filteredVoiceItems.length / 2), filteredVoiceItems.length),
       model: clampIndex(Math.floor(filteredModelItems.length / 2), filteredModelItems.length),
     });
@@ -263,11 +266,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
   useEffect(() => {
     setActiveCardIndex((prev) => ({
-      video: clampIndex(prev.video ?? 0, visibleVideoItems.length),
+      video: clampIndex(prev.video ?? 0, fanVideoItems.length),
       voice: clampIndex(prev.voice ?? 0, filteredVoiceItems.length),
       model: clampIndex(prev.model ?? 0, filteredModelItems.length),
     }));
-    }, [visibleVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
+    }, [fanVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
 
   const buildFanLayout = useCallback(
     (index: number, totalCards: number, activeIndex: number) => {
@@ -312,6 +315,55 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       };
     },
     [easedProgress]
+  );
+
+  const renderVideoCardContent = useCallback(
+    (item: LibraryItem) => (
+      <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
+        <video
+          src={item.videoUrl}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="w-full h-full object-cover rounded-[inherit]"
+          onMouseEnter={(e) => {
+            if (isExpanded) {
+              e.currentTarget.currentTime = 0;
+              e.currentTarget.play().catch(() => {});
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.pause();
+            e.currentTarget.currentTime = 0;
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
+        {item.duration && (
+          <span className="absolute top-3 right-3 text-white text-xs font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
+            {item.duration}
+          </span>
+        )}
+        <div className="absolute top-3 left-3">
+          <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
+        </div>
+        <div className="absolute bottom-4 left-4 right-4">
+          <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
+            <span className="flex items-center gap-1">
+              <Heart className="w-4 h-4" />
+              <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Eye className="w-4 h-4" />
+              <span className="text-sm font-medium">{formatNumber(item.views)}</span>
+            </span>
+          </div>
+          <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
+        </div>
+        <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
+      </div>
+    ),
+    [easedProgress, isExpanded, t]
   );
 
   return (
@@ -469,103 +521,99 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
         {/* Video Cards */}
         {activeTab === 'video' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-              {visibleVideoItems.map((item, index) => {
-                const totalCards = visibleVideoItems.length;
-              const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
-              const layout = buildFanLayout(index, totalCards, activeIndex);
+          <div className="relative w-full h-full flex flex-col items-center">
+            <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? `${videoCardHeight + 40}px` : 'auto' }}>
+              {fanVideoItems.map((item, index) => {
+                const totalCards = fanVideoItems.length;
+                const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
+                const layout = buildFanLayout(index, totalCards, activeIndex);
 
-              const currentHeight = 340 + easedProgress * 80;
-              const isActiveCard = index === activeIndex;
+                const isActiveCard = index === activeIndex;
 
-              const offsetX = isExpanded ? cardOffsets.video : 0;
-              const baseX = layout.currentX + offsetX;
-              const baseY = layout.currentY;
-              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
-              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
-              const zIndex = isActiveCard ? 999 : layout.zIndex;
+                const offsetX = isExpanded ? cardOffsets.video : 0;
+                const baseX = layout.currentX + offsetX;
+                const baseY = layout.currentY;
+                const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+                const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+                const zIndex = isActiveCard ? 999 : layout.zIndex;
 
-              return (
-                <div
-                  key={item.id}
-                  className="absolute cursor-pointer"
-                  style={{
-                    width: `${CARD_WIDTH}px`,
-                    height: `${currentHeight}px`,
-                    left: '50%',
-                    bottom: '0',
-                    marginLeft: `-${CARD_WIDTH / 2}px`,
-                    transformOrigin: 'center bottom',
-                    transform: baseTransform,
-                    zIndex,
-                    opacity: layout.opacity,
-                    transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
-                    filter: `blur(${layout.blur}px)`,
-                    boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
-                    borderRadius: '24px',
-                    overflow: 'hidden',
-                  }}
-                  onClick={() => {
-                    setActiveForTab('video', index, totalCards);
-                    if (isExpanded) setSelectedItem(item);
-                  }}
-                  onMouseEnter={(e) => {
-                    if (isExpanded) {
-                      e.currentTarget.style.transform = hoverTransform;
-                      e.currentTarget.style.zIndex = '1000';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = baseTransform;
-                    e.currentTarget.style.zIndex = String(zIndex);
-                  }}
-                >
-                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                    <video
-                      src={item.videoUrl}
-                      muted
-                      loop
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-cover rounded-[inherit]"
+                return (
+                  <div
+                    key={item.id}
+                    className="absolute cursor-pointer"
+                    style={{
+                      width: `${CARD_WIDTH}px`,
+                      height: `${videoCardHeight}px`,
+                      left: '50%',
+                      bottom: '0',
+                      marginLeft: `-${CARD_WIDTH / 2}px`,
+                      transformOrigin: 'center bottom',
+                      transform: baseTransform,
+                      zIndex,
+                      opacity: layout.opacity,
+                      transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
+                      filter: `blur(${layout.blur}px)`,
+                      boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
+                      borderRadius: '24px',
+                      overflow: 'hidden',
+                    }}
+                    onClick={() => {
+                      setActiveForTab('video', index, totalCards);
+                      if (isExpanded) setSelectedItem(item);
+                    }}
+                    onMouseEnter={(e) => {
+                      if (isExpanded) {
+                        e.currentTarget.style.transform = hoverTransform;
+                        e.currentTarget.style.zIndex = '1000';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }}
+                  >
+                    {renderVideoCardContent(item)}
+                  </div>
+                );
+              })}
+            </div>
+
+              {isExpanded && overflowVideoItems.length > 0 && (
+                <div className="w-full px-6 sm:px-10 lg:px-16 mt-12">
+                  <div
+                    className="flex flex-wrap justify-start gap-6"
+                    style={{ maxWidth: `${CARD_WIDTH * 6 + GRID_GAP * 5}px` }}
+                  >
+                    {overflowVideoItems.map((item) => (
+                      <div
+                        key={item.id}
+                      className="relative cursor-pointer"
+                      style={{
+                        width: `${CARD_WIDTH}px`,
+                        height: `${videoCardHeight}px`,
+                        borderRadius: '24px',
+                        overflow: 'hidden',
+                        boxShadow: '0 18px 50px rgba(0,0,0,0.25)',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                      }}
+                      onClick={() => setSelectedItem(item)}
                       onMouseEnter={(e) => {
                         if (isExpanded) {
-                          e.currentTarget.currentTime = 0;
-                          e.currentTarget.play().catch(() => {});
+                          e.currentTarget.style.transform = 'translateY(-10px)';
+                          e.currentTarget.style.boxShadow = '0 22px 60px rgba(0,0,0,0.3)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.pause();
-                        e.currentTarget.currentTime = 0;
+                        e.currentTarget.style.transform = 'translateY(0px)';
+                        e.currentTarget.style.boxShadow = '0 18px 50px rgba(0,0,0,0.25)';
                       }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
-                    {item.duration && (
-                      <span className="absolute top-3 right-3 text-white text-xs font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
-                        {item.duration}
-                      </span>
-                    )}
-                    <div className="absolute top-3 left-3">
-                      <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
+                    >
+                      {renderVideoCardContent(item)}
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          <span className="text-sm font-medium">{formatNumber(item.likes)}</span>
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          <span className="text-sm font-medium">{formatNumber(item.views)}</span>
-                        </span>
-                      </div>
-                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{t(item.titleKey)}</p>
-                    </div>
-                    <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
-                  </div>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         )}
 
