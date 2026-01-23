@@ -309,8 +309,8 @@ const Header: React.FC<HeaderProps> = ({
                         {tab.label}
                       </button>
                       {/* Solution Dropdown Menu - extends header background */}
-                      <div className="fixed left-0 right-0 top-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-40">
-                        <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 border-t border-border/10 py-[4px]">
+                      <div className="fixed left-0 right-0 top-0 pt-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-40 pointer-events-none">
+                        <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 py-6 pointer-events-auto">
                           <div className="max-w-4xl mx-auto px-6">
                             <div className="grid grid-cols-2 gap-12">
                               {/* 场景解决方案 */}
