@@ -96,6 +96,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const touchStartY = useRef(0);
   const searchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // 跟踪每个 Video 卡片是否正在 hover（用于显示视频）
+  const [hoveredVideoId, setHoveredVideoId] = useState<number | null>(null);
+  // 存储每个卡片的视频元素引用，用于清理
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
 
   // 处理音频自动播放和停止
   useEffect(() => {
@@ -698,20 +702,20 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         >
           <div className="flex items-center gap-3">
             {tabs.map((tab) => (
-              <button
+                <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
                   activeTab === tab.id
-                    ? 'bg-foreground text-background'
-                    : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                }`}
-              >
+                      ? 'bg-foreground text-background'
+                      : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                  }`}
+                >
                 <tab.icon className="w-4 h-4" />
                 {t(tab.labelKey)}
-              </button>
-            ))}
-          </div>
+                </button>
+              ))}
+            </div>
         </div>
       )}
 
@@ -848,6 +852,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                       e.currentTarget.style.transform = hoverTransform;
                       e.currentTarget.style.zIndex = '1000';
                     }
+                    // 设置 hover 状态，触发视频显示和播放
+                    setHoveredVideoId(item.id);
                   }}
                   onMouseLeave={(e) => {
                     if (isExpanded) {
@@ -857,27 +863,69 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                       e.currentTarget.style.transform = baseTransform;
                       e.currentTarget.style.zIndex = String(zIndex);
                     }
+                    // 停止视频播放并清理
+                    const videoEl = videoRefs.current.get(item.id);
+                    if (videoEl) {
+                      videoEl.pause();
+                      videoEl.currentTime = 0;
+                      videoEl.src = ''; // 清空视频源，释放资源
+                      videoEl.load(); // 重新加载以清理
+                    }
+                    // 移除 hover 状态，隐藏视频元素
+                    setHoveredVideoId(null);
                   }}
                 >
-                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
-                  <video 
-                    src={item.sourceUrl}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                      className="w-full h-full object-cover rounded-[inherit]"
-                    onMouseEnter={(e) => {
-                        if (isExpanded) {
-                          e.currentTarget.currentTime = 0;
+                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted relative">
+                    {/* 默认显示预览图片 */}
+                    {hoveredVideoId !== item.id && (
+                      <img 
+                        src={item.previewUrl || item.sourceUrl} 
+                        alt={item.title}
+                        className="w-full h-full object-cover rounded-[inherit]"
+                      />
+                    )}
+                    {/* Hover 时显示并播放视频 */}
+                    {hoveredVideoId === item.id && (
+                      <video 
+                        ref={(el) => {
+                          if (el) {
+                            videoRefs.current.set(item.id, el);
+                            // 视频元素创建后立即加载
+                            el.load();
+                            // 使用 setTimeout 确保 DOM 更新完成后再播放
+                            setTimeout(() => {
+                              const playPromise = el.play();
+                              if (playPromise !== undefined) {
+                                playPromise.catch((error) => {
+                                  console.warn('Video autoplay failed, will retry on canplay:', error);
+                                });
+                              }
+                            }, 50);
+                          } else {
+                            videoRefs.current.delete(item.id);
+                          }
+                        }}
+                        src={item.sourceUrl}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        preload="auto"
+                        className="w-full h-full object-cover rounded-[inherit]"
+                        onLoadedData={(e) => {
+                          // 视频加载完成后自动播放
                           e.currentTarget.play().catch(() => {});
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
-                    }}
-                  />
+                        }}
+                        onCanPlay={(e) => {
+                          // 视频可以播放时立即播放（这是最可靠的触发时机）
+                          e.currentTarget.play().catch(() => {});
+                        }}
+                        onLoadedMetadata={(e) => {
+                          // 元数据加载完成后尝试播放
+                          e.currentTarget.play().catch(() => {});
+                        }}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
                     <div className="absolute top-3 left-3">
                       <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
@@ -900,8 +948,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                 </div>
               );
             })}
-          </div>
-        )}
+                  </div>
+                )}
 
         {/* Voice Cards */}
         {activeTab === 'voice' && (
@@ -1008,7 +1056,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                         <span className="flex items-center gap-1">
                           <Play className="w-3 h-3" />
                           <span className="text-xs">{formatNumber(item.plays ?? 0)}</span>
-                  </span>
+                    </span>
                         <span className="flex items-center gap-1">
                           <Heart className="w-3 h-3" />
                           <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
