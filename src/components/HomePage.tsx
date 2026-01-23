@@ -155,12 +155,12 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             fontWeight: 400,
             letterSpacing: '0.001em'
           }}>
-                oranai
+                oranAI
               </motion.h1>
             </div>
 
             {/* Right Side Content */}
-            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[38rem]">
+            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[40rem]">
               <motion.div initial={{
             opacity: 0,
             y: 40
@@ -173,16 +173,31 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             ease: [0.16, 1, 0.3, 1]
           }} className="text-left">
                 {/* Main headline */}
-                <h2 className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-tight text-foreground dark:opacity-70" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {language === 'en' ? 'Empower your brand through customized ' : '通过定制化'}
-                  <span className="italic font-medium">{language === 'en' ? 'Solutions' : '解决方案'}</span>
-                  {language === 'en' ? ', cutting-edge ' : '、前沿'}
-                  <span className="italic font-medium">{language === 'en' ? 'Models' : '模型'}</span>
-                  {language === 'en' ? ', versatile ' : '、多功能'}
-                  <span className="italic font-medium">{language === 'en' ? 'Products' : '产品'}</span>
-                  {language === 'en' ? ', and creative ' : '以及创意'}
-                  <span className="italic font-medium">{language === 'en' ? 'Library' : '素材库'}</span>
-                  {language === 'en' ? '.' : '，为您的品牌赋能。'}
+                <h2
+                  className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-tight text-foreground dark:opacity-70"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {language === 'en' ? (
+                    <>
+                      Integrate cutting-edge{' '}
+                      <span className="italic font-medium">Models</span>,{' '}
+                      <span className="italic font-medium">Product Matrices</span>, and{' '}
+                      <span className="italic font-medium">Creative Asset Libraries</span> to build a{' '}
+                      <span className="italic font-medium">One-stop Marketing Solution</span>, empowering the growth of{' '}
+                      <span className="italic font-medium">Global Brands</span>.
+                    </>
+                  ) : (
+                    <>
+                      整合
+                      <span className="italic font-medium">前沿模型</span>、
+                      <span className="italic font-medium">产品矩阵</span>与
+                      <span className="italic font-medium">创意素材库</span>，
+                      打造
+                      <span className="italic font-medium">一站式营销解决方案</span>，
+                      赋能
+                      <span className="italic font-medium">全球品牌增长</span>。
+                    </>
+                  )}
                 </h2>
               </motion.div>
             </div>
@@ -207,8 +222,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {language === 'en'
-                  ? 'Our mission is to make AI-powered marketing accessible, effective and innovative.'
-                  : '我们的使命是让AI驱动的营销变得触手可及、高效且富有创新。'}
+                  ? 'One-stop Solution to Marketing Challenges, All-round Support for Brand Growth'
+                  : '一站式解决营销难题，全方位支持品牌增长'}
               </motion.p>
             </div>
           </motion.section>
