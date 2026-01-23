@@ -161,7 +161,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             </div>
 
             {/* Right Side Content */}
-            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[42rem]">
+            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[43rem]">
               <motion.div initial={{
             opacity: 0,
             y: 40
@@ -184,7 +184,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
                       <span className="italic font-medium">Models</span>,{' '}
                       <span className="italic font-medium">Product Matrices</span>, and{' '}
                       <span className="italic font-medium">Creative Asset Libraries</span> to build a{' '}
-                      <span className="italic font-medium">One-stop Marketing Solution</span>, empowering the growth of{' '}
+                      <span className="italic font-medium whitespace-nowrap">One-stop Marketing Solution</span>, empowering the growth of{' '}
                       <span className="italic font-medium">Global Brands</span>.
                     </>
                   ) : (
