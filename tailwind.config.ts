@@ -107,6 +107,10 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "marquee-right": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -120,6 +124,7 @@ export default {
         "float": "float 20s ease-in-out infinite",
         "float-slow": "float-slow 30s ease-in-out infinite",
         "marquee": "marquee 40s linear infinite",
+        "marquee-right": "marquee-right 40s linear infinite",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

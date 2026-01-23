@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
+import PartnerLogoMarquee from './PartnerLogoMarquee';
 import logoDarkSvg from '/logo_dark.svg';
 import logoSvg from '/logo.svg';
 interface HomePageProps {
@@ -150,7 +151,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
           }} transition={{
             duration: 0.8,
             ease: [0.16, 1, 0.3, 1]
-          }} className="font-sans text-[33vw] sm:text-[30.8vw] md:text-[28.6vw] lg:text-[26.4vw] leading-none text-foreground select-none px-0 text-center font-normal" style={{
+          }} className="font-sans text-[30vw] sm:text-[28vw] md:text-[26vw] lg:text-[24vw] leading-none text-foreground select-none px-0 text-center font-normal" style={{
             fontFamily: 'Urbanist, Zalando Sans Expanded, sans-serif',
             fontWeight: 400,
             letterSpacing: '0.001em'
@@ -160,7 +161,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             </div>
 
             {/* Right Side Content */}
-            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[40rem]">
+            <div className="absolute top-1/2 right-0 -translate-y-1/3 z-10 px-6 sm:px-10 lg:px-16 max-w-xl lg:max-w-[42rem]">
               <motion.div initial={{
             opacity: 0,
             y: 40
@@ -202,29 +203,49 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
               </motion.div>
             </div>
 
-            {/* Bottom Subtitle */}
-            <div className="absolute bottom-16 left-0 right-0 z-10 px-6 sm:px-10 lg:px-16">
-              <motion.p
-                initial={{
-                  opacity: 0,
-                  y: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  duration: 0.8,
-                  delay: 0.4,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="text-[1.2rem] sm:text-[1.35rem] text-foreground text-center font-sans font-semibold"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                {language === 'en'
-                  ? 'One-stop Solution to Marketing Challenges, All-round Support for Brand Growth'
-                  : '一站式解决营销难题，全方位支持品牌增长'}
-              </motion.p>
+            {/* Bottom Subtitle & Partner Logos */}
+            <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 z-10 px-0">
+              <div className="w-full space-y-6 sm:space-y-8">
+                <motion.p
+                  initial={{
+                    opacity: 0,
+                    y: 20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.4,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="text-[1.2rem] sm:text-[1.35rem] text-foreground text-center font-sans font-semibold"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {language === 'en'
+                    ? 'One-stop Solution to Marketing Challenges, All-round Support for Brand Growth'
+                    : '一站式解决营销难题，全方位支持品牌增长'}
+                </motion.p>
+
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    y: 20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.55,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  <PartnerLogoMarquee />
+                </motion.div>
+              </div>
             </div>
           </motion.section>
         ) : (
