@@ -29,7 +29,7 @@ const ProductsPage: React.FC = () => {
     t
   } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('material');
+  const [activeTab, setActiveTab] = useState('insight');
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
@@ -251,76 +251,115 @@ const ProductsPage: React.FC = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Sub Tab Dropdown - Shows cards */}
+              {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeSubTab ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                      {activeSubTab && currentTabConfig.subTabs?.find(st => st.id === activeSubTab) && (
+                        <img 
+                          src={currentTabConfig.subTabs.find(st => st.id === activeSubTab)?.image} 
+                          alt="" 
+                          className="w-4 h-4 rounded object-cover"
+                        />
+                      )}
+                      <span>
+                        {activeSubTab 
+                          ? t(currentTabConfig.subTabs?.find(st => st.id === activeSubTab)?.labelKey || '')
+                          : 'Select Tool'
+                        }
+                      </span>
+                      <ChevronDown className="w-2.5 h-2.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="min-w-[200px] max-h-[400px] overflow-y-auto">
+                    {currentTabConfig.subTabs.map(subTab => {
+                      const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
+                      return (
+                        <DropdownMenuItem 
+                          key={subTab.id}
+                          onClick={() => {
+                            if (!isComingSoon) {
+                              setActiveSubTab(subTab.id);
+                            }
+                          }}
+                          disabled={isComingSoon || loadingSubTabId === subTab.id}
+                          className={`flex items-center gap-2 ${activeSubTab === subTab.id ? 'bg-primary/10 text-primary' : ''} ${isComingSoon ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          {/* <img 
+                            src={subTab.image} 
+                            alt="" 
+                            className="w-8 h-8 rounded object-cover flex-shrink-0"
+                          /> */}
+                          <span className="flex-1">
+                            {loadingSubTabId === subTab.id ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                {t('products.loading') || 'Loading...'}
+                              </span>
+                            ) : (
+                              <>
+                                {t(subTab.labelKey)}
+                                {isComingSoon && (
+                                  <span className="ml-2 text-xs text-muted-foreground">
+                                    ({t('products.comingSoon')})
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             {/* Send Button */}
             <button 
-              onClick={() => window.open('https://photog.art/p/trend', '_blank')}
-              className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors"
+              onClick={async () => {
+                if (!activeSubTab || !currentTabConfig?.subTabs) {
+                  // 如果没有选择工具，使用默认行为
+                  window.open('https://photog.art/p/trend', '_blank');
+                  return;
+                }
+
+                const subTab = currentTabConfig.subTabs.find(st => st.id === activeSubTab);
+                if (!subTab) {
+                  window.open('https://photog.art/p/trend', '_blank');
+                  return;
+                }
+
+                const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
+                if (isComingSoon) {
+                  return;
+                }
+
+                // 需要 OAuth2 授权的按钮（imageGen, videoGen 等）
+                const oauthRequiredSubTabs = ['imageGen', 'videoGen'];
+                if (oauthRequiredSubTabs.includes(subTab.id)) {
+                  await handleOAuthButtonClick(subTab.id);
+                } else if (subTab.url) {
+                  window.open(subTab.url, '_blank');
+                } else {
+                  // 默认行为
+                  window.open('https://photog.art/p/trend', '_blank');
+                }
+              }}
+              disabled={loadingSubTabId !== null}
+              className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-wait"
             >
-              <ArrowUp className="w-4 h-4" />
+              {loadingSubTabId ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ArrowUp className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* Sub Tab Navigation with Images */}
-        {currentTabConfig?.subTabs && currentTabConfig.subTabs.length > 0 && <div className="mb-10 items-center justify-center flex flex-row gap-[35px] border-transparent">
-            {currentTabConfig.subTabs.map(subTab => {
-              const isComingSoon = ['brandHealth', 'brandStrategy', 'digitalHuman', 'b2bLead'].includes(subTab.id);
-              return (
-                <button 
-                  key={subTab.id} 
-                  onClick={async () => {
-                    setActiveSubTab(subTab.id);
-                    if (isComingSoon) {
-                      return;
-                    }
-                    
-                    // 需要 OAuth2 授权的按钮（imageGen, videoGen 等）
-                    const oauthRequiredSubTabs = ['imageGen', 'videoGen'];
-                    if (oauthRequiredSubTabs.includes(subTab.id)) {
-                      await handleOAuthButtonClick(subTab.id);
-                    } else if (subTab.url) {
-                      window.open(subTab.url, '_blank');
-                    }
-                  }} 
-                  disabled={loadingSubTabId === subTab.id}
-                  className={`group relative flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 overflow-hidden min-w-[170px] bg-foreground/10 dark:bg-foreground/20 text-foreground hover:shadow-md ${isComingSoon ? 'cursor-default' : ''} ${loadingSubTabId === subTab.id ? 'opacity-50 cursor-wait' : ''}`}
-                >
-                    {/* Coming Soon Overlay */}
-                    {isComingSoon && (
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="text-sm font-medium text-foreground">{t('products.comingSoon')}</span>
-                      </div>
-                    )}
-                    {/* Text content */}
-                    <span className="relative z-10 flex-shrink-0">
-                      {loadingSubTabId === subTab.id ? (
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          {t('products.loading') || 'Loading...'}
-                        </span>
-                      ) : (
-                        t(subTab.labelKey)
-                      )}
-                    </span>
-                    
-                    {/* Tilted thumbnail image */}
-                    <div className="relative w-14 h-14 flex-shrink-0 ml-auto">
-                      <div className="absolute inset-0 transform rotate-6 group-hover:rotate-12 transition-transform duration-300 rounded-lg overflow-hidden shadow-lg">
-                        {loadingSubTabId === subTab.id ? (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                            <Loader2 className="w-6 h-6 animate-spin text-foreground/50" />
-                          </div>
-                        ) : (
-                          <img src={subTab.image} alt="" className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                    </div>
-                  </button>
-              );
-            })}
-          </div>}
       </div>
     </div>;
 };

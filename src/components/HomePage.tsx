@@ -155,7 +155,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
             fontWeight: 400,
             letterSpacing: '0.001em'
           }}>
-                oranai
+                oranAI
               </motion.h1>
             </div>
 

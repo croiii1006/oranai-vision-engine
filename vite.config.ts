@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
       },
       // LIBRARY 页面 API 代理（匹配 /api/app 路径）
       '/api/app': {
-        target: 'http://192.168.112.253:8080',
+        target: 'https://photog.art',
         changeOrigin: true,
       },
       // AUTH 相关 API 代理

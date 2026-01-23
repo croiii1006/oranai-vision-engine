@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   fetchMaterialSquareDetail,
@@ -76,9 +76,6 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
   const animationProgressRef = useRef(0);
-
-  const [titleOffsets, setTitleOffsets] = useState({ x: 0, y: -116 }); // defaults aligned with HERO_TOP->TARGET_TOP
-  const [subtitleFade, setSubtitleFade] = useState(0);
 
   const [activeCardIndex, setActiveCardIndex] = useState<Record<TabType, number>>({
     video: 2,
@@ -181,31 +178,64 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     }
   }, [selectedItem]);
 
-  // 获取 AI 视频列表数据（只在初始加载时获取，不依赖搜索和分类）
-  const { data: videoListData } = useQuery({
+  // 获取 AI 视频列表数据（分页加载）
+  const {
+    data: videoListData,
+    fetchNextPage: fetchNextVideoPage,
+    hasNextPage: hasNextVideoPage,
+    isFetchingNextPage: isFetchingNextVideoPage,
+  } = useInfiniteQuery({
     queryKey: ['materialSquareList', 'video'],
-    queryFn: () => fetchMaterialSquareList({
-      page: 1,
-      size: 100,
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareList({
+      page: pageParam as number,
+      size: 10,
     }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  // 获取 AI 音频列表数据（只在初始加载时获取，不依赖搜索）
-  const { data: audioListData } = useQuery({
+  // 获取 AI 音频列表数据（分页加载）
+  const {
+    data: audioListData,
+    fetchNextPage: fetchNextAudioPage,
+    hasNextPage: hasNextAudioPage,
+    isFetchingNextPage: isFetchingNextAudioPage,
+  } = useInfiniteQuery({
     queryKey: ['materialSquareAudioList'],
-    queryFn: () => fetchMaterialSquareAudioList({
-      page: 1,
-      size: 100,
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareAudioList({
+      page: pageParam as number,
+      size: 10,
     }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  // 获取 AI 模特列表数据（只在初始加载时获取，不依赖搜索）
-  const { data: modelListData } = useQuery({
+  // 获取 AI 模特列表数据（分页加载）
+  const {
+    data: modelListData,
+    fetchNextPage: fetchNextModelPage,
+    hasNextPage: hasNextModelPage,
+    isFetchingNextPage: isFetchingNextModelPage,
+  } = useInfiniteQuery({
     queryKey: ['materialSquareModelList'],
-    queryFn: () => fetchMaterialSquareModelList({
-      page: 1,
-      size: 100,
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareModelList({
+      page: pageParam as number,
+      size: 10,
     }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
   // 搜索防抖：300ms延迟
@@ -232,10 +262,18 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     setSelectedCategory('all');
   }, []);
 
-  // 使用 API 数据
-  const previewVideoItems: MaterialSquareItem[] = videoListData?.data?.list || [];
-  const previewVoiceItems: MaterialSquareAudioItem[] = audioListData?.data?.list || [];
-  const previewModelItems: MaterialSquareModelItem[] = modelListData?.data?.list || [];
+  // 合并所有页面的数据
+  const previewVideoItems: MaterialSquareItem[] = useMemo(() => {
+    return videoListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [videoListData]);
+
+  const previewVoiceItems: MaterialSquareAudioItem[] = useMemo(() => {
+    return audioListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [audioListData]);
+
+  const previewModelItems: MaterialSquareModelItem[] = useMemo(() => {
+    return modelListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [modelListData]);
 
   // 从 API 数据中提取所有唯一的 category 值（去重处理）
   const videoCategories = useMemo(() => {
@@ -307,16 +345,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   }, []);
 
   useLayoutEffect(() => {
-    const HERO_TOP = 140;
-    const TARGET_TOP = 24;
-    const LEFT_PADDING = 185;
-
     const updateOffsets = () => {
       if (typeof window === 'undefined') return;
-      const viewportWidth = window.innerWidth;
-      const centerToLeftX = -(viewportWidth / 2 - LEFT_PADDING);
-      const centerToTopY = TARGET_TOP - HERO_TOP;
-      setTitleOffsets({ x: centerToLeftX, y: centerToTopY });
 
       // Update max horizontal offset for video carousel so we can scroll all cards
       const totalVideoCards = filteredVideoItems.length;
@@ -336,17 +366,24 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if (selectedItem) return; // Don't animate when modal is open
-      e.preventDefault();
-
-      // When expanded and on video tab, allow horizontal scroll of cards
-      if (isExpanded && activeTab === 'video' && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        setCardOffsets((prev) => ({
-          ...prev,
-          // Invert trackpad delta so left swipe shows previous (matches arrow direction)
-          video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video - e.deltaX)),
-        }));
+      
+      // 展开状态下使用瀑布流布局，允许正常页面滚动
+      if (isExpanded) {
+        // 只有在视频标签页且是水平滚动时才处理卡片偏移
+        if (activeTab === 'video' && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          e.preventDefault();
+          setCardOffsets((prev) => ({
+            ...prev,
+            // Invert trackpad delta so left swipe shows previous (matches arrow direction)
+            video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video - e.deltaX)),
+          }));
+        }
+        // 其他情况允许正常滚动，不阻止默认行为
         return;
       }
+
+      // 收起状态下，阻止默认滚动，用于控制展开/收起动画
+      e.preventDefault();
 
       const delta = e.deltaY;
       const sensitivity = 0.012;
@@ -365,6 +402,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
       if (selectedItem) return;
+      
+      // 展开状态下使用瀑布流布局，允许正常页面滚动
+      if (isExpanded) {
+        // 不阻止默认行为，允许正常滚动
+        return;
+      }
+
+      // 收起状态下，阻止默认滚动，用于控制展开/收起动画
       e.preventDefault();
 
       const deltaY = touchStartY.current - e.touches[0].clientY;
@@ -375,8 +420,33 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       const target = current + deltaY * sensitivity;
       setProgressClamped(target);
     },
-    [selectedItem, setProgressClamped]
+    [selectedItem, setProgressClamped, isExpanded]
   );
+
+  // Handle scroll events - auto collapse when scrolled to top
+  const handleScroll = useCallback(() => {
+    if (!isExpanded || selectedItem) return;
+    
+    const container = containerRef.current;
+    if (!container) return;
+
+    // 检查是否滚动到底部，加载更多数据
+    const scrollHeight = container.scrollHeight;
+    const clientHeight = container.clientHeight;
+    const scrollTop = container.scrollTop;
+    const scrollBottom = scrollHeight - scrollTop - clientHeight;
+
+    // 当距离底部小于 200px 时，触发加载更多
+    if (scrollBottom < 200) {
+      if (activeTab === 'video' && hasNextVideoPage && !isFetchingNextVideoPage) {
+        fetchNextVideoPage();
+      } else if (activeTab === 'voice' && hasNextAudioPage && !isFetchingNextAudioPage) {
+        fetchNextAudioPage();
+      } else if (activeTab === 'model' && hasNextModelPage && !isFetchingNextModelPage) {
+        fetchNextModelPage();
+      }
+    }
+  }, [isExpanded, selectedItem, activeTab, hasNextVideoPage, hasNextAudioPage, hasNextModelPage, isFetchingNextVideoPage, isFetchingNextAudioPage, isFetchingNextModelPage, fetchNextVideoPage, fetchNextAudioPage, fetchNextModelPage]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -385,13 +455,19 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
     container.addEventListener('wheel', handleWheel, { passive: false });
     container.addEventListener('touchstart', handleTouchStart, { passive: true });
     container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    
+    // 只在展开状态下监听滚动事件
+    if (isExpanded) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+    }
 
     return () => {
       container.removeEventListener('wheel', handleWheel);
       container.removeEventListener('touchstart', handleTouchStart);
       container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('scroll', handleScroll);
     };
-  }, [handleWheel, handleTouchStart, handleTouchMove]);
+  }, [handleWheel, handleTouchStart, handleTouchMove, handleScroll, isExpanded]);
 
   const tabs = [
     { id: 'video' as TabType, labelKey: 'library.tab.video', icon: Video, sectionKey: 'library.section.video' },
@@ -451,42 +527,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const easeOutCubic = (tt: number) => 1 - Math.pow(1 - tt, 3);
   const easedProgress = easeOutCubic(animationProgress);
 
-  // Title fade logic: fade out mid-way, then fade back in
-  const fadeOut = clamp01((progress - 0.1) / 0.25);
-  const fadeIn = clamp01((progress - 0.55) / 0.25);
-  const titleOpacity = clamp01(1 - fadeOut + fadeIn);
-  const subtitleOpacity = subtitleFade;
-  const alignToLeft = easedProgress >= 0.85;
-
-  // Only shift left once aligned; keep centered before expansion
-  const titleTranslateX = alignToLeft ? titleOffsets.x * easedProgress * 0.85 + 310 : 0;
-  const titleTranslateY = 0; // vertical handled via top interpolation
-  const titleTop = TITLE_TOP_COLLAPSED + (TITLE_TOP_EXPANDED - TITLE_TOP_COLLAPSED) * easedProgress;
-
-  // Subtitle fades only after expansion nearly completes
-  useEffect(() => {
-    let raf = 0;
-
-    if (alignToLeft) {
-      const start = performance.now();
-      const duration = 400; // ms
-
-      const tick = (ts: number) => {
-        const tt = Math.min(1, (ts - start) / duration);
-        setSubtitleFade(tt);
-        if (tt < 1) raf = requestAnimationFrame(tick);
-      };
-
-      setSubtitleFade(0);
-      raf = requestAnimationFrame(tick);
-    } else {
-      setSubtitleFade(0);
-    }
-
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [alignToLeft]);
+  // Simplified: no fade logic needed, just check if expanded
+  const alignToLeft = isExpanded;
 
   // Initialize active cards to the middle item of each tab
   useEffect(() => {
@@ -519,7 +561,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       const totalWidth = totalCards * CARD_WIDTH + (totalCards - 1) * CARD_GAP;
       const startX = -totalWidth / 2 + CARD_WIDTH / 2;
       const linearX = startX + index * (CARD_WIDTH + CARD_GAP);
-      const linearY = easedProgress > 0.5 ? 0 : -450;
+      const linearY = isExpanded ? 0 : -450;
 
       const currentX = fanX + (linearX - fanX) * easedProgress;
       const currentY = fanY + (linearY - fanY) * easedProgress;
@@ -548,34 +590,52 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
         zIndex,
       };
     },
-    [easedProgress]
+    [easedProgress, isExpanded]
   );
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 overflow-hidden bg-background"
-      style={{ touchAction: 'none', top: '60px' }}
+      className="fixed inset-0 bg-background"
+      style={{ 
+        top: '60px',
+        overflow: isExpanded ? 'auto' : 'hidden',
+        touchAction: isExpanded ? 'auto' : 'none'
+      }}
     >
       {/* Title Container - Animates from center to top-left */}
       <div
         className="absolute z-20 left-0 right-0 px-6 sm:px-10 lg:px-16"
-        style={{ top: titleTop, opacity: titleOpacity }}
+        style={{ 
+          top: isExpanded ? TITLE_TOP_EXPANDED : TITLE_TOP_COLLAPSED, 
+          opacity: 1,
+          transition: 'top 0.5s ease-out',
+        }}
       >
+        {/* Close Button - Only visible when expanded */}
+        {isExpanded && (
+          <button
+            onClick={() => setProgressClamped(0)}
+            className="absolute top-0 right-6 sm:right-10 lg:right-16 z-30 p-2 rounded-full hover:bg-muted/50 transition-colors duration-200"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+        )}
         <div 
-          className={`flex flex-col ${alignToLeft ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
+          className={`flex flex-col ${isExpanded ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
           style={{
             gap: `${TITLE_SUBTITLE_GAP}px`,
-            transform: alignToLeft ? 'none' : `translateX(${titleTranslateX}px) translateY(${titleTranslateY}px)`,
-            transition: 'transform 0.35s ease, opacity 0.35s ease',
+            transform: isExpanded ? 'none' : 'none',
+            transition: 'all 0.5s ease-out',
           }}
         >
           <h1
             className="font-bold tracking-tight whitespace-nowrap"
             style={{
-              fontSize: `${Math.max(1.75, 4 - easedProgress * 2.5)}rem`,
-              opacity: titleOpacity,
-              transition: 'font-size 0.35s ease, opacity 0.35s ease',
+              fontSize: isExpanded ? '1.75rem' : '4rem',
+              opacity: 1,
+              transition: 'font-size 0.5s ease-out',
             }}
           >
             {t('library.title')}
@@ -584,10 +644,11 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
           <div
             className="flex w-full items-center justify-between"
             style={{
-              opacity: subtitleOpacity,
+              opacity: isExpanded ? 1 : 0,
               transform: `translateY(6px)`,
-              transition: 'opacity 0.35s ease, transform 0.35s ease',
+              transition: 'opacity 0.5s ease-out',
               marginTop: '1px',
+              pointerEvents: isExpanded ? 'auto' : 'none',
             }}
           >
             <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
@@ -609,48 +670,50 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
           </div>
         </div>
 
-      {/* Description - Fades out */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
-        style={{
-          top: '26%',
-          // Fade even faster as soon as the user starts scrolling
-          opacity: Math.max(0, 1 - easedProgress * 10),
-          transform: `translateX(-50%) translateY(${easedProgress * -25}px)`,
-          pointerEvents: progress > 0.02 ? 'none' : 'auto',
-          transition: 'opacity 0.35s ease, transform 0.35s ease',
-        }}
-      >
-        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
-      </div>
-
-      {/* Tab Selector - Fades out, positioned below description */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 z-30"
-        style={{
-          top: '42%',
-          opacity: 1 - easedProgress * 2.5,
-          transform: `translateX(-50%) translateY(${easedProgress * -20}px)`,
-          pointerEvents: progress > 0.3 ? 'none' : 'auto',
-        }}
-      >
-        <div className="flex items-center gap-3">
-          {tabs.map((tab) => (
-                <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeTab === tab.id
-                      ? 'bg-foreground text-background'
-                      : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                  }`}
-                >
-              <tab.icon className="w-4 h-4" />
-              {t(tab.labelKey)}
-                </button>
-              ))}
+      {/* Description - Hidden when expanded */}
+      {!isExpanded && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
+          style={{
+            top: '26%',
+            opacity: 1,
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
         </div>
-            </div>
+      )}
+
+      {/* Tab Selector - Hidden when expanded */}
+      {!isExpanded && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-30"
+          style={{
+            top: '42%',
+            opacity: 1,
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? 'bg-foreground text-background'
+                    : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {t(tab.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter Bar - sits under subtitle, full width */}
       <div
@@ -701,34 +764,23 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       <div
         className="absolute left-0 right-0 z-10 overflow-visible"
         style={{
-          top: easedProgress > 0.5 ? '30vh' : 'auto',
-          bottom: easedProgress > 0.5 ? 'auto' : `${-15 + easedProgress * 30}%`,
-          height: easedProgress > 0.5 ? 'auto' : '65%',
+          top: isExpanded ? '30vh' : 'auto',
+          bottom: isExpanded ? 'auto' : `${-15 + easedProgress * 30}%`,
+          height: isExpanded ? 'auto' : '65%',
+          transition: 'top 0.5s ease-out, bottom 0.5s ease-out, height 0.5s ease-out',
         }}
       >
         <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
         {/* Video Cards */}
         {activeTab === 'video' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredVideoItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous video"
-                  onClick={() => handleArrowNavigation('video', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next video"
-                  onClick={() => handleArrowNavigation('video', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined
+            }}
+          >
             {filteredVideoItems.map((item, index) => {
               const totalCards = filteredVideoItems.length;
               const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
@@ -742,13 +794,23 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
               const baseY = layout.currentY;
               const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
               const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
-              const zIndex = isActiveCard ? 999 : layout.zIndex;
+              const zIndex = 999;
 
             return (
               <div
                 key={item.id}
-                  className="absolute cursor-pointer"
-                  style={{
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
                     width: `${CARD_WIDTH}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
@@ -758,11 +820,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                     transform: baseTransform,
                     zIndex,
                     opacity: layout.opacity,
-                    transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
                     filter: `blur(${layout.blur}px)`,
                     boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
                     borderRadius: '24px',
                     overflow: 'hidden',
+                    position: 'absolute',
                   }}
                   onClick={async () => {
                     setActiveForTab('video', index, totalCards);
@@ -779,13 +842,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
                       e.currentTarget.style.transform = hoverTransform;
                       e.currentTarget.style.zIndex = '1000';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = baseTransform;
-                    e.currentTarget.style.zIndex = String(zIndex);
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
                   }}
                 >
                   <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
@@ -834,25 +905,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
         {/* Voice Cards */}
         {activeTab === 'voice' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredVoiceItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous voice"
-                  onClick={() => handleArrowNavigation('voice', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next voice"
-                  onClick={() => handleArrowNavigation('voice', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined,
+              transition: 'all 0.5s ease-out',
+            }}
+          >
             {filteredVoiceItems.map((item, index) => {
               const totalCards = filteredVoiceItems.length;
               const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
@@ -866,13 +926,23 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
               const baseY = layout.currentY;
               const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
               const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
-              const zIndex = isActiveCard ? 999 : layout.zIndex;
+              const zIndex = 999;
 
               return (
                 <div
                   key={item.id}
-                  className="absolute cursor-pointer"
-                  style={{
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
                     width: `${CARD_WIDTH}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
@@ -882,11 +952,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                     transform: baseTransform,
                     zIndex,
                     opacity: layout.opacity,
-                    transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
                     filter: `blur(${layout.blur}px)`,
                     boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
                     borderRadius: '24px',
                     overflow: 'hidden',
+                    position: 'absolute',
                   }}
                   onClick={async () => {
                     setActiveForTab('voice', index, totalCards);
@@ -903,13 +974,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
                       e.currentTarget.style.transform = hoverTransform;
                       e.currentTarget.style.zIndex = '1000';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = baseTransform;
-                    e.currentTarget.style.zIndex = String(zIndex);
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
                   }}
                 >
                   <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
@@ -934,7 +1013,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                           <Heart className="w-3 h-3" />
                           <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
                     </span>
-                      </div>
+                  </div>
                       <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.title}</p>
                     </div>
                     <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
@@ -947,25 +1026,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
 
         {/* Model Cards */}
         {activeTab === 'model' && (
-          <div className="relative w-full h-full flex items-end justify-center overflow-visible" style={{ minHeight: easedProgress > 0.5 ? '420px' : 'auto' }}>
-            {isExpanded && filteredModelItems.length > 0 && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 sm:px-8 z-[1100]">
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Previous model"
-                  onClick={() => handleArrowNavigation('model', 'prev')}
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  className="pointer-events-auto h-10 w-10 flex items-center justify-center text-foreground/60 hover:text-foreground transition-all duration-200 hover:scale-105"
-                  aria-label="Next model"
-                  onClick={() => handleArrowNavigation('model', 'next')}
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-                  </div>
-            )}
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined,
+              transition: 'all 0.5s ease-out',
+            }}
+          >
             {filteredModelItems.map((item, index) => {
               const totalCards = filteredModelItems.length;
               const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
@@ -979,13 +1047,23 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
               const baseY = layout.currentY;
               const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
               const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
-              const zIndex = isActiveCard ? 999 : layout.zIndex;
+              const zIndex = 999;
 
               return (
                 <div
                   key={item.id}
-                  className="absolute cursor-pointer"
-                  style={{
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
                     width: `${CARD_WIDTH}px`,
                     height: `${currentHeight}px`,
                     left: '50%',
@@ -995,11 +1073,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                     transform: baseTransform,
                     zIndex,
                     opacity: layout.opacity,
-                    transition: 'transform 0.4s ease, height 0.4s ease, opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease',
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
                     filter: `blur(${layout.blur}px)`,
                     boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
                     borderRadius: '24px',
                     overflow: 'hidden',
+                    position: 'absolute',
                   }}
                   onClick={async () => {
                     setActiveForTab('model', index, totalCards);
@@ -1016,13 +1095,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                   }}
                   onMouseEnter={(e) => {
                     if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
                       e.currentTarget.style.transform = hoverTransform;
                       e.currentTarget.style.zIndex = '1000';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = baseTransform;
-                    e.currentTarget.style.zIndex = String(zIndex);
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
                   }}
                 >
                   <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
@@ -1056,9 +1143,9 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
       </div>
 
       {/* Progress Indicator */}
-      <div className="absolute bottom-4 right-4 w-1 h-20 bg-muted/30 rounded-full overflow-hidden z-20">
+      {/* <div className="absolute bottom-4 right-4 w-1 h-20 bg-muted/30 rounded-full overflow-hidden z-20">
         <div className="w-full bg-foreground/50 rounded-full transition-all duration-100" style={{ height: `${progress * 100}%` }} />
-      </div>
+      </div> */}
 
       {/* Detail Modal */}
       {selectedItem && (
@@ -1296,16 +1383,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
                       >
                         <Download className="w-5 h-5" />
                         {t('library.downloadAudio')}
-                      </a>
-                    )}
+                    </a>
+                  )}
                     <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
                       <Sparkles className="w-5 h-5" />
-                      {t('library.replicate')}
+                    {t('library.replicate')}
                       <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
                       </div>
-                    </button>
-                  </div>
+                  </button>
+                </div>
               </div>
             </div>
             ) : (
