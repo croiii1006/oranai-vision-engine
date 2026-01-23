@@ -356,7 +356,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                         {tab.label}
                       </button>
                       {/* Solution Dropdown Menu */}
-                      <div className="fixed left-0 right-0 top-16 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                      <div className="fixed inset-x-0 top-16 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                         <div className="backdrop-blur-md bg-background/80 dark:bg-background/60 border-y border-border/30 shadow-xl p-8 w-full">
                           <div className="max-w-4xl mx-auto grid grid-cols-2 gap-16">
                             {/* 场景解决方案 */}
