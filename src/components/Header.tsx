@@ -343,17 +343,97 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
             <nav className="hidden md:flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-none dark:shadow-lg bg-transparent dark:bg-background/40 backdrop-blur-none dark:backdrop-blur-md">
                 {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                      activeTab === tab.id
-                        ? 'bg-foreground text-background shadow-md'
-                        : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
+                  tab.id === 'solution' ? (
+                    <div key={tab.id} className="relative group">
+                      <button
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                          activeTab === tab.id
+                            ? 'bg-foreground text-background shadow-md'
+                            : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                      {/* Solution Dropdown Menu */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                        <div className="backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/30 rounded-2xl shadow-xl p-6 min-w-[400px]">
+                          <div className="grid grid-cols-2 gap-8">
+                            {/* 场景解决方案 */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
+                                {language === 'en' ? 'Scenario Solutions' : '场景解决方案'}
+                              </h3>
+                              <div className="space-y-2">
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  OranGEO
+                                </button>
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'TK Full Chain' : 'TK全链路'}
+                                </button>
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'Email Marketing' : '邮件营销'}
+                                </button>
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'Sales Training' : '销售培训'}
+                                </button>
+                              </div>
+                            </div>
+                            {/* 行业解决方案 */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
+                                {language === 'en' ? 'Industry Solutions' : '行业解决方案'}
+                              </h3>
+                              <div className="space-y-2">
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'Beauty & FMCG' : '美妆快消'}
+                                </button>
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'Consumer Electronics' : '消费电子'}
+                                </button>
+                                <button 
+                                  onClick={() => setActiveTab('solution')}
+                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                >
+                                  {language === 'en' ? 'Cross-border E-commerce' : '跨境出海'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-foreground text-background shadow-md'
+                          : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  )
                 ))}
               </div>
             </nav>
