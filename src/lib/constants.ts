@@ -22,6 +22,9 @@ export const STORAGE_KEYS = {
   THEME: "app_theme",
   USER_PREFERENCES: "user_preferences",
   IP_LOCATION: "app_ip_location",
+  AUTH_TOKEN: "auth_token",
+  USER_INFO: "user_info",
+  OAUTH_CODE: "oauth_code",
 } as const;
 
 /**

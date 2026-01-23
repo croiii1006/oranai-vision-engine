@@ -1,620 +1,1246 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowUp, Play, Download, Eye, Heart, MessageCircle, Share2, X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMemo } from 'react';
+import {
+  Play,
+  Download,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share2,
+  X,
+  Sparkles,
+  Video,
+  Music,
+  User,
+  Volume2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchMaterialSquareList, 
+import {
   fetchMaterialSquareDetail,
-  MaterialSquareItem,
-  MaterialSquareDetail as MaterialSquareDetailType
+  fetchMaterialSquareList,
+  fetchMaterialSquareAudioList,
+  fetchMaterialSquareAudioDetail,
+  fetchMaterialSquareModelList,
+  fetchMaterialSquareModelDetail,
+  type MaterialSquareItem,
+  type MaterialSquareDetail,
+  type MaterialSquareAudioItem,
+  type MaterialSquareAudioDetail,
+  type MaterialSquareModelItem,
+  type MaterialSquareModelDetail,
 } from '@/lib/api/library';
 
-// 使用API返回的接口类型
-type LibraryItem = MaterialSquareItem;
+// Shared layout constants for the carousel fan
+const CARD_WIDTH = 210;
+const CARD_GAP = 28;
+// Fan/stack tuning for up to 8 cards (distance 0-4), wider spread to fill width
+const FAN_OFFSETS = [0, 130, 240, 340, 440];
+const SCALE_BY_DISTANCE = [1, 0.92, 0.84, 0.76, 0.74];
+const ROTATE_BY_DISTANCE = [0, 6, 10, 14, 16];
+const Y_OFFSETS = [0, 8, 16, 24, 30];
+const OPACITY_DROP_BY_DISTANCE = [0, 0.06, 0.12, 0.18, 0.2];
+const BLUR_PER_STEP = 0.6;
+const MAX_DISTANCE_INDEX = FAN_OFFSETS.length - 1;
+const CARD_STEP = CARD_WIDTH + CARD_GAP;
+// Decouple collapsed/expanded title top positions
+const TITLE_TOP_COLLAPSED = 70;
+const TITLE_TOP_EXPANDED = 20;
+// Gap between main title and subtitle/search row (px)
+const TITLE_SUBTITLE_GAP = 1;
 
-const formatNumber = (num: number): string => {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
+const formatNumber = (num: number | undefined | null): string => {
+  const value = num ?? 0;
+  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+  if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
+  return value.toString();
 };
 
-// 格式化日期
-const formatDate = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  } catch {
-    return dateString;
-  }
-};
+type TabType = 'video' | 'voice' | 'model';
 
-const LibraryPage: React.FC = () => {
+type SelectedItemType = MaterialSquareDetail | MaterialSquareAudioDetail | MaterialSquareModelDetail;
+
+interface LibraryPageProps {
+  onExpandedChange?: (expanded: boolean) => void;
+}
+
+const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
-  // 搜索输入值（立即更新，用于显示）
-  const [searchInput, setSearchInput] = useState('');
-  // 实际用于查询的搜索关键词（防抖后更新）
+
+  const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState<TabType>('video');
+
+  const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
+  const animationProgressRef = useRef(0);
+
+  const [activeCardIndex, setActiveCardIndex] = useState<Record<TabType, number>>({
+    video: 2,
+    voice: 2,
+    model: 2,
+  });
+  const [cardOffsets, setCardOffsets] = useState<Record<TabType, number>>({
+    video: 0,
+    voice: 0,
+    model: 0,
+  });
+  const [maxVideoOffset, setMaxVideoOffset] = useState(800);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
-  
-  // 防抖定时器引用
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // 分页状态 - 使用累加方式存储所有已加载的数据
-  const [allLoadedItems, setAllLoadedItems] = useState<MaterialSquareItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  
-  // 固定的筛选器列表（初始化后不再变化）
-  const [fixedFilters, setFixedFilters] = useState<Array<{ id: string; label: string }>>([
-    { id: 'all', label: t('library.all') || 'All' }
-  ]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const searchDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 组件挂载时，重置所有状态并重新获取数据
+  // 处理音频自动播放和停止
   useEffect(() => {
-    // 重置状态
-    setCurrentPage(1);
-    setAllLoadedItems([]);
-    setTotalCount(0);
-    setSearchInput('');
-    setSearchQuery('');
-    setActiveFilter('all');
-    setSelectedItemId(null);
-    // 重置筛选器列表
-    setFixedFilters([{ id: 'all', label: t('library.all') || 'All' }]);
-    
-    // 清除防抖定时器
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    
-    // 清除查询缓存并重新获取数据
-    queryClient.invalidateQueries({ queryKey: ['materialSquareList'] });
-  }, []); // 空依赖数组，只在组件挂载时执行
-
-  // 搜索防抖：用户停止输入500ms后才更新searchQuery
-  useEffect(() => {
-    // 清除之前的定时器
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    
-    // 设置新的防抖定时器
-    debounceTimerRef.current = setTimeout(() => {
-      setSearchQuery(searchInput);
-    }, 500); // 500ms防抖延迟
-    
-    // 清理函数：组件卸载或searchInput变化时清除定时器
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+    // 当 selectedItem 是 Audio 类型且有 audioUrl 时，自动播放
+    if (selectedItem && 'audioUrl' in selectedItem && selectedItem.audioUrl) {
+      // 创建或更新 audio 元素
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
       }
-    };
-  }, [searchInput]);
-  
-  // 组件卸载时清理防抖定时器
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      
+      audioRef.current.src = selectedItem.audioUrl;
+      audioRef.current.load();
+      
+      // 自动播放
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsAudioPlaying(true);
+          })
+          .catch((error) => {
+            console.error('Audio autoplay failed:', error);
+            setIsAudioPlaying(false);
+          });
       }
-    };
-  }, []);
-
-  // 响应式列数（根据屏幕大小）
-  const getColumnCount = (): number => {
-    if (typeof window === 'undefined') return 5;
-    const width = window.innerWidth;
-    if (width >= 1280) return 5; // xl
-    if (width >= 1024) return 4; // lg
-    if (width >= 768) return 3; // md
-    return 2; // sm
-  };
-
-  const [columnCount, setColumnCount] = useState(getColumnCount());
-
-  useEffect(() => {
-    const handleResize = () => {
-      setColumnCount(getColumnCount());
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // 获取列表数据
-  const { data: listData, isLoading: listLoading, error: listError } = useQuery({
-    queryKey: ['materialSquareList', searchQuery, activeFilter, currentPage],
-    queryFn: () => {
-      const params: Parameters<typeof fetchMaterialSquareList>[0] = {
-        page: currentPage,
-        size: pageSize,
+      
+      // 监听播放结束
+      const handleEnded = () => {
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
       };
       
-      // 只有当搜索关键词存在时才添加title参数
-      if (searchQuery) {
-        params.title = searchQuery;
-      }
+      // 监听播放错误
+      const handleError = () => {
+        console.error('Audio playback error');
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      };
       
-      // 只有当筛选不是'all'时才添加type参数
-      if (activeFilter && activeFilter !== 'all') {
-        params.type = activeFilter;
-      }
+      // 监听时间更新，更新进度条
+      const handleTimeUpdate = () => {
+        if (audioRef.current && audioRef.current.duration) {
+          const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+          setAudioProgress(progress);
+        }
+      };
       
-      return fetchMaterialSquareList(params);
+      // 监听播放状态变化
+      const handlePlay = () => setIsAudioPlaying(true);
+      const handlePause = () => setIsAudioPlaying(false);
+      
+      audioRef.current.addEventListener('ended', handleEnded);
+      audioRef.current.addEventListener('error', handleError);
+      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      audioRef.current.addEventListener('play', handlePlay);
+      audioRef.current.addEventListener('pause', handlePause);
+      
+      // 清理函数：移除事件监听器并停止播放
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('ended', handleEnded);
+          audioRef.current.removeEventListener('error', handleError);
+          audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+          audioRef.current.removeEventListener('play', handlePlay);
+          audioRef.current.removeEventListener('pause', handlePause);
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          setIsAudioPlaying(false);
+          setAudioProgress(0);
+        }
+      };
+    } else {
+      // 当弹窗关闭或不是 Audio 类型时，停止播放
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setIsAudioPlaying(false);
+        setAudioProgress(0);
+      }
+    }
+  }, [selectedItem]);
+
+  // 获取 AI 视频列表数据（分页加载）
+  const {
+    data: videoListData,
+    fetchNextPage: fetchNextVideoPage,
+    hasNextPage: hasNextVideoPage,
+    isFetchingNextPage: isFetchingNextVideoPage,
+  } = useInfiniteQuery({
+    queryKey: ['materialSquareList', 'video'],
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareList({
+      page: pageParam as number,
+      size: 10,
+    }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
     },
+    initialPageParam: 1,
   });
 
-  // 当列表数据更新时，累加到allLoadedItems
+  // 获取 AI 音频列表数据（分页加载）
+  const {
+    data: audioListData,
+    fetchNextPage: fetchNextAudioPage,
+    hasNextPage: hasNextAudioPage,
+    isFetchingNextPage: isFetchingNextAudioPage,
+  } = useInfiniteQuery({
+    queryKey: ['materialSquareAudioList'],
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareAudioList({
+      page: pageParam as number,
+      size: 10,
+    }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+
+  // 获取 AI 模特列表数据（分页加载）
+  const {
+    data: modelListData,
+    fetchNextPage: fetchNextModelPage,
+    hasNextPage: hasNextModelPage,
+    isFetchingNextPage: isFetchingNextModelPage,
+  } = useInfiniteQuery({
+    queryKey: ['materialSquareModelList'],
+    queryFn: ({ pageParam = 1 }) => fetchMaterialSquareModelList({
+      page: pageParam as number,
+      size: 10,
+    }),
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.data?.total || 0;
+      const loaded = allPages.reduce((sum, page) => sum + (page.data?.list?.length || 0), 0);
+      return loaded < total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+
+  // 搜索防抖：300ms延迟
   useEffect(() => {
-    if (listData?.data?.list) {
-      if (currentPage === 1) {
-        // 第一页，直接替换
-        setAllLoadedItems(listData.data.list);
-        setTotalCount(listData.data.total);
-        
-        // 只在初始化时（activeFilter为'all'且筛选器列表还未初始化）提取筛选类型
-        if (activeFilter === 'all') {
-          setFixedFilters(prev => {
-            // 如果筛选器列表已经初始化（长度大于1），不再更新
-            if (prev.length > 1) {
-              return prev;
-            }
-            
-            // 从第一页数据中提取所有唯一的category
-            const categories = new Set<string>();
-            listData.data.list.forEach(item => {
-              if (item.category && item.category.trim()) {
-                categories.add(item.category);
-              }
-            });
-            
-            const categoryFilters = Array.from(categories)
-              .sort()
-              .map(cat => ({
-                id: cat,
-                label: cat,
-              }));
-            
-            return [
-              { id: 'all', label: t('library.all') || 'All' },
-              ...categoryFilters,
-            ];
-          });
-        }
-      } else {
-        // 后续页，累加
-        setAllLoadedItems(prev => [...prev, ...listData.data.list]);
-        // 更新总数（如果后端返回的总数有变化）
-        if (listData.data.total !== totalCount) {
-          setTotalCount(listData.data.total);
-        }
-      }
+    if (searchDebounceTimerRef.current) {
+      clearTimeout(searchDebounceTimerRef.current);
     }
-  }, [listData, currentPage, activeFilter, t, totalCount]);
-
-  // 当搜索或筛选条件改变时，重置数据
-  useEffect(() => {
-    setCurrentPage(1);
-    setAllLoadedItems([]);
-    setTotalCount(0);
-    // 清除相关查询缓存
-    queryClient.invalidateQueries({ queryKey: ['materialSquareList'] });
-  }, [searchQuery, activeFilter, queryClient]);
-
-  // 获取详情数据
-  const { data: detailData, isLoading: detailLoading } = useQuery({
-    queryKey: ['materialSquareDetail', selectedItemId],
-    queryFn: () => fetchMaterialSquareDetail(selectedItemId!),
-    enabled: selectedItemId !== null,
-  });
-
-  // 筛选项目（客户端筛选，因为API可能不支持所有筛选）
-  const filteredItems = useMemo(() => {
-    return allLoadedItems.filter(item => {
-      const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = activeFilter === 'all' || item.category === activeFilter;
-    return matchesSearch && matchesFilter;
-  });
-  }, [allLoadedItems, searchQuery, activeFilter]);
-
-  // 使用固定的筛选器列表（初始化后不再变化）
-  const filters = useMemo(() => {
-    return fixedFilters;
-  }, [fixedFilters]);
-
-  // 是否还有更多数据 - 基于已加载的数据量和总数判断
-  const hasMore = useMemo(() => {
-    if (!totalCount || totalCount === 0) {
-      // 如果还没有总数，检查当前查询结果
-      return listData?.data ? (currentPage * pageSize < listData.data.total) : false;
-    }
-    // 基于已加载的数据量和总数判断
-    return allLoadedItems.length < totalCount;
-  }, [allLoadedItems.length, totalCount, listData, currentPage, pageSize]);
-
-  // 滚动加载更多
-  useEffect(() => {
-    if (!hasMore || listLoading) return;
-
-    const currentRef = loadMoreRef.current;
-    if (!currentRef) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !listLoading) {
-          // 确保还有更多数据且不在加载中时才加载下一页
-          setCurrentPage((prev) => {
-            // 计算应该加载的下一页
-            const nextPage = prev + 1;
-            // 检查是否超过总数
-            const maxPage = totalCount > 0 ? Math.ceil(totalCount / pageSize) : nextPage;
-            return nextPage <= maxPage ? nextPage : prev;
-          });
-        }
-      },
-      {
-        rootMargin: '200px', // 提前200px开始加载
-        threshold: 0.1,
-      }
-    );
-
-    observer.observe(currentRef);
+    searchDebounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (searchDebounceTimerRef.current) {
+        clearTimeout(searchDebounceTimerRef.current);
       }
     };
-  }, [hasMore, listLoading, totalCount, pageSize]);
+  }, [searchQuery]);
 
-  // 判断是否为视频
-  const isVideo = (url: string, mediaType: string): boolean => {
-    return mediaType === 'video' || url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm');
-  };
+  // 切换tab时清空搜索框和重置Video类型
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab);
+    setSearchQuery('');
+    setDebouncedSearchQuery('');
+    setSelectedCategory('all');
+  }, []);
+
+  // 合并所有页面的数据
+  const previewVideoItems: MaterialSquareItem[] = useMemo(() => {
+    return videoListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [videoListData]);
+
+  const previewVoiceItems: MaterialSquareAudioItem[] = useMemo(() => {
+    return audioListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [audioListData]);
+
+  const previewModelItems: MaterialSquareModelItem[] = useMemo(() => {
+    return modelListData?.pages?.flatMap(page => page.data?.list || []) || [];
+  }, [modelListData]);
+
+  // 从 API 数据中提取所有唯一的 category 值（去重处理）
+  const videoCategories = useMemo(() => {
+    const categoryMap = new Map<string, string>(); // 使用 Map 存储：小写key -> 原始值
+    previewVideoItems.forEach((item) => {
+      if (item.category && item.category.trim()) {
+        const trimmedCategory = item.category.trim();
+        const lowerKey = trimmedCategory.toLowerCase();
+        // 如果已存在，保留第一个出现的原始值（保持大小写）
+        if (!categoryMap.has(lowerKey)) {
+          categoryMap.set(lowerKey, trimmedCategory);
+        }
+      }
+    });
+    // 转换为数组并排序（按原始值排序，不区分大小写）
+    return Array.from(categoryMap.values()).sort((a, b) => 
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    );
+  }, [previewVideoItems]);
+
+  // 使用防抖后的搜索查询进行过滤
+  const normalizedQuery = debouncedSearchQuery.trim().toLowerCase();
+
+  // 客户端过滤：前端遍历控制数据展示隐藏
+  const filteredVideoItems = useMemo(() => {
+    return previewVideoItems.filter((item) => {
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      const textBlob = `${item.title} ${item.publisher} ${(item.tags || []).join(' ')}`.toLowerCase();
+      const matchesSearch = !normalizedQuery || textBlob.includes(normalizedQuery);
+      return matchesCategory && matchesSearch;
+    });
+  }, [previewVideoItems, selectedCategory, normalizedQuery]);
+
+  const filteredVoiceItems = useMemo(() => {
+    return previewVoiceItems.filter((item) => {
+      const textBlob = `${item.title} ${item.publisher} ${item.style}`.toLowerCase();
+      return !normalizedQuery || textBlob.includes(normalizedQuery);
+    });
+  }, [previewVoiceItems, normalizedQuery]);
+
+  const filteredModelItems = useMemo(() => {
+    return previewModelItems.filter((item) => {
+      const textBlob = `${item.name} ${item.style} ${item.gender} ${item.ethnicity}`.toLowerCase();
+      return !normalizedQuery || textBlob.includes(normalizedQuery);
+    });
+  }, [previewModelItems, normalizedQuery]);
+
+  const clampIndex = (index: number, total: number) => Math.max(0, Math.min(total - 1, index));
+  const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+  const progress = animationProgress;
+  const isExpanded = progress > 0.5;
+
+  useEffect(() => {
+    animationProgressRef.current = animationProgress;
+  }, [animationProgress]);
+
+  const setProgressClamped = useCallback((next: number) => {
+    const clamped = Math.max(0, Math.min(1, next));
+    animationProgressRef.current = clamped;
+    setAnimationProgress(clamped);
+  }, []);
+
+  // Compute dynamic offsets so the title moves from centered to ~24px from edges responsively
+  const computeMaxOffset = useCallback((totalCards: number) => {
+    if (typeof window === 'undefined' || totalCards === 0) return 0;
+    const totalWidth = totalCards * CARD_WIDTH + Math.max(0, totalCards - 1) * CARD_GAP;
+    return Math.max(0, (totalWidth - window.innerWidth) / 2 + 120);
+  }, []);
+
+  useLayoutEffect(() => {
+    const updateOffsets = () => {
+      if (typeof window === 'undefined') return;
+
+      // Update max horizontal offset for video carousel so we can scroll all cards
+      const totalVideoCards = filteredVideoItems.length;
+      if (totalVideoCards === 0) {
+        setMaxVideoOffset(0);
+        return;
+      }
+      setMaxVideoOffset(computeMaxOffset(totalVideoCards));
+    };
+
+    updateOffsets();
+    window.addEventListener('resize', updateOffsets);
+    return () => window.removeEventListener('resize', updateOffsets);
+  }, [filteredVideoItems.length, computeMaxOffset]);
+
+  // Handle wheel events for animation control
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (selectedItem) return; // Don't animate when modal is open
+      
+      // 展开状态下使用瀑布流布局，允许正常页面滚动
+      if (isExpanded) {
+        // 只有在视频标签页且是水平滚动时才处理卡片偏移
+        if (activeTab === 'video' && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          e.preventDefault();
+          setCardOffsets((prev) => ({
+            ...prev,
+            // Invert trackpad delta so left swipe shows previous (matches arrow direction)
+            video: Math.max(-maxVideoOffset, Math.min(maxVideoOffset, prev.video - e.deltaX)),
+          }));
+        }
+        // 其他情况允许正常滚动，不阻止默认行为
+        return;
+      }
+
+      // 收起状态下，阻止默认滚动，用于控制展开/收起动画
+      e.preventDefault();
+
+      const delta = e.deltaY;
+      const sensitivity = 0.012;
+      const current = animationProgressRef.current;
+      const target = current + delta * sensitivity;
+      setProgressClamped(target);
+    },
+    [selectedItem, setProgressClamped, isExpanded, activeTab, maxVideoOffset]
+  );
+
+  // Handle touch events for mobile
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (selectedItem) return;
+      
+      // 展开状态下使用瀑布流布局，允许正常页面滚动
+      if (isExpanded) {
+        // 不阻止默认行为，允许正常滚动
+        return;
+      }
+
+      // 收起状态下，阻止默认滚动，用于控制展开/收起动画
+      e.preventDefault();
+
+      const deltaY = touchStartY.current - e.touches[0].clientY;
+      touchStartY.current = e.touches[0].clientY;
+
+      const sensitivity = 0.014;
+      const current = animationProgressRef.current;
+      const target = current + deltaY * sensitivity;
+      setProgressClamped(target);
+    },
+    [selectedItem, setProgressClamped, isExpanded]
+  );
+
+  // Handle scroll events - auto collapse when scrolled to top
+  const handleScroll = useCallback(() => {
+    if (!isExpanded || selectedItem) return;
+    
+    const container = containerRef.current;
+    if (!container) return;
+
+    // 检查是否滚动到底部，加载更多数据
+    const scrollHeight = container.scrollHeight;
+    const clientHeight = container.clientHeight;
+    const scrollTop = container.scrollTop;
+    const scrollBottom = scrollHeight - scrollTop - clientHeight;
+
+    // 当距离底部小于 200px 时，触发加载更多
+    if (scrollBottom < 200) {
+      if (activeTab === 'video' && hasNextVideoPage && !isFetchingNextVideoPage) {
+        fetchNextVideoPage();
+      } else if (activeTab === 'voice' && hasNextAudioPage && !isFetchingNextAudioPage) {
+        fetchNextAudioPage();
+      } else if (activeTab === 'model' && hasNextModelPage && !isFetchingNextModelPage) {
+        fetchNextModelPage();
+      }
+    }
+  }, [isExpanded, selectedItem, activeTab, hasNextVideoPage, hasNextAudioPage, hasNextModelPage, isFetchingNextVideoPage, isFetchingNextAudioPage, isFetchingNextModelPage, fetchNextVideoPage, fetchNextAudioPage, fetchNextModelPage]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    
+    // 只在展开状态下监听滚动事件
+    if (isExpanded) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleWheel, handleTouchStart, handleTouchMove, handleScroll, isExpanded]);
+
+  const tabs = [
+    { id: 'video' as TabType, labelKey: 'library.tab.video', icon: Video, sectionKey: 'library.section.video' },
+    { id: 'voice' as TabType, labelKey: 'library.tab.voice', icon: Music, sectionKey: 'library.section.voice' },
+    { id: 'model' as TabType, labelKey: 'library.tab.model', icon: User, sectionKey: 'library.section.model' },
+  ];
+
+  const setActiveForTab = useCallback((tab: TabType, index: number, total: number) => {
+    setActiveCardIndex((prev) => ({
+      ...prev,
+      [tab]: clampIndex(index, total),
+    }));
+  }, []);
+
+  const handleArrowNavigation = useCallback(
+    (tab: TabType, direction: 'prev' | 'next') => {
+      const items =
+        tab === 'video' ? filteredVideoItems : tab === 'voice' ? filteredVoiceItems : filteredModelItems;
+      if (!items.length) return;
+      const total = items.length;
+      const current = activeCardIndex[tab] ?? Math.floor(total / 2);
+      const nextIndex = clampIndex(current + (direction === 'prev' ? -1 : 1), total);
+      setActiveForTab(tab, nextIndex, total);
+
+      setCardOffsets((prev) => {
+        const currentOffset = prev[tab] ?? 0;
+        const maxOffset = tab === 'video' ? maxVideoOffset : computeMaxOffset(items.length);
+        // Move viewport opposite to the desired card direction to keep arrows intuitive
+        const delta = direction === 'prev' ? CARD_STEP : -CARD_STEP;
+        const nextOffset = Math.max(-maxOffset, Math.min(maxOffset, currentOffset + delta));
+        return { ...prev, [tab]: nextOffset };
+      });
+    },
+    [activeCardIndex, computeMaxOffset, filteredModelItems, filteredVideoItems, filteredVoiceItems, maxVideoOffset, setActiveForTab]
+  );
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (!isExpanded || selectedItem) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleArrowNavigation(activeTab, 'prev');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleArrowNavigation(activeTab, 'next');
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [activeTab, handleArrowNavigation, isExpanded, selectedItem]);
+
+  // Subtitle content based on tab
+  const currentTab = tabs.find((tab) => tab.id === activeTab);
+  const subtitleKey = currentTab?.sectionKey || 'library.section.video';
+
+  // Easing function for smoother animations
+  const easeOutCubic = (tt: number) => 1 - Math.pow(1 - tt, 3);
+  const easedProgress = easeOutCubic(animationProgress);
+
+  // Simplified: no fade logic needed, just check if expanded
+  const alignToLeft = isExpanded;
+
+  // Initialize active cards to the middle item of each tab
+  useEffect(() => {
+    setActiveCardIndex({
+      video: clampIndex(Math.floor(filteredVideoItems.length / 2), filteredVideoItems.length),
+      voice: clampIndex(Math.floor(filteredVoiceItems.length / 2), filteredVoiceItems.length),
+      model: clampIndex(Math.floor(filteredModelItems.length / 2), filteredModelItems.length),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setActiveCardIndex((prev) => ({
+      video: clampIndex(prev.video ?? 0, filteredVideoItems.length),
+      voice: clampIndex(prev.voice ?? 0, filteredVoiceItems.length),
+      model: clampIndex(prev.model ?? 0, filteredModelItems.length),
+    }));
+  }, [filteredVideoItems.length, filteredVoiceItems.length, filteredModelItems.length]);
+
+  const buildFanLayout = useCallback(
+    (index: number, totalCards: number, activeIndex: number) => {
+      const distanceFromActive = index - activeIndex;
+      const distanceAbs = Math.min(Math.abs(distanceFromActive), MAX_DISTANCE_INDEX);
+      const sign = Math.sign(distanceFromActive);
+
+      const fanX = sign * FAN_OFFSETS[distanceAbs];
+      const fanY = Y_OFFSETS[distanceAbs];
+      const fanRotation = sign * ROTATE_BY_DISTANCE[distanceAbs];
+
+      const totalWidth = totalCards * CARD_WIDTH + (totalCards - 1) * CARD_GAP;
+      const startX = -totalWidth / 2 + CARD_WIDTH / 2;
+      const linearX = startX + index * (CARD_WIDTH + CARD_GAP);
+      const linearY = isExpanded ? 0 : -450;
+
+      const currentX = fanX + (linearX - fanX) * easedProgress;
+      const currentY = fanY + (linearY - fanY) * easedProgress;
+      const currentRotation = fanRotation * (1 - easedProgress);
+
+      const baseScale = SCALE_BY_DISTANCE[distanceAbs];
+      const currentScale = baseScale + (1 - baseScale) * easedProgress;
+
+      const opacityDrop = OPACITY_DROP_BY_DISTANCE[distanceAbs];
+      const opacity = 1 - opacityDrop * (1 - easedProgress);
+
+      const tiltY = -fanRotation * (1 - easedProgress);
+      const blur = BLUR_PER_STEP * distanceAbs * (1 - easedProgress);
+      const shadowStrength = Math.max(0.15, 0.35 - distanceAbs * 0.06);
+      const zIndex = 200 - Math.abs(Math.round(distanceFromActive));
+
+      return {
+        currentX,
+        currentY,
+        currentRotation,
+        currentScale,
+        opacity,
+        tiltY,
+        blur,
+        shadowStrength,
+        zIndex,
+      };
+    },
+    [easedProgress, isExpanded]
+  );
 
   return (
-    <div className="min-h-screen pt-32 pb-20">
-      <div className="w-full px-6 sm:px-10 lg:px-16">
-        {/* Header with Title and Search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 bg-background"
+      style={{ 
+        top: '60px',
+        overflow: isExpanded ? 'auto' : 'hidden',
+        touchAction: isExpanded ? 'auto' : 'none'
+      }}
+    >
+      {/* Title Container - Animates from center to top-left */}
+      <div
+        className="absolute z-20 left-0 right-0 px-6 sm:px-10 lg:px-16"
+        style={{ 
+          top: isExpanded ? TITLE_TOP_EXPANDED : TITLE_TOP_COLLAPSED, 
+          opacity: 1,
+          transition: 'top 0.5s ease-out',
+        }}
+      >
+        {/* Close Button - Only visible when expanded */}
+        {isExpanded && (
+          <button
+            onClick={() => setProgressClamped(0)}
+            className="absolute top-0 right-6 sm:right-10 lg:right-16 z-30 p-2 rounded-full hover:bg-muted/50 transition-colors duration-200"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+        )}
+        <div 
+          className={`flex flex-col ${isExpanded ? 'items-start text-left justify-start' : 'items-center text-center justify-center'}`}
+          style={{
+            gap: `${TITLE_SUBTITLE_GAP}px`,
+            transform: isExpanded ? 'none' : 'none',
+            transition: 'all 0.5s ease-out',
+          }}
+        >
+          <h1
+            className="font-bold tracking-tight whitespace-nowrap"
+            style={{
+              fontSize: isExpanded ? '1.75rem' : '4rem',
+              opacity: 1,
+              transition: 'font-size 0.5s ease-out',
+            }}
+          >
             {t('library.title')}
           </h1>
           
-          <div className="flex items-center gap-4 flex-1 max-w-2xl">
-            <div className="flex-1 relative">
+          <div
+            className="flex w-full items-center justify-between"
+            style={{
+              opacity: isExpanded ? 1 : 0,
+              transform: `translateY(6px)`,
+              transition: 'opacity 0.5s ease-out',
+              marginTop: '1px',
+              pointerEvents: isExpanded ? 'auto' : 'none',
+            }}
+          >
+            <span className="text-xl md:text-2xl font-light text-muted-foreground whitespace-nowrap block">
+              {t(subtitleKey)}
+            </span>
+
+            <div className="w-[220px] sm:w-[260px] md:w-[320px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
-                type="text"
-                placeholder={t('common.search')}
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full px-6 py-3 rounded-full border border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/50 transition-colors"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by title, tags, or publisher"
+                  className="w-full h-10 pl-10 pr-3 rounded-lg border border-border/50 bg-background/90 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/30 transition-all"
               />
             </div>
-            <button className="px-8 py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors">
-              <ArrowUp className="w-5 h-5" />
-            </button>
+            </div>
+          </div>
           </div>
         </div>
 
-        {/* Filter Tabs with horizontal scroll */}
-        <div className="relative mb-8">
-          <div className="flex items-center gap-2">
-            {/* Left Arrow */}
-            <button 
-              onClick={() => {
-                const container = document.getElementById('filter-scroll');
-                if (container) container.scrollBy({ left: -200, behavior: 'smooth' });
-              }}
-              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+      {/* Description - Hidden when expanded */}
+      {!isExpanded && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl text-center px-6 z-10"
+          style={{
+            top: '26%',
+            opacity: 1,
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">{t('library.heroDesc')}</p>
+        </div>
+      )}
 
-            {/* Scrollable Filter Container */}
-            <div 
-              id="filter-scroll"
-              className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {filters.map((filter) => (
+      {/* Tab Selector - Hidden when expanded */}
+      {!isExpanded && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-30"
+          style={{
+            top: '42%',
+            opacity: 1,
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? 'bg-foreground text-background'
+                    : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {t(tab.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filter Bar - sits under subtitle, full width */}
+      <div
+        className="absolute left-0 right-0 z-30 px-6 sm:px-10 lg:px-16"
+        style={{
+          top: '18vh',
+          opacity: alignToLeft ? 1 : 0,
+          transform: `translateY(${alignToLeft ? 0 : 8}px)`,
+          pointerEvents: alignToLeft ? 'auto' : 'none',
+          transition: 'opacity 0.35s ease, transform 0.35s ease',
+        }}
+      >
+        {activeTab === 'video' && (
+          <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex flex-nowrap gap-2 min-w-max pb-1">
+              {/* All 选项 */}
+              <button
+                key="all"
+                onClick={() => setSelectedCategory('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                  selectedCategory === 'all'
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'border-border/60 text-foreground/70 hover:border-foreground/40 hover:text-foreground'
+                }`}
+              >
+                {t('library.all')}
+            </button>
+              {/* 从 API 数据中动态生成的分类 */}
+              {videoCategories.map((category) => (
                 <button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all ${
-                    activeFilter === filter.id
-                      ? 'bg-foreground text-background'
-                      : 'border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0 ${
+                    selectedCategory === category
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'border-border/60 text-foreground/70 hover:border-foreground/40 hover:text-foreground'
                   }`}
                 >
-                  {filter.label}
+                  {category}
                 </button>
               ))}
-            </div>
-
-            {/* Right Arrow */}
-            <button 
-              onClick={() => {
-                const container = document.getElementById('filter-scroll');
-                if (container) container.scrollBy({ left: 200, behavior: 'smooth' });
-              }}
-              className="flex-shrink-0 p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
+          </div>
+        )}
         </div>
 
-        {/* Loading State */}
-        {listLoading && filteredItems.length === 0 && (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-muted-foreground">{t('library.loading')}</div>
-          </div>
-        )}
+      {/* Cards Container - Positioned at bottom initially, moves to top when expanded */}
+      <div
+        className="absolute left-0 right-0 z-10 overflow-visible"
+        style={{
+          top: isExpanded ? '30vh' : 'auto',
+          bottom: isExpanded ? 'auto' : `${-15 + easedProgress * 30}%`,
+          height: isExpanded ? 'auto' : '65%',
+          transition: 'top 0.5s ease-out, bottom 0.5s ease-out, height 0.5s ease-out',
+        }}
+      >
+        <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-        {/* Error State */}
-        {listError && (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-destructive">{t('library.loadFailed')}</div>
-          </div>
-        )}
+        {/* Video Cards */}
+        {activeTab === 'video' && (
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined
+            }}
+          >
+            {filteredVideoItems.map((item, index) => {
+              const totalCards = filteredVideoItems.length;
+              const activeIndex = clampIndex(activeCardIndex.video ?? Math.floor(totalCards / 2), totalCards);
+              const layout = buildFanLayout(index, totalCards, activeIndex);
 
-        {/* Library Grid - TikTok style vertical cards */}
-        {filteredItems.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredItems.map((item, index) => {
-              const isVideoItem = isVideo(item.sourceUrl, item.mediaType);
-              // 计算列索引（瀑布流式：不同列有不同的延迟）
-              const columnIndex = index % columnCount;
-              // 计算行索引
-              const rowIndex = Math.floor(index / columnCount);
-              // 瀑布流式延迟：列索引决定基础延迟，行索引增加额外延迟
-              const delay = columnIndex * 0.1 + rowIndex * 0.05;
-              
+              const currentHeight = 340 + easedProgress * 80;
+              const isActiveCard = index === activeIndex;
+
+              const offsetX = isExpanded ? cardOffsets.video : 0;
+              const baseX = layout.currentX + offsetX;
+              const baseY = layout.currentY;
+              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+              const zIndex = 999;
+
             return (
-                <motion.div
+              <div
                 key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: delay,
-                    ease: [0.16, 1, 0.3, 1],
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
+                    width: `${CARD_WIDTH}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${CARD_WIDTH / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: baseTransform,
+                    zIndex,
+                    opacity: layout.opacity,
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
+                    filter: `blur(${layout.blur}px)`,
+                    boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    position: 'absolute',
                   }}
-                  onClick={() => setSelectedItemId(item.id)}
-                className="group relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer"
-              >
-                  {/* Video element for video - shows first frame as thumbnail, plays on hover */}
-                  {isVideoItem ? (
+                  onClick={async () => {
+                    setActiveForTab('video', index, totalCards);
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch video detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
+                      e.currentTarget.style.transform = hoverTransform;
+                      e.currentTarget.style.zIndex = '1000';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
+                  }}
+                >
+                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
                   <video 
-                      src={item.sourceUrl}
+                    src={item.sourceUrl}
                     muted
                     loop
                     playsInline
                     preload="metadata"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover rounded-[inherit]"
                     onMouseEnter={(e) => {
-                      const video = e.currentTarget;
-                      video.currentTime = 0;
-                      video.play().catch(() => {});
+                        if (isExpanded) {
+                          e.currentTarget.currentTime = 0;
+                          e.currentTarget.play().catch(() => {});
+                        }
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.pause();
                       e.currentTarget.currentTime = 0;
                     }}
                   />
-                  ) : (
-                  <img 
-                      src={item.sourceUrl} 
-                      alt={item.title}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        // 如果图片加载失败，显示占位符
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                  />
-                )}
-                
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20 pointer-events-none" />
-                
-                  {/* Play button - hide for video on hover since video plays */}
-                  {isVideoItem && (
-                    <div className="absolute inset-0 flex items-center justify-center transition-opacity z-20 pointer-events-none opacity-0 group-hover:opacity-100">
-                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Play className="w-5 h-5 text-white ml-0.5" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
+                    <div className="absolute top-3 left-3">
+                      <p className="text-white/60 text-xs font-medium">{item.publisher}</p>
                     </div>
-                  </div>
-                )}
-                
-                {/* Content overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none">
-                  {/* Stats - prominent display at top */}
-                  <div className="flex items-center gap-4 text-white mb-3">
-                    <span className="flex items-center gap-1.5">
-                      <Heart className="w-5 h-5" />
-                        <span className="text-base font-bold">{formatNumber(item.likeCount)}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <MessageCircle className="w-5 h-5" />
-                        <span className="text-base font-bold">{item.commentCount}</span>
-                    </span>
-                  </div>
-                  
-                  {/* Title */}
-                  <h3 className="text-white text-base font-bold mb-1.5 line-clamp-2 drop-shadow-lg leading-tight">
-                      {item.title}
-                  </h3>
-                  
-                  {/* Publisher & Views */}
-                  <div className="flex items-center justify-between text-white/80">
-                      <span className="text-sm">@{item.publisher?.replace(/\s+/g, '').toLowerCase() || t('library.unknown').toLowerCase()}</span>
-                    <span className="flex items-center gap-1 text-sm">
-                      <Eye className="w-4 h-4" />
-                        {formatNumber(item.viewCount)}
-                    </span>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.likeCount ?? 0)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span className="text-sm font-medium">{formatNumber(item.viewCount ?? 0)}</span>
+                        </span>
+                      </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg line-clamp-2">{item.title}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
                   </div>
                 </div>
-                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Voice Cards */}
+        {activeTab === 'voice' && (
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined,
+              transition: 'all 0.5s ease-out',
+            }}
+          >
+            {filteredVoiceItems.map((item, index) => {
+              const totalCards = filteredVoiceItems.length;
+              const activeIndex = clampIndex(activeCardIndex.voice ?? Math.floor(totalCards / 2), totalCards);
+              const layout = buildFanLayout(index, totalCards, activeIndex);
+
+              const currentHeight = 340 + easedProgress * 80;
+              const isActiveCard = index === activeIndex;
+
+              const offsetX = isExpanded ? cardOffsets.voice : 0;
+              const baseX = layout.currentX + offsetX;
+              const baseY = layout.currentY;
+              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+              const zIndex = 999;
+
+              return (
+                <div
+                  key={item.id}
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
+                    width: `${CARD_WIDTH}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${CARD_WIDTH / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: baseTransform,
+                    zIndex,
+                    opacity: layout.opacity,
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
+                    filter: `blur(${layout.blur}px)`,
+                    boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    position: 'absolute',
+                  }}
+                  onClick={async () => {
+                    setActiveForTab('voice', index, totalCards);
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareAudioDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch audio detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
+                      e.currentTarget.style.transform = hoverTransform;
+                      e.currentTarget.style.zIndex = '1000';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
+                  }}
+                >
+                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
+                    <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover rounded-[inherit]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center rounded-[inherit]">
+                      <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <Volume2 className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">
+                        {item.style} • {item.duration}
+                      </p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
+                        <span className="flex items-center gap-1">
+                          <Play className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.plays ?? 0)}</span>
+                  </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
+                    </span>
+                  </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.title}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Model Cards */}
+        {activeTab === 'model' && (
+          <div 
+            className={isExpanded ? "masonry-grid" : "relative w-full h-full flex items-end justify-center overflow-visible"} 
+            style={{ 
+              minHeight: isExpanded ? '420px' : 'auto',
+              display: isExpanded ? 'grid' : undefined,
+              transition: 'all 0.5s ease-out',
+            }}
+          >
+            {filteredModelItems.map((item, index) => {
+              const totalCards = filteredModelItems.length;
+              const activeIndex = clampIndex(activeCardIndex.model ?? Math.floor(totalCards / 2), totalCards);
+              const layout = buildFanLayout(index, totalCards, activeIndex);
+
+              const currentHeight = 340 + easedProgress * 80;
+              const isActiveCard = index === activeIndex;
+
+              const offsetX = isExpanded ? cardOffsets.model : 0;
+              const baseX = layout.currentX + offsetX;
+              const baseY = layout.currentY;
+              const baseTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY}px) rotate(${layout.currentRotation}deg) rotateY(${layout.tiltY}deg) scale(${layout.currentScale})`;
+              const hoverTransform = `perspective(1200px) translateX(${baseX}px) translateY(${baseY - 18}px) rotate(0deg) rotateY(0deg) scale(${layout.currentScale + 0.06})`;
+              const zIndex = 999;
+
+              return (
+                <div
+                  key={item.id}
+                  className={isExpanded ? "cursor-pointer" : "absolute cursor-pointer"}
+                  style={isExpanded ? {
+                    width: '100%',
+                    height: `${currentHeight}px`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    opacity: 1,
+                    filter: 'none',
+                    transition: 'all 0.5s ease-out, transform 0.3s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    position: 'relative',
+                  } : {
+                    width: `${CARD_WIDTH}px`,
+                    height: `${currentHeight}px`,
+                    left: '50%',
+                    bottom: '0',
+                    marginLeft: `-${CARD_WIDTH / 2}px`,
+                    transformOrigin: 'center bottom',
+                    transform: baseTransform,
+                    zIndex,
+                    opacity: layout.opacity,
+                    transition: 'all 0.5s ease-out, transform 0.4s ease',
+                    filter: `blur(${layout.blur}px)`,
+                    boxShadow: `0 18px 50px rgba(0,0,0,${layout.shadowStrength})`,
+                    borderRadius: '24px',
+                    overflow: 'hidden',
+                    position: 'absolute',
+                  }}
+                  onClick={async () => {
+                    setActiveForTab('model', index, totalCards);
+                    if (isExpanded) {
+                      // 获取详情数据
+                      try {
+                        const detailResponse = await fetchMaterialSquareModelDetail(item.id);
+                        setSelectedItem(detailResponse.data);
+                      } catch (error) {
+                        console.error('Failed to fetch model detail:', error);
+                        setSelectedItem(item as any);
+                      }
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                      e.currentTarget.style.zIndex = '1000';
+                    } else {
+                      e.currentTarget.style.transform = hoverTransform;
+                      e.currentTarget.style.zIndex = '1000';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isExpanded) {
+                      e.currentTarget.style.transform = '';
+                      e.currentTarget.style.zIndex = '';
+                    } else {
+                      e.currentTarget.style.transform = baseTransform;
+                      e.currentTarget.style.zIndex = String(zIndex);
+                    }
+                  }}
+                >
+                  <div className="w-full h-full rounded-[24px] overflow-hidden bg-muted">
+                    <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover rounded-[inherit]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[inherit]" />
+                    <div className="absolute top-3 left-3 right-3">
+                      <p className="text-white/60 text-xs font-medium">
+                        {item.style} • {item.gender}
+                      </p>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center gap-3 text-white mb-2 transition-opacity duration-300" style={{ opacity: easedProgress }}>
+                        <span className="flex items-center gap-1">
+                          <Download className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.downloads ?? 0)}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          <span className="text-xs">{formatNumber(item.likes ?? 0)}</span>
+                    </span>
+                  </div>
+                      <p className="text-white text-sm font-bold leading-tight drop-shadow-lg">{item.name}</p>
+                    </div>
+                    <div className="absolute inset-0 rounded-[inherit] border border-white/20 pointer-events-none" />
+                </div>
+              </div>
             );
           })}
         </div>
         )}
-
-        {/* 加载更多触发器 */}
-        {hasMore && (
-          <div ref={loadMoreRef} className="flex justify-center items-center py-8">
-            <div className="text-sm text-muted-foreground">{t('library.loadingMore')}</div>
-          </div>
-        )}
-
-        {/* 空状态 */}
-        {!listLoading && filteredItems.length === 0 && (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-muted-foreground">{t('library.noData')}</div>
-          </div>
-        )}
       </div>
 
+      {/* Progress Indicator */}
+      {/* <div className="absolute bottom-4 right-4 w-1 h-20 bg-muted/30 rounded-full overflow-hidden z-20">
+        <div className="w-full bg-foreground/50 rounded-full transition-all duration-100" style={{ height: `${progress * 100}%` }} />
+      </div> */}
+
       {/* Detail Modal */}
-      {selectedItemId && (
+      {selectedItem && (
         <div 
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedItemId(null)}
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4" 
+          onClick={() => setSelectedItem(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setSelectedItem(null);
+            }
+          }}
         >
           <div 
-            className="bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto overflow-x-hidden"
+            className="relative bg-background rounded-3xl p-6 md:p-8 max-w-4xl w-full shadow-2xl border border-border/20 max-h-[90vh] overflow-y-auto"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button 
-              onClick={() => setSelectedItemId(null)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted/30 transition-colors z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedItem(null);
+              }} 
+              className="absolute top-4 right-4 z-[101] p-2 rounded-full hover:bg-muted/30 transition-colors cursor-pointer"
+              aria-label="Close"
             >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {detailLoading ? (
-              <div className="flex justify-center items-center py-20">
-                <div className="text-muted-foreground">{t('library.loading')}</div>
-              </div>
-            ) : detailData?.data ? (
+            {/* 判断类型并渲染对应的详情 */}
+            {('sourceUrl' in selectedItem) ? (
+              // Video 详情
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-              {/* Media Preview - Phone style */}
               <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
                 <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
-                    {isVideo(detailData.data.sourceUrl, detailData.data.mediaType) ? (
-                    <video 
-                        src={detailData.data.sourceUrl}
-                      controls
-                      autoPlay
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                      <img 
-                        src={detailData.data.sourceUrl} 
-                        alt={detailData.data.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = '/placeholder.svg';
-                        }}
-                      />
-                  )}
+                    <video src={selectedItem.sourceUrl} controls autoPlay className="w-full h-full object-cover" poster={selectedItem.sourceUrl} />
                 </div>
               </div>
               
-              {/* Details */}
               <div className="flex-1 flex flex-col min-w-0">
-                {/* Primary: Title */}
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4 break-words">
-                    {detailData.data.title}
-                  </h2>
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.title}</h2>
                 
-                {/* Secondary: Publisher Info */}
                 <div className="space-y-2 mb-5">
                   <p className="text-sm md:text-base">
                       <span className="text-muted-foreground">{t('library.publisher')}: </span>
-                      <span className="text-foreground font-medium">{detailData.data.publisher || t('library.unknown')}</span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
                   </p>
+                    {selectedItem.category && (
                   <p className="text-sm md:text-base">
-                      <span className="text-muted-foreground">{t('library.category')}: </span>
-                      <span className="text-foreground font-medium">{detailData.data.category || t('library.unknown')}</span>
-                  </p>
-                    {detailData.data.purpose && (
-                  <p className="text-sm md:text-base">
-                        <span className="text-muted-foreground">{t('library.purposeLabel')}: </span>
-                        <span className="text-foreground font-medium break-words">{detailData.data.purpose}</span>
+                        <span className="text-muted-foreground">{t('library.category')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.category}</span>
                   </p>
                     )}
-                    {detailData.data.targetAudience && (
+                    {selectedItem.purpose && (
                   <p className="text-sm md:text-base">
-                        <span className="text-muted-foreground">{t('library.targetAudienceLabel')}: </span>
-                        <span className="text-foreground font-medium break-words">{detailData.data.targetAudience}</span>
+                    <span className="text-muted-foreground">{t('library.purpose')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.purpose}</span>
                   </p>
                     )}
-                    {detailData.data.aiTech && (
+                    {selectedItem.targetAudience && (
                   <p className="text-sm md:text-base">
-                        <span className="text-muted-foreground">{t('library.aiTechLabel')}: </span>
-                        <span className="text-foreground font-medium break-words">{detailData.data.aiTech}</span>
+                    <span className="text-muted-foreground">{t('library.audience')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.targetAudience}</span>
                   </p>
                     )}
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                      {t('library.publishTime')}: {formatDate(detailData.data.publishTime)}
+                    {selectedItem.aiTech && (
+                  <p className="text-sm md:text-base">
+                    <span className="text-muted-foreground">{t('library.aiAnalysis')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.aiTech}</span>
                   </p>
+                    )}
                 </div>
 
-                {/* Stats - 2x2 Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
                   <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.viewCount.toLocaleString()}</span>
-                      <span className="text-xs text-muted-foreground">{t('library.views')}</span>
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.viewCount ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.likeCount.toLocaleString()}</span>
-                      <span className="text-xs text-muted-foreground">{t('library.likes')}</span>
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likeCount ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.commentCount.toLocaleString()}</span>
-                      <span className="text-xs text-muted-foreground">{t('library.comments')}</span>
+                      <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.commentCount ?? 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.shareCount.toLocaleString()}</span>
-                      <span className="text-xs text-muted-foreground">{t('library.shares')}</span>
+                      <Share2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.shareCount ?? 0).toLocaleString()}</span>
                   </div>
-                    {detailData.data.collectCount !== undefined && (
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-base md:text-lg font-bold text-foreground">{detailData.data.collectCount.toLocaleString()}</span>
-                        <span className="text-xs text-muted-foreground">{t('library.collects')}</span>
-                      </div>
-                    )}
                 </div>
 
-                {/* Tags */}
-                  {detailData.data.tags && detailData.data.tags.length > 0 && (
+                  {selectedItem.tags && selectedItem.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
-                      {detailData.data.tags.map((tag, index) => (
-                    <span 
-                      key={index}
-                      className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-xs md:text-sm font-medium rounded-full border border-border/20"
-                    >
+                  {selectedItem.tags.map((tag, index) => (
+                        <span key={index} className="px-3 py-1.5 bg-muted/30 text-muted-foreground text-sm font-medium rounded-full border border-border/20">
                       #{tag}
                     </span>
                   ))}
@@ -622,43 +1248,207 @@ const LibraryPage: React.FC = () => {
                   )}
 
                 <div className="flex gap-3">
-                    {isVideo(detailData.data.sourceUrl, detailData.data.mediaType) ? (
+                    {selectedItem.sourceUrl && (
                     <a 
-                        href={detailData.data.sourceUrl}
+                        href={selectedItem.sourceUrl}
                       download
-                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+                        className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
                     >
-                      <Download className="w-4 h-4 md:w-5 md:h-5" />
+                        <Download className="w-5 h-5" />
                       {t('library.downloadVideo')}
                     </a>
-                  ) : (
-                    <a 
-                        href={detailData.data.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 py-3 md:py-4 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
-                    >
-                      <Play className="w-4 h-4 md:w-5 md:h-5" />
-                        {t('library.watchResource')}
+                    )}
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                      <Sparkles className="w-5 h-5" />
+                      {t('library.replicate')}
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : ('audioUrl' in selectedItem) ? (
+              // Audio 详情
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <img src={selectedItem.thumbnail} alt={selectedItem.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
+                      <div className="relative w-14 h-14 flex items-center justify-center">
+                        {/* 涟漪效果 */}
+                        {isAudioPlaying && (
+                          <>
+                            <div className="absolute inset-0 rounded-full bg-white/20 audio-ripple" />
+                            <div className="absolute inset-0 rounded-full bg-white/15 audio-ripple" style={{ animationDelay: '0.5s' }} />
+                            <div className="absolute inset-0 rounded-full bg-white/10 audio-ripple" style={{ animationDelay: '1s' }} />
+                          </>
+                        )}
+                        {/* 图标容器 */}
+                        <div className={`relative w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 transition-all duration-300 ${isAudioPlaying ? 'audio-playing' : ''}`}>
+                          <Volume2 className={`w-7 h-7 text-white transition-all duration-300 ${isAudioPlaying ? 'audio-playing' : ''}`} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.title}</h2>
+
+                  <div className="space-y-2 mb-5">
+                    <p className="text-sm md:text-base">
+                      <span className="text-muted-foreground">{t('library.publisher')}: </span>
+                      <span className="text-foreground font-medium">{selectedItem.publisher || t('library.unknown')}</span>
+                    </p>
+                    {selectedItem.style && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.style')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.style}</span>
+                      </p>
+                    )}
+                    {selectedItem.duration && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.duration')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.duration}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Play className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.plays ?? 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* 音频播放控件 */}
+                  {selectedItem.audioUrl && (
+                    <div className="mb-6 p-4 rounded-xl bg-muted/30 border border-border/30">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            if (audioRef.current) {
+                              if (isAudioPlaying) {
+                                audioRef.current.pause();
+                                setIsAudioPlaying(false);
+                              } else {
+                                audioRef.current.play().catch((error) => {
+                                  console.error('Audio play failed:', error);
+                                });
+                                setIsAudioPlaying(true);
+                              }
+                            }
+                          }}
+                          className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 transition-colors"
+                          aria-label={isAudioPlaying ? 'Pause' : 'Play'}
+                        >
+                          {isAudioPlaying ? (
+                            <div className="w-5 h-5 flex items-center justify-center gap-1">
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                              <div className="w-1 h-4 bg-current rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                            </div>
+                          ) : (
+                            <Play className="w-5 h-5 ml-0.5" />
+                          )}
+                        </button>
+                        <div className="flex-1">
+                          <div className="text-sm text-muted-foreground mb-1">
+                            {isAudioPlaying ? t('library.playing') || 'Playing...' : t('library.paused') || 'Paused'}
+                          </div>
+                          <div className="h-1 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-foreground transition-all duration-100"
+                              style={{
+                                width: `${audioProgress}%`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    {selectedItem.audioUrl && (
+                      <a
+                        href={selectedItem.audioUrl}
+                        download
+                        className="flex-1 py-3 rounded-xl border border-border/50 text-foreground font-medium hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-5 h-5" />
+                        {t('library.downloadAudio')}
                     </a>
                   )}
-                  <button 
-                    className="group relative flex-1 py-3 md:py-4 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 text-sm md:text-base cursor-default"
-                    disabled
-                  >
-                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                      <Sparkles className="w-5 h-5" />
                     {t('library.replicate')}
-                    {/* Coming Soon Overlay */}
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
-                    </div>
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
                   </button>
                 </div>
               </div>
             </div>
             ) : (
-              <div className="flex justify-center items-center py-20">
-                <div className="text-destructive">{t('library.loadDetailFailed')}</div>
+              // Model 详情
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                <div className="lg:w-[240px] flex-shrink-0 mx-auto lg:mx-0">
+                  <div className="relative aspect-[9/16] bg-black rounded-[2rem] overflow-hidden border-4 border-muted/30 max-w-[200px] lg:max-w-none mx-auto">
+                    <img src={selectedItem.thumbnail} alt={selectedItem.name} className="w-full h-full object-cover" />
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col min-w-0">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight mb-4">{selectedItem.name}</h2>
+
+                  <div className="space-y-2 mb-5">
+                    {selectedItem.style && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.style')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.style}</span>
+                      </p>
+                    )}
+                    {selectedItem.gender && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.gender')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.gender}</span>
+                      </p>
+                    )}
+                    {selectedItem.ethnicity && (
+                      <p className="text-sm md:text-base">
+                        <span className="text-muted-foreground">{t('library.ethnicity')}: </span>
+                        <span className="text-foreground font-medium">{selectedItem.ethnicity}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-y border-border/30">
+                    <div className="flex items-center gap-2">
+                      <Download className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.downloads ?? 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">{(selectedItem.likes ?? 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 py-3 rounded-xl bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 relative group">
+                      <Sparkles className="w-5 h-5" />
+                      {t('library.replicate')}
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-sm font-medium text-foreground">{t('library.comingSoon')}</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

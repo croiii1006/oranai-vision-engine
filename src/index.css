@@ -88,6 +88,22 @@
     @apply border-border;
   }
 
+  @font-face {
+    font-family: 'Zalando Sans Expanded';
+    src: url('/fonts/zalando-sans-expanded.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Urbanist';
+    src: url('/fonts/urbanist-variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-light;
   }
@@ -106,6 +122,15 @@
 }
 
 @layer components {
+  /* Homepage hero gradient */
+  .hero-gradient {
+    background: linear-gradient(to bottom, #ffffff, #999999);
+  }
+
+  .dark .hero-gradient {
+    background: linear-gradient(to bottom, #000000, #454545);
+  }
+
   /* Glassmorphism */
   .glass {
     @apply backdrop-blur-xl border;
@@ -293,5 +318,123 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Mac 风格滚动条 - 细边黑色圆角 */
+  /* 全局滚动条样式 - 应用到所有可滚动元素 */
+  * {
+    scrollbar-width: thin; /* Firefox - 细滚动条 */
+    scrollbar-color: rgba(0, 0, 0, 0.35) transparent; /* Firefox - 滚动条颜色和轨道 */
+  }
+
+  /* Webkit 浏览器（Chrome, Safari, Edge）滚动条样式 */
+  *::-webkit-scrollbar {
+    width: 11px; /* 垂直滚动条宽度 - Mac 标准宽度 */
+    height: 11px; /* 水平滚动条高度 */
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent; /* 轨道背景透明 */
+    border-radius: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.35); /* 滚动条颜色 - 半透明黑色 */
+    border-radius: 10px; /* 圆角 */
+    border: 2px solid transparent; /* 边框透明，用于创建细边效果 */
+    background-clip: padding-box; /* 确保背景不延伸到边框 */
+    transition: background-color 0.2s ease; /* 平滑过渡 */
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5); /* hover 时变深 */
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 0, 0, 0.65); /* 点击时更深 */
+  }
+
+  /* 暗色主题滚动条 */
+  .dark * {
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent; /* Firefox - 暗色主题 */
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35); /* 暗色主题 - 半透明白色 */
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5); /* hover 时变亮 */
+  }
+
+  .dark *::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.65); /* 点击时更亮 */
+  }
+
+  /* 隐藏滚动条但保持滚动功能（用于特殊场景） */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* 音频播放动画 */
+  @keyframes audio-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes audio-ripple {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .audio-playing {
+    animation: audio-pulse 1.5s ease-in-out infinite;
+  }
+
+  .audio-ripple {
+    animation: audio-ripple 1.5s ease-out infinite;
+  }
+
+  /* 瀑布流布局 */
+  .masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 28px;
+    padding: 20px;
+    width: 100%;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .masonry-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 16px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .masonry-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 32px;
+      padding: 24px;
+    }
   }
 }

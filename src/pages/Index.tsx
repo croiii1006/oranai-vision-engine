@@ -10,22 +10,31 @@ import Footer from '@/components/Footer';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [libraryFooterVisible, setLibraryFooterVisible] = useState(false);
+  // 首页 footer 只在滚动到 "Trend & Revenue Forecasting" 模块时显示，初始隐藏
   const [showFooterInSolution, setShowFooterInSolution] = useState(false);
 
   const handleScrollToFooter = () => {
     setShowFooterInSolution(true);
-    // 滚动到footer
+    // 滚动到页面底部
     setTimeout(() => {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }, 100);
   };
 
   const handleHideFooter = () => {
     setShowFooterInSolution(false);
   };
+
+  // 当切换到非 solution 页面时，重置 footer 状态
+  useEffect(() => {
+    if (activeTab !== 'solution') {
+      setShowFooterInSolution(false);
+    }
+  }, [activeTab]);
+
+  // Check if header should be visible (not on hero view)
+  const isHeroView = activeTab === 'home' || activeTab === 'hero';
 
   const renderContent = () => {
     switch (activeTab) {
@@ -43,18 +52,9 @@ const Index = () => {
     }
   };
 
-  // Show footer for non-scroll pages or when scrolled to footer in solution page
-  const showFooter = !['home', 'hero', 'solution'].includes(activeTab) || (activeTab === 'solution' && showFooterInSolution);
-  
-  // Reset showFooterInSolution when leaving solution page or entering solution page
-  useEffect(() => {
-    if (activeTab !== 'solution') {
-      setShowFooterInSolution(false);
-    } else {
-      // 当切换到solution页面时，先隐藏footer，让ScrollSolutionPage来决定是否显示
-      setShowFooterInSolution(false);
-    }
-  }, [activeTab]);
+  const isLibrary = activeTab === 'library';
+  const isSolution = activeTab === 'solution';
+  const showFooter = (isLibrary && libraryFooterVisible) || (!isLibrary && !isSolution) || (isSolution && showFooterInSolution);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -63,6 +63,7 @@ const Index = () => {
         setActiveTab={setActiveTab}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        isVisible={!isHeroView}
       />
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

@@ -32,13 +32,22 @@ export const config = {
     baseUrl: import.meta.env.VITE_API_BASE_URL || "",
     timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
     // 模型页面API地址
-    // 生产环境使用相对路径通过 Nginx 代理，开发环境使用完整 URL
+    // 开发环境使用代理路径，生产环境使用完整 URL
     modelsBaseUrl: import.meta.env.VITE_MODELS_API_BASE_URL || 
-      (import.meta.env.PROD ? "/api/models" : "https://models.photog.art"),
+      (import.meta.env.PROD ? "https://models.photog.art" : ""),
     // LIBRARY页面API地址
     // 生产环境使用相对路径通过 Nginx 代理，开发环境使用完整 URL
     libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
-      (import.meta.env.PROD ? "/api/library" : "https://photog.art"),
+      (import.meta.env.PROD ? "https://photog.art" : ""),
+    // AUTH页面API地址
+    authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || 
+      (import.meta.env.PROD ? "https://photog.art" : ""),
+    // Image Generation 工具地址
+    imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
+      (import.meta.env.PROD ? "https://tools.photog.art" : "http://localhost:8081"),
+    // Video Generation 工具地址（与 Image Generation 使用相同地址）
+    videoGenUrl: import.meta.env.VITE_VIDEO_GEN_URL || 
+      (import.meta.env.PROD ? "https://tools.photog.art" : "http://localhost:8081"),
   },
 
   // 应用信息
