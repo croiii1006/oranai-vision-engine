@@ -94,12 +94,12 @@ const ProductsPage: React.FC = () => {
       id: 'imageGen',
       labelKey: 'products.imageGen',
       image: imageGenThumb,
-      url: undefined // 动态获取，不在这里设置
+      url: 'https://tools.photog.art' // 动态获取，不在这里设置
     }, {
       id: 'videoGen',
       labelKey: 'products.videoGen',
       image: videoGenThumb,
-      url: undefined // 动态获取，使用 OAuth2 授权
+      url: 'https://tools.photog.art' // 动态获取，使用 OAuth2 授权
     }, {
       id: 'digitalHuman',
       labelKey: 'products.digitalHuman',
@@ -338,10 +338,11 @@ const ProductsPage: React.FC = () => {
                 }
 
                 // 需要 OAuth2 授权的按钮（imageGen, videoGen 等）
-                const oauthRequiredSubTabs = ['imageGen', 'videoGen'];
-                if (oauthRequiredSubTabs.includes(subTab.id)) {
-                  await handleOAuthButtonClick(subTab.id);
-                } else if (subTab.url) {
+                // const oauthRequiredSubTabs = ['imageGen', 'videoGen'];
+                // if (oauthRequiredSubTabs.includes(subTab.id)) {
+                //   await handleOAuthButtonClick(subTab.id);
+                // } else
+                  if (subTab.url) {
                   window.open(subTab.url, '_blank');
                 } else {
                   // 默认行为

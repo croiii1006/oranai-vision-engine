@@ -378,7 +378,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 <span className="hidden sm:inline">{language === 'en' ? 'EN' : '中文'}</span>
               </button>
               
-              {user ? (
+              {/* {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="focus:outline-none">
@@ -412,7 +412,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                 >
                   {language === 'en' ? 'Sign In' : '登录'}
                 </button>
-              )}
+              )} */}
             </div>
           </div>
 
