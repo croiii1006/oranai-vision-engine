@@ -104,12 +104,15 @@
     font-display: swap;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased font-light;
+  /* 固定滚动条占位，避免视口宽度变化导致页面左右抖动 */
+  html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable both-edges;
+    scroll-behavior: smooth;
   }
 
-  html {
-    scroll-behavior: smooth;
+  body {
+    @apply bg-background text-foreground antialiased font-light;
   }
 
   /* Theme transition */
