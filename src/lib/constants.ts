@@ -8,7 +8,7 @@
  */
 export const ROUTES = {
   HOME: "/",
-  MODELS: "/models",
+  PLATFORMS: "/models",
   PRODUCTS: "/products",
   LIBRARY: "/library",
   NOT_FOUND: "*",
@@ -32,7 +32,7 @@ export const STORAGE_KEYS = {
  */
 export const API_ENDPOINTS = {
   // 示例端点，根据实际 API 调整
-  MODELS: "/api/models",
+  PLATFORMS: "/api/models",
   PRODUCTS: "/api/products",
   LIBRARY: "/api/library",
 } as const;

@@ -12,7 +12,7 @@ const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
     "nav.solution": "Solution",
-    "nav.models": "Models",
+    "nav.models": "Platform",
     "nav.products": "Products",
     "nav.library": "Library",
     "nav.signIn": "Sign In",
@@ -137,7 +137,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Are you stuck with global marketing that is hard to localize, inefficient ad delivery, and ROI you cannot predict accurately?",
 
     // Models Page
-    "models.title": "MODELS",
+    "models.title": "PLATFORM",
     "models.filter": "Filter",
     "models.reset": "Reset",
     "models.nlp": "NLP",
@@ -618,7 +618,7 @@ const translations: Record<Language, Record<string, string>> = {
   zh: {
     // Navigation
     "nav.solution": "解决方案",
-    "nav.models": "模型",
+    "nav.models": "开放平台",
     "nav.products": "产品",
     "nav.library": "素材广场",
     "nav.signIn": "登录",
