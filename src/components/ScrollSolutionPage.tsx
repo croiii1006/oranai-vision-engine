@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ArrowUp } from "lucide-react";
 
 interface SectionData {
   id: string;
@@ -38,9 +39,9 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
   const lastScrollTime = useRef(0);
   
   // 滚动配置
-  const SCROLL_THRESHOLD = 120; // 需要累积的滚动量
-  const SCROLL_LOCK_DURATION = 1000; // 滚动锁定时长（毫秒）
-  const SCROLL_DEBOUNCE = 150; // 防抖时间（毫秒）
+  const SCROLL_THRESHOLD = 60; // 需要累积的滚动量
+  const SCROLL_LOCK_DURATION = 700; // 滚动锁定时长（毫秒）
+  const SCROLL_DEBOUNCE = 80; // 防抖时间（毫秒）
 
   const sections: SectionData[] = [
     {
@@ -190,24 +191,20 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
     }
   }, [showDetail, currentTab, currentSection, onScrollToTop, onScrollToFooter]);
 
+  const lastSectionIndex = sections.length - 1;
+  const lastTabIndex = sections[lastSectionIndex]?.tabs.length - 1;
+  const isAtFooter =
+    currentSection === lastSectionIndex && showDetail && currentTab === lastTabIndex;
+
   // 检测是否到达 "Trend & Revenue Forecasting" 模块，并控制footer显示
   // "Trend & Revenue Forecasting" 是最后一个 section (scale) 的最后一个 tab
   useEffect(() => {
-    const lastSectionIndex = sections.length - 1;
-    const lastTabIndex = sections[lastSectionIndex]?.tabs.length - 1;
-    
-    // 检查当前是否在 "Trend & Revenue Forecasting" 模块
-    const isAtTrendForecastModule = 
-      currentSection === lastSectionIndex &&
-      showDetail &&
-      currentTab === lastTabIndex;
-    
-    if (isAtTrendForecastModule) {
+    if (isAtFooter) {
       onScrollToFooter?.();
     } else {
       onHideFooter?.();
     }
-  }, [currentSection, currentTab, showDetail, onScrollToFooter, onHideFooter]);
+  }, [isAtFooter, onScrollToFooter, onHideFooter]);
 
   // Calculate progress
   const totalSteps = sections.reduce((acc, s) => acc + s.tabs.length + 1, 0) - 1;
@@ -215,6 +212,7 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
     sections.slice(0, currentSection).reduce((acc, s) => acc + s.tabs.length + 1, 0) +
     (showDetail ? currentTab + 1 : 0);
   const progress = (currentStep / totalSteps) * 100;
+  const showBackToTop = currentSection > 0 || showDetail;
 
   return (
     <div ref={containerRef} className="min-h-[calc(100vh-64px)] relative">
@@ -228,40 +226,51 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
         />
       </div>
 
-      {/* Left sidebar navigation - compact centered, always visible */}
-      <div className="fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24">
-        <div className="flex flex-col gap-20">
-          {sections.map((section, index) => (
-            <button
-              key={section.id}
-              onClick={() => {
-                setCurrentSection(index);
-                setCurrentTab(0);
-                setShowDetail(false);
-              }}
-              className="group flex flex-col items-center gap-2"
-            >
-              <div
-                className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${
-                  currentSection === index
-                    ? "bg-foreground border-foreground"
-                    : "border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60"
-                }`}
-              />
-              <span
-                className={`text-[9px] font-medium uppercase tracking-widest transition-all duration-300 ${
-                  currentSection === index
-                    ? "text-foreground"
-                    : "text-muted-foreground/40 group-hover:text-muted-foreground/60"
-                }`}
-                style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-              >
-                {t(section.titleKey)}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Left sidebar navigation - compact centered, hides at footer */}
+      <AnimatePresence>
+        {!isAtFooter && (
+          <motion.div
+            key="side-nav"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-0 top-0 h-screen w-20 z-30 hidden lg:flex flex-col justify-evenly items-center py-24"
+          >
+            <div className="flex flex-col gap-20">
+              {sections.map((section, index) => (
+                <button
+                  key={section.id}
+                  onClick={() => {
+                    setCurrentSection(index);
+                    setCurrentTab(0);
+                    setShowDetail(false);
+                  }}
+                  className="group flex flex-col items-center gap-2"
+                >
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full border-2 transition-all duration-300 ${
+                      currentSection === index
+                        ? "bg-foreground border-foreground"
+                        : "border-muted-foreground/30 bg-transparent hover:border-muted-foreground/60"
+                    }`}
+                  />
+                  <span
+                    className={`text-[9px] font-medium uppercase tracking-widest transition-all duration-300 ${
+                      currentSection === index
+                        ? "text-foreground"
+                        : "text-muted-foreground/40 group-hover:text-muted-foreground/60"
+                    }`}
+                    style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+                  >
+                    {t(section.titleKey)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main content area - centered with left padding */}
       <AnimatePresence mode="wait">
@@ -401,6 +410,30 @@ const ScrollSolutionPage: React.FC<ScrollSolutionPageProps> = ({ onScrollToTop, 
           </button>
         ))}
       </div>
+
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            key="solution-back-to-top"
+            type="button"
+            aria-label="Back to top"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-8 right-6 lg:bottom-10 lg:right-10 z-40 p-2 text-foreground hover:-translate-y-1 transition-transform duration-200"
+            onClick={() => {
+              setCurrentSection(0);
+              setCurrentTab(0);
+              setShowDetail(false);
+              scrollAccumulator.current = 0;
+              scrollLock.current = false;
+            }}
+          >
+            <ArrowUp className="w-6 h-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.18)]" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
