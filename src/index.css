@@ -106,6 +106,9 @@
 
   body {
     @apply bg-background text-foreground antialiased font-light;
+    /* 始终预留滚动条位置，避免出现/消失时页面水平抖动 */
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
   }
 
   html {

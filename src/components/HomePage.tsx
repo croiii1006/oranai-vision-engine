@@ -98,7 +98,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
   }, [activeTab, currentView]);
 
   return (
-    <div ref={containerRef} className="min-h-screen">
+    <div ref={containerRef} className="min-h-screen overflow-hidden">
       <AnimatePresence mode="wait">
         {currentView === 'hero' ? (
           <motion.section
