@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe, Sun, Moon, LogOut, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -57,6 +58,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
   const [error, setError] = useState<string | null>(null);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   
   // 从缓存加载用户信息
   useEffect(() => {
@@ -78,6 +80,54 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     { id: 'products', label: t('nav.products') },
     { id: 'library', label: t('nav.library') },
   ];
+
+  const menuConfigs: Record<
+    string,
+    {
+      sections: { title: string; items: string[] }[];
+    }
+  > = {
+    solution: {
+      sections: [
+        {
+          title: language === 'en' ? 'Scenario Solutions' : '场景解决方案',
+          items:
+            language === 'en'
+              ? ['OranGEO', 'TK Full-Chain', 'Email Marketing', 'Sales Training']
+              : ['OranGEO', 'TK全链路', '邮件营销', '销售培训'],
+        },
+        {
+          title: language === 'en' ? 'Industry Solutions' : '行业解决方案',
+          items:
+            language === 'en'
+              ? ['Beauty & FMCG', 'Consumer Electronics', 'Cross-border Expansion']
+              : ['美妆快消', '消费电子', '跨境出海'],
+        },
+      ],
+    },
+    models: {
+      sections: [
+        {
+          title: language === 'en' ? 'Platform Capabilities' : '平台能力',
+          items:
+            language === 'en'
+              ? ['Data Center', 'Model Library', 'MiniApps']
+              : ['数据中心', '模型库', 'MiniApps'],
+        },
+      ],
+    },
+    products: {
+      sections: [
+        {
+          title: language === 'en' ? 'Product Matrix' : '产品矩阵',
+          items:
+            language === 'en'
+              ? ['Data Infrastructure', 'Insights Hub', 'Strategy Engine', 'Content Factory']
+              : ['数据基建', '洞察中心', '策略引擎', '内容工厂'],
+        },
+      ],
+    },
+  };
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'zh' : 'en');
@@ -300,7 +350,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
       }`}
     >
-      <div className="backdrop-blur-md bg-background/20 dark:bg-background/10">
+      <div className="backdrop-blur bg-background/20 dark:bg-background/10">
         <div className="w-full px-6 sm:px-10 lg:px-16">
           <div className="relative flex items-center justify-between h-16">
             {/* Left - Logo with glassmorphism */}
@@ -340,23 +390,88 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
             </div>
 
             {/* Center - Main Navigation Tabs - Absolutely positioned for true center */}
-            <nav className="hidden md:flex items-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-none dark:shadow-lg bg-transparent dark:bg-background/40 backdrop-blur-none dark:backdrop-blur-md">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                      activeTab === tab.id
-                        ? 'bg-foreground text-background shadow-md'
-                        : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                    }`}
+            <div className="hidden md:flex flex-1 justify-center relative" onMouseLeave={() => setOpenMenu(null)}>
+              <nav className="flex items-center">
+                <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-none dark:shadow-lg bg-transparent dark:bg-background/40 backdrop-blur dark:backdrop-blur-md relative">
+                  {tabs.map((tab) =>
+                    menuConfigs[tab.id] ? (
+                      <div key={tab.id} className="relative">
+                        <button
+                          onMouseEnter={() => setOpenMenu(tab.id)}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                            activeTab === tab.id
+                              ? 'bg-foreground text-background shadow-md'
+                              : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        key={tab.id}
+                        onMouseEnter={() => setOpenMenu(null)}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                          activeTab === tab.id
+                            ? 'bg-foreground text-background shadow-md'
+                            : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    )
+                  )}
+                </div>
+              </nav>
+              <AnimatePresence>
+                {openMenu && menuConfigs[openMenu] && (
+                  <motion.div
+                    key="solution-mega"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed left-0 right-0 top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40"
+                    onMouseEnter={() => setOpenMenu(openMenu)}
+                    onMouseLeave={() => setOpenMenu(null)}
                   >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </nav>
+                    <div className="backdrop-blur bg-background/90 dark:bg-background/10 pointer-events-auto w-full rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/6   shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
+                      {menuConfigs[openMenu]?.sections && (
+                        <div
+                          className={`grid ${
+                            menuConfigs[openMenu].sections.length > 1 ? 'grid-cols-2' : 'grid-cols-1'
+                          } gap-10`}
+                        >
+                          {menuConfigs[openMenu].sections.map((section) => (
+                            <div className="space-y-3" key={section.title}>
+                              <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                                {section.title}
+                              </div>
+                              <div className="space-y-2">
+                                {section.items.map((item) => (
+                                  <button
+                                    key={item}
+                                    onClick={() => {
+                                      setActiveTab(openMenu);
+                                      setOpenMenu(null);
+                                    }}
+                                    className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
+                                  >
+                                    {item}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             {/* Right - Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
               <button
@@ -392,7 +507,10 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                       </Avatar>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48 backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/40"
+                  >
                     <div className="px-2 py-1.5 text-sm font-medium text-foreground">
                       {user.username || user.nickname}
                     </div>
