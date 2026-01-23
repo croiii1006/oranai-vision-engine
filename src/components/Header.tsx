@@ -355,66 +355,68 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                       >
                         {tab.label}
                       </button>
-                      {/* Solution Dropdown Menu */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                        <div className="backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/30 rounded-2xl shadow-xl p-6 min-w-[400px]">
-                          <div className="grid grid-cols-2 gap-8">
-                            {/* 场景解决方案 */}
-                            <div>
-                              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
-                                {language === 'en' ? 'Scenario Solutions' : '场景解决方案'}
-                              </h3>
-                              <div className="space-y-2">
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  OranGEO
-                                </button>
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'TK Full Chain' : 'TK全链路'}
-                                </button>
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'Email Marketing' : '邮件营销'}
-                                </button>
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'Sales Training' : '销售培训'}
-                                </button>
+                      {/* Solution Dropdown Menu - extends header background */}
+                      <div className="fixed left-0 right-0 top-16 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-40">
+                        <div className="backdrop-blur-md bg-background/20 dark:bg-background/10 border-t border-border/10 py-6">
+                          <div className="max-w-4xl mx-auto px-6">
+                            <div className="grid grid-cols-2 gap-12">
+                              {/* 场景解决方案 */}
+                              <div>
+                                <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
+                                  {language === 'en' ? 'Scenario Solutions' : '场景解决方案'}
+                                </h3>
+                                <div className="space-y-2">
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    OranGEO
+                                  </button>
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'TK Full Chain' : 'TK全链路'}
+                                  </button>
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'Email Marketing' : '邮件营销'}
+                                  </button>
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'Sales Training' : '销售培训'}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                            {/* 行业解决方案 */}
-                            <div>
-                              <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
-                                {language === 'en' ? 'Industry Solutions' : '行业解决方案'}
-                              </h3>
-                              <div className="space-y-2">
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'Beauty & FMCG' : '美妆快消'}
-                                </button>
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'Consumer Electronics' : '消费电子'}
-                                </button>
-                                <button 
-                                  onClick={() => setActiveTab('solution')}
-                                  className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                                >
-                                  {language === 'en' ? 'Cross-border E-commerce' : '跨境出海'}
-                                </button>
+                              {/* 行业解决方案 */}
+                              <div>
+                                <h3 className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border/30">
+                                  {language === 'en' ? 'Industry Solutions' : '行业解决方案'}
+                                </h3>
+                                <div className="space-y-2">
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'Beauty & FMCG' : '美妆快消'}
+                                  </button>
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'Consumer Electronics' : '消费电子'}
+                                  </button>
+                                  <button 
+                                    onClick={() => setActiveTab('solution')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+                                  >
+                                    {language === 'en' ? 'Cross-border E-commerce' : '跨境出海'}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
