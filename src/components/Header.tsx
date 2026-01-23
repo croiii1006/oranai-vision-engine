@@ -359,7 +359,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
             </nav>
             {/* Right - Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <button
+            <button
                 onClick={toggleTheme}
                 className="flex items-center justify-center p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors duration-200"
                 aria-label="Toggle theme"

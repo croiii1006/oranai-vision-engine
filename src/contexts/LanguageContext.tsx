@@ -12,9 +12,9 @@ const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
     "nav.solution": "Solution",
-    "nav.models": "Models",
+    "nav.models": "Platform",
     "nav.products": "Products",
-    "nav.library": "Library",
+    "nav.library": "Inspiration",
     "nav.signIn": "Sign In",
     "nav.contactUs": "Contact Us",
 
@@ -137,7 +137,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Are you stuck with global marketing that is hard to localize, inefficient ad delivery, and ROI you cannot predict accurately?",
 
     // Models Page
-    "models.title": "MODELS",
+    "models.title": "PLATFORM",
     "models.filter": "Filter",
     "models.reset": "Reset",
     "models.nlp": "NLP",
@@ -194,8 +194,8 @@ const translations: Record<Language, Record<string, string>> = {
     "products.modelDoubao": "Doubao",
 
     // Library - labels
-    "library.title": "LIBRARY",
-    "library.heroDesc": "Your one-stop destination for AI-generated creative assets. Discover stunning videos, immersive soundscapes, and lifelike digital models — all powered by cutting-edge AI technology to accelerate your creative workflow.",
+    "library.title": "AI INSPIRATION",
+    "library.heroDesc": "AI inspiration from across the web, brought together in one place. Discover stunning videos, immersive soundscapes, and lifelike digital models — all powered by cutting-edge AI technology to accelerate your creative workflow.",
     "library.scrollToExplore": "Scroll to explore",
     "library.tab.video": "AI Video",
     "library.tab.voice": "AI Voice",
@@ -618,9 +618,9 @@ const translations: Record<Language, Record<string, string>> = {
   zh: {
     // Navigation
     "nav.solution": "解决方案",
-    "nav.models": "模型",
+    "nav.models": "开放平台",
     "nav.products": "产品",
-    "nav.library": "素材广场",
+    "nav.library": "灵感",
     "nav.signIn": "登录",
     "nav.contactUs": "联系我们",
 
@@ -769,8 +769,8 @@ const translations: Record<Language, Record<string, string>> = {
     "products.modelDoubao": "豆包",
 
     // Library - labels
-    "library.title": "素材广场",
-    "library.heroDesc": "您的一站式 AI 创意素材中心。探索令人惊艳的视频、沉浸式音效和逼真的数字模特——全部由尖端 AI 技术驱动，加速您的创意工作流程。",
+    "library.title": "AI 灵感中心",
+    "library.heroDesc": "来自全网的 AI 灵感在这里汇聚。探索令人惊艳的视频、沉浸式音效和逼真的数字模特——全部由尖端 AI 技术驱动，加速您的创意工作流程。",
     "library.scrollToExplore": "向下滚动探索",
     "library.tab.video": "AI 视频",
     "library.tab.voice": "AI 语音",

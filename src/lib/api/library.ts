@@ -11,6 +11,7 @@ export interface MaterialSquareItem {
   category: string;
   tags: string[];
   sourceUrl: string;
+  previewUrl?: string; // 预览图片URL
   publisher: string;
   publishTime: string;
   viewCount: number;

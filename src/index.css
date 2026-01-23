@@ -104,12 +104,31 @@
     font-display: swap;
   }
 
+  /* 固定滚动条占位，避免视口宽度变化导致页面左右抖动 */
+  html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable both-edges;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none; /* IE/Edge hide scrollbar */
+    scrollbar-width: none; /* Firefox hide scrollbar */
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-light;
   }
 
-  html {
-    scroll-behavior: smooth;
+  /* Hide scrollbars globally but keep scrollable behavior */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   /* Theme transition */
