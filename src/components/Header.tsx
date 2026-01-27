@@ -466,9 +466,19 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                   <button
                                     key={item}
                                     onClick={() => {
-                                      // Handle OranGEO external link
-                                      if (item === 'OranGEO') {
-                                        window.open('http://orangeo.photog.art', '_blank');
+                                      // Handle external links for solution menu items
+                                      const externalLinks: Record<string, string> = {
+                                        'OranGEO': 'http://orangeo.photog.art',
+                                        'TK Full-Chain': 'http://tkfactory.photog.art',
+                                        'TK全链路': 'http://tkfactory.photog.art',
+                                        'Email Marketing': 'http://aigrowth.photog.art',
+                                        '邮件营销': 'http://aigrowth.photog.art',
+                                        'Sales Training': 'http://aisales.photog.art',
+                                        '销售培训': 'http://aisales.photog.art',
+                                      };
+                                      
+                                      if (externalLinks[item]) {
+                                        window.open(externalLinks[item], '_blank');
                                         setOpenMenu(null);
                                         return;
                                       }
