@@ -481,6 +481,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                         '消费电子': 'https://industrysolution.photog.art/',
                                         'Cross-border Expansion': 'https://industrysolution.photog.art/',
                                         '跨境出海': 'https://industrysolution.photog.art/',
+                                        'Data Infrastructure': 'https://industrysolution.photog.art/',
+                                        '数据基建': 'https://industrysolution.photog.art/',
+                                        'Insights Hub': 'https://insighthub.photog.art',
+                                        '洞察中心': 'https://insighthub.photog.art',
+                                        'Strategy Engine': 'https://strategyengine.photog.art',
+                                        '策略引擎': 'https://strategyengine.photog.art',
+                                        'Content Factory': 'https://toolbox.photog.art',
+                                        '内容工厂': 'https://toolbox.photog.art',
                                       };
                                       
                                       if (externalLinks[item]) {
