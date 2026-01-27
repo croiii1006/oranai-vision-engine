@@ -433,11 +433,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.2 }}
-                    className="fixed left-0 right-0 top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40"
+                    className="fixed left-0 right-0 top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40 flex justify-center"
                     onMouseEnter={() => setOpenMenu(openMenu)}
                     onMouseLeave={() => setOpenMenu(null)}
                   >
-                    <div className="backdrop-blur bg-background/90 dark:bg-background/10 pointer-events-auto w-fit rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/6   shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
+                    <div className="backdrop-blur bg-background/90 dark:bg-background/10 pointer-events-auto w-fit rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/6 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
                       {menuConfigs[openMenu]?.sections && (
                         <div
                           className={`grid ${
