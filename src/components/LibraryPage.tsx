@@ -64,15 +64,21 @@ type SelectedItemType = MaterialSquareDetail | MaterialSquareAudioDetail | Mater
 
 interface LibraryPageProps {
   onExpandedChange?: (expanded: boolean) => void;
+  initialTab?: 'video' | 'voice' | 'model';
 }
 
-const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange }) => {
+const LibraryPage: React.FC<LibraryPageProps> = ({ onExpandedChange, initialTab = 'video' }) => {
   const { t } = useLanguage();
 
   const [selectedItem, setSelectedItem] = useState<SelectedItemType | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
-  const [activeTab, setActiveTab] = useState<TabType>('video');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // Sync activeTab when initialTab prop changes
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const [animationProgress, setAnimationProgress] = useState(0); // 0 = hero, 1 = expanded
   const animationProgressRef = useRef(0);
