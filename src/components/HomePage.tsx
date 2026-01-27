@@ -5,6 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
 import PartnerLogoMarquee from './PartnerLogoMarquee';
+import WhitepaperBanner from './WhitepaperBanner';
 import logoDarkSvg from '/logo_dark.svg';
 import logoSvg from '/logo.svg';
 interface HomePageProps {
@@ -99,6 +100,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
 
   return (
     <div ref={containerRef} className="min-h-screen w-screen overflow-hidden">
+      <WhitepaperBanner />
       <AnimatePresence mode="wait">
         {currentView === 'hero' ? (
           <motion.section
