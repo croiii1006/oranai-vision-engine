@@ -78,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     { id: 'solution', label: t('nav.solution') },
     { id: 'models', label: t('nav.models') },
     { id: 'products', label: t('nav.products') },
-    { id: 'inspiration', label: language === 'en' ? 'Inspiration' : '灵感库' },
+    { id: 'library', label: t('nav.library') },
   ];
 
   const menuConfigs: Record<
@@ -124,17 +124,6 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
             language === 'en'
               ? ['Data Infrastructure', 'Insights Hub', 'Strategy Engine', 'Content Factory']
               : ['数据基建', '洞察中心', '策略引擎', '内容工厂'],
-        },
-      ],
-    },
-    inspiration: {
-      sections: [
-        {
-          title: language === 'en' ? 'Creative Resources' : '创意资源',
-          items:
-            language === 'en'
-              ? ['Video', 'Voice', 'Model']
-              : ['视频', '语音', '模特'],
         },
       ],
     },
