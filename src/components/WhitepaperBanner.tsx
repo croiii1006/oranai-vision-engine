@@ -24,14 +24,14 @@ const WhitepaperBanner: React.FC = () => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground px-6 py-3 rounded-xl shadow-lg flex items-center gap-4"
+          className="fixed top-0 left-0 right-0 z-50 bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-center gap-3"
         >
           <span className="text-sm font-medium">
-            {language === 'zh' ? 'OranAI白皮书已上线！' : 'OranAI Whitepaper is now live!'}
+            {language === 'zh' ? '🎉 OranAI白皮书已上线！' : '🎉 OranAI Whitepaper is now live!'}
           </span>
           <button
             onClick={handleDetailsClick}
@@ -41,10 +41,10 @@ const WhitepaperBanner: React.FC = () => {
           </button>
           <button
             onClick={handleClose}
-            className="absolute -top-2 -right-2 w-6 h-6 bg-background text-foreground rounded-full flex items-center justify-center shadow-md hover:bg-muted transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-primary-foreground/10 rounded transition-colors"
             aria-label="Close"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         </motion.div>
       )}
