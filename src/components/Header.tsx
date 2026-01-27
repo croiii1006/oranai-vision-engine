@@ -78,7 +78,6 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
     { id: 'solution', label: t('nav.solution') },
     { id: 'models', label: t('nav.models') },
     { id: 'products', label: t('nav.products') },
-    { id: 'library', label: t('nav.library') },
     { id: 'inspiration', label: language === 'en' ? 'Inspiration' : '灵感库' },
   ];
 
