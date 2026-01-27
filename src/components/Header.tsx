@@ -475,6 +475,12 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                         '邮件营销': 'http://aigrowth.photog.art',
                                         'Sales Training': 'http://aisales.photog.art',
                                         '销售培训': 'http://aisales.photog.art',
+                                        'Beauty & FMCG': 'https://industrysolution.photog.art/',
+                                        '美妆快消': 'https://industrysolution.photog.art/',
+                                        'Consumer Electronics': 'https://industrysolution.photog.art/',
+                                        '消费电子': 'https://industrysolution.photog.art/',
+                                        'Cross-border Expansion': 'https://industrysolution.photog.art/',
+                                        '跨境出海': 'https://industrysolution.photog.art/',
                                       };
                                       
                                       if (externalLinks[item]) {
