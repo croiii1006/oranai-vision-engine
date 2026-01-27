@@ -127,6 +127,17 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         },
       ],
     },
+    library: {
+      sections: [
+        {
+          title: language === 'en' ? 'Inspiration Library' : '灵感素材库',
+          items:
+            language === 'en'
+              ? ['Video', 'Voice', 'Model']
+              : ['视频', '语音', '模特'],
+        },
+      ],
+    },
   };
 
   const toggleLanguage = () => {
