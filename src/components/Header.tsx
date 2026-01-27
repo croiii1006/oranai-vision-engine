@@ -466,6 +466,12 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                   <button
                                     key={item}
                                     onClick={() => {
+                                      // Handle OranGEO external link
+                                      if (item === 'OranGEO') {
+                                        window.open('http://orangeo.photog.art', '_blank');
+                                        setOpenMenu(null);
+                                        return;
+                                      }
                                       // Handle library sub-tab navigation
                                       if (openMenu === 'library' && setLibrarySubTab) {
                                         const subTabs: ('video' | 'voice' | 'model')[] = ['video', 'voice', 'model'];
