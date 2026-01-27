@@ -11,6 +11,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [libraryFooterVisible, setLibraryFooterVisible] = useState(false);
+  const [librarySubTab, setLibrarySubTab] = useState<'video' | 'voice' | 'model'>('video');
   // 首页 footer 只在滚动到 "Trend & Revenue Forecasting" 模块时显示，初始隐藏
   const [showFooterInSolution, setShowFooterInSolution] = useState(false);
 
@@ -43,7 +44,7 @@ const Index = () => {
       case 'products':
         return <ProductsPage />;
       case 'library':
-        return <LibraryPage />;
+        return <LibraryPage initialTab={librarySubTab} />;
       case 'home':
       case 'hero':
       case 'solution':
@@ -64,6 +65,7 @@ const Index = () => {
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         isVisible={!isHeroView}
+        setLibrarySubTab={setLibrarySubTab}
       />
       
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

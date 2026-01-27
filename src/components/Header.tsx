@@ -27,6 +27,7 @@ interface HeaderProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   isVisible?: boolean;
+  setLibrarySubTab?: (tab: 'video' | 'voice' | 'model') => void;
 }
 
 interface UserData {
@@ -36,7 +37,7 @@ interface UserData {
   avatar?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, isVisible = true }) => {
+const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen, isVisible = true, setLibrarySubTab }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -461,10 +462,15 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                 {section.title}
                               </div>
                               <div className="space-y-2">
-                                {section.items.map((item) => (
+                                {section.items.map((item, index) => (
                                   <button
                                     key={item}
                                     onClick={() => {
+                                      // Handle library sub-tab navigation
+                                      if (openMenu === 'library' && setLibrarySubTab) {
+                                        const subTabs: ('video' | 'voice' | 'model')[] = ['video', 'voice', 'model'];
+                                        setLibrarySubTab(subTabs[index]);
+                                      }
                                       setActiveTab(openMenu);
                                       setOpenMenu(null);
                                     }}
