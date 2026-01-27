@@ -71,7 +71,7 @@ const ProductsPage: React.FC = () => {
       id: 'geoMonitor',
       labelKey: 'products.geoMonitor',
       image: geoMonitorThumb,
-      url: 'https://geo.photog.art/ai'
+      url: 'https://orangeo.photog.art/'
     }, {
       id: 'brandHealth',
       labelKey: 'products.brandHealth',
