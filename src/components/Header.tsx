@@ -120,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({
       sections: [
         {
           title: language === "en" ? "Platform Capabilities" : "平台能力",
-          items: language === "en" ? ["Data Center", "Model Library", "MiniApps"] : ["数据中心", "模型库", "MiniApps"],
+          items: language === "en" ? ["Data Center", "Model Library", "Skills", "MiniApps"] : ["数据中心", "模型库", "Skills", "MiniApps"],
         },
       ],
     },
