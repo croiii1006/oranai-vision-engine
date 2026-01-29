@@ -8,6 +8,9 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { IPDetectionProvider } from "@/contexts/IPDetectionContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { logger } from "@/lib/logger";
+import { useEffect, useRef } from "react";
+import { getToken, clearAuth, saveUserInfo } from "@/lib/utils/auth-storage";
+import { getUserInfo } from "@/lib/api/auth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -43,6 +46,46 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // 使用 ref 防止重复初始化（React StrictMode 会导致 useEffect 执行两次）
+  const initializedRef = useRef(false);
+
+  // 页面初始化时检查 token 和用户信息
+  useEffect(() => {
+    // 防止重复调用
+    if (initializedRef.current) {
+      return;
+    }
+    initializedRef.current = true;
+
+    const initializeAuth = async () => {
+      const token = getToken();
+      
+      if (token) {
+        // 如果有 token，尝试获取用户信息（token 通过 Authorization 头传递）
+        try {
+          const userInfoResponse = await getUserInfo();
+          // 保存用户信息到缓存
+          saveUserInfo(userInfoResponse.data);
+        } catch (error) {
+          // 如果获取用户信息失败（包括 401 token 过期），清空 token，变成未登录状态
+          // handleHttpResponse 已经处理了 401 并清除了认证信息，这里只需要记录日志
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          if (errorMessage.includes('401') || errorMessage.includes('登录已过期')) {
+            logger.warn('Token expired (401), auth data already cleared', error as Error);
+          } else {
+            logger.warn('Failed to get user info, clearing token', error as Error);
+            clearAuth();
+          }
+        }
+      } else {
+        // 如果没有 token，确保是未登录状态（清除可能存在的旧数据）
+        clearAuth();
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   return (
     <ErrorBoundary>
     <QueryClientProvider client={queryClient}>

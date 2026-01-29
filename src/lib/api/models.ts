@@ -5,6 +5,7 @@
 import { config } from "../config";
 import { logger } from "../logger";
 import { handleError } from "../utils/error-handler";
+import { modelsApiClient } from "./client";
 
 /**
  * 供应商信息
@@ -45,6 +46,7 @@ export interface PricingResponse {
 
 /**
  * 获取模型定价数据
+ * 注意：此 API 的响应格式与标准 ApiResponse 不同，直接返回 PricingResponse
  */
 export async function fetchPricingData(): Promise<PricingResponse> {
   const apiUrl = `${config.api.modelsBaseUrl}/api/pricing`;

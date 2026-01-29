@@ -1,5 +1,8 @@
 import { logger } from '@/lib/logger';
 import { config } from '@/lib/config';
+import { handleHttpResponse, handleApiResponse } from '@/lib/utils/api-response-handler';
+import { createAuthHeaders } from '@/lib/utils/api-request';
+import { authApiClient } from './client';
 
 // 登录请求参数
 export interface LoginRequest {
@@ -105,26 +108,15 @@ export interface OAuth2AuthorizeResponse {
  */
 export async function login(params: LoginRequest): Promise<LoginResponse> {
   try {
-    const response = await fetch(`${config.api.authBaseUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
+    const data = await authApiClient.post<{ token: string }>('/auth/login', params, {
+      needAuth: false, // 登录不需要认证
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: LoginResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || '登录失败');
-    }
-
     logger.info('Login successful', { email: params.email });
-    return data;
+    return {
+      ...data,
+      data: data.data!,
+    } as LoginResponse;
   } catch (error) {
     logger.error('Login failed', error as Error);
     throw error;
@@ -136,26 +128,15 @@ export async function login(params: LoginRequest): Promise<LoginResponse> {
  */
 export async function register(params: RegisterRequest): Promise<RegisterResponse> {
   try {
-    const response = await fetch(`${config.api.authBaseUrl}/api/register/email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
+    const data = await authApiClient.post<boolean>('/api/register/email', params, {
+      needAuth: false, // 注册不需要认证
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: RegisterResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || '注册失败');
-    }
-
     logger.info('Register successful', { email: params.email });
-    return data;
+    return {
+      ...data,
+      data: data.data ?? false,
+    } as RegisterResponse;
   } catch (error) {
     logger.error('Register failed', error as Error);
     throw error;
@@ -164,29 +145,19 @@ export async function register(params: RegisterRequest): Promise<RegisterRespons
 
 /**
  * 获取用户信息接口
+ * 注意：token 通过 Authorization 请求头传递（Bearer token）
  */
-export async function getUserInfo(token: string): Promise<UserInfoResponse> {
+export async function getUserInfo(token?: string): Promise<UserInfoResponse> {
   try {
-    const response = await fetch(`${config.api.authBaseUrl}/auth/user/info`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+    const data = await authApiClient.get<UserInfo>('/auth/user/info', {
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: UserInfoResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || '获取用户信息失败');
-    }
-
-    logger.info('Get user info successful', { userId: data.data.id });
-    return data;
+    logger.info('Get user info successful', { userId: data.data?.id });
+    return {
+      ...data,
+      data: data.data!,
+    } as UserInfoResponse;
   } catch (error) {
     logger.error('Get user info failed', error as Error);
     throw error;
@@ -202,25 +173,15 @@ export async function sendCaptcha(params: SendCaptchaRequest): Promise<SendCaptc
       email: params.email,
     });
 
-    const response = await fetch(`${config.api.authBaseUrl}/api/captcha/mail?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const data = await authApiClient.get<boolean>(`/api/captcha/mail?${queryParams.toString()}`, {
+      needAuth: false, // 发送验证码不需要认证
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: SendCaptchaResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || '发送验证码失败');
-    }
-
     logger.info('Send captcha successful', { email: params.email });
-    return data;
+    return {
+      ...data,
+      data: data.data ?? false,
+    } as SendCaptchaResponse;
   } catch (error) {
     logger.error('Send captcha failed', error as Error);
     throw error;
@@ -232,25 +193,15 @@ export async function sendCaptcha(params: SendCaptchaRequest): Promise<SendCaptc
  */
 export async function getGoogleOAuthUrl(): Promise<GoogleOAuthResponse> {
   try {
-    const response = await fetch(`${config.api.authBaseUrl}/oauth/google`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const data = await authApiClient.get<{ authorizeUrl: string }>('/oauth/google', {
+      needAuth: false, // 获取 OAuth URL 不需要认证
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: GoogleOAuthResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || '获取 Google OAuth URL 失败');
-    }
-
     logger.info('Get Google OAuth URL successful');
-    return data;
+    return {
+      ...data,
+      data: data.data!,
+    } as GoogleOAuthResponse;
   } catch (error) {
     logger.error('Get Google OAuth URL failed', error as Error);
     throw error;
@@ -259,29 +210,19 @@ export async function getGoogleOAuthUrl(): Promise<GoogleOAuthResponse> {
 
 /**
  * OAuth2 授权接口
+ * 注意：token 通过 Authorization 请求头传递（Bearer token）
  */
-export async function oauth2Authorize(token: string): Promise<OAuth2AuthorizeResponse> {
+export async function oauth2Authorize(token?: string): Promise<OAuth2AuthorizeResponse> {
   try {
-    const response = await fetch(`${config.api.authBaseUrl}/oauth2/authorize?clientId=portal-a`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+    const data = await authApiClient.get<{ code: string } | null>('/oauth2/authorize?clientId=portal-a', {
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: OAuth2AuthorizeResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'OAuth2 授权失败');
-    }
-
     logger.info('OAuth2 authorize successful');
-    return data;
+    return {
+      ...data,
+      data: data.data ?? null,
+    } as OAuth2AuthorizeResponse;
   } catch (error) {
     logger.error('OAuth2 authorize failed', error as Error);
     throw error;

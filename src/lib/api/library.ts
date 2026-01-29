@@ -1,5 +1,7 @@
 import { logger } from '@/lib/logger';
 import { config } from '@/lib/config';
+import { handleHttpResponse } from '@/lib/utils/api-response-handler';
+import { libraryApiClient } from './client';
 
 // 列表项接口
 export interface MaterialSquareItem {
@@ -203,26 +205,19 @@ export async function fetchMaterialSquareList(
       queryParams.append('sort', params.sort.trim());
     }
 
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/page${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const endpoint = `/api/app/material-square/page${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
-    logger.info('Fetching material square list', { url, params });
+    logger.info('Fetching material square list', { endpoint, params });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<{ list: MaterialSquareItem[]; total: number }>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareListResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square list');
-    }
+    const data: MaterialSquareListResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square list fetched successfully', { count: data.data.list.length });
     return data;
@@ -237,26 +232,19 @@ export async function fetchMaterialSquareList(
  */
 export async function fetchMaterialSquareDetail(id: number): Promise<MaterialSquareDetailResponse> {
   try {
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/${id}`;
+    const endpoint = `/api/app/material-square/${id}`;
     
-    logger.info('Fetching material square detail', { url, id });
+    logger.info('Fetching material square detail', { endpoint, id });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<MaterialSquareDetail>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareDetailResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square detail');
-    }
+    const data: MaterialSquareDetailResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square detail fetched successfully', { id });
     return data;
@@ -294,26 +282,19 @@ export async function fetchMaterialSquareAudioList(
       queryParams.append('sort', params.sort.trim());
     }
 
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/audio${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const endpoint = `/api/app/material-square/audio${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
-    logger.info('Fetching material square audio list', { url, params });
+    logger.info('Fetching material square audio list', { endpoint, params });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<{ list: MaterialSquareAudioItem[]; total: number }>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareAudioListResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square audio list');
-    }
+    const data: MaterialSquareAudioListResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square audio list fetched successfully', { count: data.data.list.length });
     return data;
@@ -328,26 +309,19 @@ export async function fetchMaterialSquareAudioList(
  */
 export async function fetchMaterialSquareAudioDetail(id: number): Promise<MaterialSquareAudioDetailResponse> {
   try {
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/audio/${id}`;
+    const endpoint = `/api/app/material-square/audio/${id}`;
     
-    logger.info('Fetching material square audio detail', { url, id });
+    logger.info('Fetching material square audio detail', { endpoint, id });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<MaterialSquareAudioDetail>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareAudioDetailResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square audio detail');
-    }
+    const data: MaterialSquareAudioDetailResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square audio detail fetched successfully', { id });
     return data;
@@ -388,26 +362,19 @@ export async function fetchMaterialSquareModelList(
       queryParams.append('sort', params.sort.trim());
     }
 
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/model${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const endpoint = `/api/app/material-square/model${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
-    logger.info('Fetching material square model list', { url, params });
+    logger.info('Fetching material square model list', { endpoint, params });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<{ list: MaterialSquareModelItem[]; total: number }>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareModelListResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square model list');
-    }
+    const data: MaterialSquareModelListResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square model list fetched successfully', { count: data.data.list.length });
     return data;
@@ -422,26 +389,19 @@ export async function fetchMaterialSquareModelList(
  */
 export async function fetchMaterialSquareModelDetail(id: number): Promise<MaterialSquareModelDetailResponse> {
   try {
-    const url = `${config.api.libraryBaseUrl}/api/app/material-square/model/${id}`;
+    const endpoint = `/api/app/material-square/model/${id}`;
     
-    logger.info('Fetching material square model detail', { url, id });
+    logger.info('Fetching material square model detail', { endpoint, id });
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const apiData = await libraryApiClient.get<MaterialSquareModelDetail>(endpoint, {
+      contentType: 'application/x-www-form-urlencoded',
+      needAuth: true,
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: MaterialSquareModelDetailResponse = await response.json();
     
-    if (!data.success) {
-      throw new Error(data.msg || 'Failed to fetch material square model detail');
-    }
+    const data: MaterialSquareModelDetailResponse = {
+      ...apiData,
+      data: apiData.data!,
+    };
 
     logger.info('Material square model detail fetched successfully', { id });
     return data;

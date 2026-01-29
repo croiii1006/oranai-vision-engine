@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowUp, Globe, Sparkles, ChevronDown, Loader2 } from 'lucide-react';
+import { ArrowUp, Globe, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { oauth2Authorize } from '@/lib/api/auth';
-import { getToken } from '@/lib/utils/auth-storage';
 import { config } from '@/lib/config';
 
 // Import thumbnail images
@@ -33,7 +31,6 @@ const ProductsPage: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedSearchSource, setSelectedSearchSource] = useState<string | null>(null);
-  const [loadingSubTabId, setLoadingSubTabId] = useState<string | null>(null);
   
   const modelOptions = [
     { id: 'claude', labelKey: 'products.modelClaude' },
@@ -135,43 +132,22 @@ const ProductsPage: React.FC = () => {
   }, [currentTabConfig, activeSubTab]);
 
   /**
-   * 公共方法：处理需要 OAuth2 授权的按钮点击
+   * 处理工具跳转
    * @param subTabId 子标签 ID（如 'imageGen', 'videoGen'）
-   * @param targetUrl 目标跳转地址（可选，如果不提供则根据 subTabId 自动获取）
    */
-  const handleOAuthButtonClick = async (subTabId: string, targetUrl?: string) => {
-    const token = getToken();
-    if (!token) {
-      alert(t('products.pleaseLogin') || 'Please login first');
+  const handleToolNavigation = (subTabId: string) => {
+    let targetUrl: string;
+    
+    if (subTabId === 'imageGen') {
+      targetUrl = config.api.imageGenUrl;
+    } else if (subTabId === 'videoGen') {
+      targetUrl = config.api.videoGenUrl;
+    } else {
       return;
     }
-
-    setLoadingSubTabId(subTabId);
-    try {
-      const oauth2Response = await oauth2Authorize(token);
-      if (oauth2Response.data && oauth2Response.data.code) {
-        const oauthCode = oauth2Response.data.code;
-        // 如果没有提供 targetUrl，根据 subTabId 自动获取
-        let finalUrl = targetUrl;
-        if (!finalUrl) {
-          if (subTabId === 'imageGen') {
-            finalUrl = config.api.imageGenUrl;
-          } else if (subTabId === 'videoGen') {
-            finalUrl = config.api.videoGenUrl;
-          } else {
-            throw new Error(`Unknown subTabId: ${subTabId}`);
-          }
-        }
-        window.location.href = `${finalUrl}/?oauth_code=${oauthCode}`;
-      } else {
-        alert(t('products.oauthFailed') || 'Failed to get OAuth code');
-      }
-    } catch (error) {
-      console.error('OAuth2 authorize failed:', error);
-      alert(t('products.oauthFailed') || 'Failed to get OAuth code');
-    } finally {
-      setLoadingSubTabId(null);
-    }
+    
+    // 直接跳转，不需要 OAuth2 授权
+    window.location.href = targetUrl;
   };
   return <div className="min-h-screen pt-24 pb-16">
       <div className="w-full px-6 sm:px-10 lg:px-16 py-[61px]">
@@ -284,7 +260,7 @@ const ProductsPage: React.FC = () => {
                               setActiveSubTab(subTab.id);
                             }
                           }}
-                          disabled={isComingSoon || loadingSubTabId === subTab.id}
+                          disabled={isComingSoon}
                           className={`flex items-center gap-2 ${activeSubTab === subTab.id ? 'bg-primary/10 text-primary' : ''} ${isComingSoon ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           {/* <img 
@@ -293,20 +269,11 @@ const ProductsPage: React.FC = () => {
                             className="w-8 h-8 rounded object-cover flex-shrink-0"
                           /> */}
                           <span className="flex-1">
-                            {loadingSubTabId === subTab.id ? (
-                              <span className="flex items-center gap-2">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                {t('products.loading') || 'Loading...'}
+                            {t(subTab.labelKey)}
+                            {isComingSoon && (
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({t('products.comingSoon')})
                               </span>
-                            ) : (
-                              <>
-                                {t(subTab.labelKey)}
-                                {isComingSoon && (
-                                  <span className="ml-2 text-xs text-muted-foreground">
-                                    ({t('products.comingSoon')})
-                                  </span>
-                                )}
-                              </>
                             )}
                           </span>
                         </DropdownMenuItem>
@@ -319,7 +286,7 @@ const ProductsPage: React.FC = () => {
 
             {/* Send Button */}
             <button 
-              onClick={async () => {
+              onClick={() => {
                 if (!activeSubTab || !currentTabConfig?.subTabs) {
                   // 如果没有选择工具，使用默认行为
                   window.open('https://photog.art/p/trend', '_blank');
@@ -337,10 +304,9 @@ const ProductsPage: React.FC = () => {
                   return;
                 }
 
-                // 需要 OAuth2 授权的按钮（imageGen, videoGen 等）
-                const oauthRequiredSubTabs = ['imageGen', 'videoGen'];
-                if (oauthRequiredSubTabs.includes(subTab.id)) {
-                  await handleOAuthButtonClick(subTab.id);
+                // Image Generation 和 Video Generation 直接跳转
+                if (subTab.id === 'imageGen' || subTab.id === 'videoGen') {
+                  handleToolNavigation(subTab.id);
                 } else if (subTab.url) {
                   window.open(subTab.url, '_blank');
                 } else {
@@ -348,14 +314,9 @@ const ProductsPage: React.FC = () => {
                   window.open('https://photog.art/p/trend', '_blank');
                 }
               }}
-              disabled={loadingSubTabId !== null}
-              className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-wait"
+              className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors"
             >
-              {loadingSubTabId ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ArrowUp className="w-4 h-4" />
-              )}
+              <ArrowUp className="w-4 h-4" />
             </button>
           </div>
         </div>

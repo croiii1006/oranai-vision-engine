@@ -30,29 +30,35 @@ export default defineConfig(({ mode }) => ({
         target: 'https://photog.art',
         changeOrigin: true,
       },
-      // AUTH 相关 API 代理
+      // AUTH 相关 API 代理 - 代理到开发服务器
       '/auth': {
         target: 'http://192.168.112.253:8000',
         changeOrigin: true,
+        secure: false, // 如果是 http，设置为 false
+        ws: true, // 支持 WebSocket
       },
       // OAuth 相关 API 代理
       '/oauth': {
         target: 'http://192.168.112.253:8000',
         changeOrigin: true,
+        secure: false,
       },
       '/oauth2': {
         target: 'http://192.168.112.253:8000',
         changeOrigin: true,
+        secure: false,
       },
       // 验证码 API 代理
       '/captcha': {
         target: 'http://192.168.112.253:8000',
         changeOrigin: true,
+        secure: false,
       },
       // 注册 API 代理
       '/api/register': {
         target: 'http://192.168.112.253:8000',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

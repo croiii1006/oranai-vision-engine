@@ -39,8 +39,10 @@ export const config = {
     libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
       (import.meta.env.PROD ? "https://photog.art" : ""),
     // AUTH页面API地址
+    // 开发环境：使用空字符串，通过 Vite 代理转发（代理配置在 vite.config.ts）
+    // 生产环境：http://94.74.101.163:28080
     authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://photog.art" : ""),
+      (import.meta.env.PROD ? "http://94.74.101.163:28080" : ""),
     // Image Generation 工具地址
     imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
       (import.meta.env.PROD ? "https://tools.photog.art" : "http://localhost:8081"),

@@ -61,18 +61,26 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   
-  // 从缓存加载用户信息
+  // 从缓存加载用户信息（在 App 初始化检查完成后）
   useEffect(() => {
-    const cachedUser = getCachedUserInfo();
-    const token = getToken();
-    if (cachedUser && token) {
-      setUser({
-        username: cachedUser.username,
-        email: cachedUser.email,
-        nickname: cachedUser.nickname,
-        avatar: cachedUser.avatar,
-      });
-    }
+    // 延迟一点确保 App 的初始化检查完成
+    const timer = setTimeout(() => {
+      const cachedUser = getCachedUserInfo();
+      const token = getToken();
+      if (cachedUser && token) {
+        setUser({
+          username: cachedUser.username,
+          email: cachedUser.email,
+          nickname: cachedUser.nickname,
+          avatar: cachedUser.avatar,
+        });
+      } else {
+        // 如果没有 token 或用户信息，确保是未登录状态
+        setUser(null);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const tabs = [
@@ -173,11 +181,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         password: encryptedPassword,
       });
       
-      // 保存 token
+      // 保存 token（保存到 cookies 和 localStorage）
       saveToken(response.data.token);
       
-      // 获取用户信息
-      const userInfoResponse = await getUserInfo(response.data.token);
+      // 获取用户信息（token 通过 Authorization 头传递）
+      const userInfoResponse = await getUserInfo();
       
       // 保存用户信息到缓存
       saveUserInfo(userInfoResponse.data);
@@ -194,6 +202,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
       resetForm();
     } catch (error) {
       console.error('Login failed:', error);
+      // 如果是 401 错误（token 过期），清除用户状态
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('401') || errorMessage.includes('登录已过期') || errorMessage.includes('token')) {
+        setUser(null);
+      }
       setError(
         error instanceof Error 
           ? error.message 
@@ -241,11 +254,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
         password: encryptedPassword,
       });
       
-      // 保存 token
+      // 保存 token（保存到 cookies 和 localStorage）
       saveToken(loginResponse.data.token);
       
-      // 获取用户信息
-      const userInfoResponse = await getUserInfo(loginResponse.data.token);
+      // 获取用户信息（token 通过 Authorization 头传递）
+      const userInfoResponse = await getUserInfo();
       
       // 保存用户信息到缓存
       saveUserInfo(userInfoResponse.data);
@@ -262,6 +275,11 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
       resetForm();
     } catch (error) {
       console.error('Register failed:', error);
+      // 如果是 401 错误（token 过期），清除用户状态
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('401') || errorMessage.includes('登录已过期') || errorMessage.includes('token')) {
+        setUser(null);
+      }
       setError(
         error instanceof Error 
           ? error.message 
