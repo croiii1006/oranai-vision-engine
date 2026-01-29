@@ -289,13 +289,13 @@ const ProductsPage: React.FC = () => {
               onClick={() => {
                 if (!activeSubTab || !currentTabConfig?.subTabs) {
                   // 如果没有选择工具，使用默认行为
-                  window.open('https://photog.art/p/trend', '_blank');
+                  window.open('https://toolbox.oran.cn', '_blank');
                   return;
                 }
 
                 const subTab = currentTabConfig.subTabs.find(st => st.id === activeSubTab);
                 if (!subTab) {
-                  window.open('https://photog.art/p/trend', '_blank');
+                  window.open('https://toolbox.oran.cn', '_blank');
                   return;
                 }
 
@@ -311,7 +311,7 @@ const ProductsPage: React.FC = () => {
                   window.open(subTab.url, '_blank');
                 } else {
                   // 默认行为
-                  window.open('https://photog.art/p/trend', '_blank');
+                  window.open('https://toolbox.oran.cn', '_blank');
                 }
               }}
               className="p-2.5 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors"

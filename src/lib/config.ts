@@ -45,10 +45,10 @@ export const config = {
       (import.meta.env.PROD ? "http://94.74.101.163:28080" : ""),
     // Image Generation 工具地址
     imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
-      (import.meta.env.PROD ? "https://tools.photog.art" : "http://localhost:8081"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn" : "https://toolbox.oran.cn"),
     // Video Generation 工具地址（与 Image Generation 使用相同地址）
     videoGenUrl: import.meta.env.VITE_VIDEO_GEN_URL || 
-      (import.meta.env.PROD ? "https://tools.photog.art" : "http://localhost:8081"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn" : "https://toolbox.oran.cn"),
   },
 
   // 应用信息

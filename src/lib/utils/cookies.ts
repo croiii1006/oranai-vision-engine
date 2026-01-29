@@ -5,7 +5,7 @@
 
 /**
  * 获取当前域名的基础域名（用于设置 cookies 的 domain）
- * 例如：www.photog.art -> .photog.art
+ * 例如：www.oran.cn -> .oran.cn
  *      localhost -> localhost
  */
 function getCookieDomain(): string {
@@ -21,8 +21,8 @@ function getCookieDomain(): string {
   }
 
   // 生产环境：提取基础域名
-  // 例如：www.photog.art -> .photog.art
-  //      tools.photog.art -> .photog.art
+  // 例如：www.oran.cn -> .oran.cn
+  //      toolbox.oran.cn -> .oran.cn
   const parts = hostname.split('.');
   if (parts.length >= 2) {
     // 取最后两部分作为基础域名

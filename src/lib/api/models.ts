@@ -6,6 +6,7 @@ import { config } from "../config";
 import { logger } from "../logger";
 import { handleError } from "../utils/error-handler";
 import { modelsApiClient } from "./client";
+import { createAuthHeaders } from "../utils/api-request";
 
 /**
  * 供应商信息
@@ -52,12 +53,14 @@ export async function fetchPricingData(): Promise<PricingResponse> {
   const apiUrl = `${config.api.modelsBaseUrl}/api/pricing`;
 
   try {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    // 使用 createAuthHeaders 确保包含 Accept-Language 头
+    const requestConfig = createAuthHeaders({
+      method: 'GET',
+      contentType: 'application/json',
+      needAuth: false, // 定价数据不需要认证
     });
+
+    const response = await fetch(apiUrl, requestConfig);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

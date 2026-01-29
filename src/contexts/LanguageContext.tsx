@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { STORAGE_KEYS } from "@/lib/constants";
+import { getLanguage as getStoredLanguage, setLanguage as setStoredLanguage } from "@/lib/utils/storage";
 
 type Language = "en" | "zh";
 
@@ -1135,7 +1137,22 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>("en");
+  // 从 localStorage 读取初始语言，如果没有则默认使用 'en'
+  const [language, setLanguageState] = useState<Language>(() => {
+    const stored = getStoredLanguage() as Language;
+    return (stored === 'zh' || stored === 'en') ? stored : "en";
+  });
+
+  // 当语言改变时，保存到 localStorage
+  useEffect(() => {
+    setStoredLanguage(language);
+  }, [language]);
+
+  // 包装 setLanguage，确保保存到 localStorage
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    setStoredLanguage(lang);
+  };
 
   const t = (key: string): string => {
     return translations[language][key] || key;

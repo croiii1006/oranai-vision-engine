@@ -16,12 +16,12 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // 模型页面 API 代理（匹配 /api/pricing 等路径）
       '/api/pricing': {
-        target: 'http://119.12.161.54:3000',
+        target: 'https://models.photog.art',
         changeOrigin: true,
       },
       // 模型页面其他 API 代理
       '/api/models': {
-        target: 'http://119.12.161.54:3000',
+        target: 'https://models.photog.art',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/models/, ''),
       },
@@ -32,31 +32,31 @@ export default defineConfig(({ mode }) => ({
       },
       // AUTH 相关 API 代理 - 代理到开发服务器
       '/auth': {
-        target: 'http://192.168.112.253:8000',
+        target: 'http://94.74.101.163:28080',
         changeOrigin: true,
         secure: false, // 如果是 http，设置为 false
         ws: true, // 支持 WebSocket
       },
       // OAuth 相关 API 代理
       '/oauth': {
-        target: 'http://192.168.112.253:8000',
+        target: 'http://94.74.101.163:28080',
         changeOrigin: true,
         secure: false,
       },
       '/oauth2': {
-        target: 'http://192.168.112.253:8000',
+        target: 'http://94.74.101.163:28080',
         changeOrigin: true,
         secure: false,
       },
       // 验证码 API 代理
-      '/captcha': {
-        target: 'http://192.168.112.253:8000',
+      '/api/captcha': {
+        target: 'http://94.74.101.163:28080',
         changeOrigin: true,
         secure: false,
       },
       // 注册 API 代理
       '/api/register': {
-        target: 'http://192.168.112.253:8000',
+        target: 'http://94.74.101.163:28080',
         changeOrigin: true,
         secure: false,
       },

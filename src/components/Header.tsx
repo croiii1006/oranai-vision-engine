@@ -439,18 +439,18 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                         </button>
                       </div>
                     ) : (
-                      <button
-                        key={tab.id}
+                  <button
+                    key={tab.id}
                         onMouseEnter={() => setOpenMenu(null)}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                          activeTab === tab.id
-                            ? 'bg-foreground text-background shadow-md'
-                            : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                      activeTab === tab.id
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'text-foreground/60 dark:text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
                     )
                   )}
                 </div>
@@ -529,8 +529,8 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, sidebarOpen, s
                                 ))}
                               </div>
                             </div>
-                          ))}
-                        </div>
+                ))}
+              </div>
                       )}
                     </div>
                   </motion.div>

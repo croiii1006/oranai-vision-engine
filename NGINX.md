@@ -46,7 +46,7 @@ error_log /www/wwwlogs/home.photog.art.error.log;
 | `/auth/*` | `http://94.74.101.163:28080/auth/*` | AUTH 登录、用户信息接口 |
 | `/oauth/*` | `http://94.74.101.163:28080/oauth/*` | OAuth 相关接口 |
 | `/oauth2/*` | `http://94.74.101.163:28080/oauth2/*` | OAuth2 授权接口 |
-| `/captcha/*` | `http://94.74.101.163:28080/captcha/*` | 验证码接口 |
+| `/api/captcha/*` | `http://94.74.101.163:28080/api/captcha/*` | 验证码接口 |
 | `/api/register/*` | `http://94.74.101.163:28080/api/register/*` | 注册接口 |
 | `/api/models/*` | `https://models.photog.art/*` | Models API（移除前缀） |
 | `/api/library/*` | `https://photog.art/*` | Library API（移除前缀） |
@@ -116,7 +116,7 @@ AUTH API 代理支持 WebSocket 连接（如果需要）。
 ## ⚙️ 环境配置
 
 ### 开发环境
-- **AUTH API 地址**：`http://192.168.112.253:8000`
+- **AUTH API 地址**：`http://94.74.101.163:28080`
 - **配置位置**：`src/lib/config.ts`
 
 ### 生产环境

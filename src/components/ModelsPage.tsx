@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowUp, ArrowRight, ChevronDown, ChevronUp, Sparkles, Brain, Diamond, Layers, Wind, Moon, Zap, Play, Video, Grid3X3, MessageCircle, ShoppingBag, Bot, HelpCircle, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,8 +40,10 @@ interface DisplayModel {
 }
 
 const ModelsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isChinaIP: isChinaIPAddress, isLoading: isIPDetecting } = useIPDetection();
+  const queryClient = useQueryClient();
+  
   // 搜索输入值（立即更新，用于显示）
   const [searchInput, setSearchInput] = useState('');
   // 实际用于筛选的搜索关键词（防抖后更新）
@@ -73,20 +75,48 @@ const ModelsPage: React.FC = () => {
     '腾讯',
     '阿里巴巴',
     '零一万物',
+    '橙果视界',
+    '月之暗面',
+    'DeepSeek',
+  ], []);
+  const chinaVendorNames_en = useMemo(() => [
+    'ByteDance',
+    'Kuaishou',
+    'Zhipu',
+    '腾讯',
+    'Alibaba',
+    '01.AI',
+    'OranAI',
+    'Moonshot',
+    'DeepSeek',
   ], []);
 
   // 获取数据
-  const { data: pricingData, isLoading, error } = useQuery({
+  // 注意：queryKey 不包含 language，因为数据本身不依赖语言，只是请求头需要 Accept-Language
+  const { data: pricingData, isLoading, error, refetch } = useQuery({
     queryKey: ['pricing'],
     queryFn: fetchPricingData,
   });
 
+  // 监听语言变化，重新请求模型接口
+  useEffect(() => {
+    // 当语言变化时，重新获取模型数据
+    // 使用 refetch 确保使用最新的 Accept-Language 头重新请求
+    if (pricingData || !isLoading) {
+      refetch();
+      logger.info('Language changed, refetching pricing data', { language });
+    }
+  }, [language, refetch, pricingData, isLoading]);
   // 处理数据：添加供应商名称，并根据IP地址过滤
   const displayModels = useMemo<DisplayModel[]>(() => {
-    if (!pricingData) return [];
+    if (!pricingData) {
+      logger.info('No pricing data available', { pricingData });
+      return [];
+    }
     
     // 如果IP检测还未完成，返回空数组（避免显示错误数据）
     if (isChinaIPAddress === null) {
+      logger.info('IP detection not completed yet', { isChinaIPAddress });
       return [];
     }
     
@@ -102,17 +132,28 @@ const ModelsPage: React.FC = () => {
       };
     });
     
+    logger.info('Processing models', { 
+      totalModels: models.length, 
+      isChinaIP: isChinaIPAddress,
+      language 
+    });
+    
     // 如果是中国IP，只显示中国大模型
     if (isChinaIPAddress) {
-      return models.filter((model) => {
-        return model.vendor_name && chinaVendorNames.includes(model.vendor_name);
+      const filtered = models.filter((model) => {
+        if (language === 'en') {
+          return model.vendor_name && chinaVendorNames_en.includes(model.vendor_name);
+        } else {
+          return model.vendor_name && chinaVendorNames.includes(model.vendor_name);
+        }
       });
+      logger.info('Filtered models for China IP', { filteredCount: filtered.length });
+      return filtered;
     }
-    
     // 非中国IP，显示所有模型
+    logger.info('Showing all models for non-China IP', { modelsCount: models.length });
     return models;
-  }, [pricingData, isChinaIPAddress, chinaVendorNames]);
-
+  }, [pricingData, isChinaIPAddress, chinaVendorNames, chinaVendorNames_en, language]);
   // 构建供应商选项（根据IP地址过滤）
   const supplierOptions = useMemo(() => {
     if (!pricingData) return [];
@@ -135,9 +176,15 @@ const ModelsPage: React.FC = () => {
     let filteredVendors = pricingData.vendors;
     if (isChinaIPAddress) {
       // 如果是中国IP，只显示中国供应商
-      filteredVendors = pricingData.vendors.filter((vendor) => 
-        chinaVendorNames.includes(vendor.name)
-      );
+      if (language === 'en') {
+        filteredVendors = pricingData.vendors.filter((vendor) => 
+          chinaVendorNames_en.includes(vendor.name)
+        );
+      } else {
+        filteredVendors = pricingData.vendors.filter((vendor) => 
+          chinaVendorNames.includes(vendor.name)
+        );
+      }
     }
     // 如果不是中国IP，显示所有供应商（不需要过滤）
 
@@ -163,7 +210,7 @@ const ModelsPage: React.FC = () => {
     }
 
     return [...baseOptions, ...vendorOptions];
-  }, [pricingData, displayModels, t, isChinaIPAddress, chinaVendorNames]);
+  }, [pricingData, displayModels, t, isChinaIPAddress, chinaVendorNames, chinaVendorNames_en]);
 
   // 构建端点选项
   const endpointOptions = useMemo(() => {
@@ -222,8 +269,15 @@ const ModelsPage: React.FC = () => {
 
   // 显示的子集（用于分页）
   const displayedModels = useMemo(() => {
-    return filteredModels.slice(0, displayedCount);
-  }, [filteredModels, displayedCount]);
+    const result = filteredModels.slice(0, displayedCount);
+    logger.info('Displayed models calculated', { 
+      filteredCount: filteredModels.length,
+      displayedCount: result.length,
+      language,
+      isChinaIP: isChinaIPAddress
+    });
+    return result;
+  }, [filteredModels, displayedCount, language, isChinaIPAddress]);
 
   // 是否还有更多数据
   const hasMore = displayedCount < filteredModels.length;
@@ -538,11 +592,24 @@ const ModelsPage: React.FC = () => {
               </motion.div>
             </div>
           </aside>
-
           {/* Main Content - Model Grid */}
           <main className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {displayedModels.map((model, index) => (
+            {displayedModels.length === 0 && !isLoading && !isIPDetecting && isChinaIPAddress !== null ? (
+              <div className="text-center py-12">
+                <div className="text-lg text-muted-foreground">
+                  {t('models.noModels') || 'No models available'}
+                </div>
+                <div className="text-sm text-muted-foreground mt-2">
+                  Debug: pricingData={pricingData ? 'exists' : 'null'}, 
+                  displayModels={displayModels.length}, 
+                  filteredModels={filteredModels.length},
+                  isChinaIP={String(isChinaIPAddress)},
+                  language={language}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {displayedModels.map((model, index) => (
                 <motion.div
                   key={model.model_name}
                   initial={{ opacity: 0 }}
@@ -586,12 +653,12 @@ const ModelsPage: React.FC = () => {
                   </div>
                 </motion.div>
               ))}
-            </div>
-            
-            {/* 加载更多触发器 */}
-            {hasMore && (
-              <div ref={loadMoreRef} className="flex justify-center items-center py-8">
-                <div className="text-sm text-muted-foreground">{t('models.loadingMore')}</div>
+                {/* 加载更多触发器 */}
+                {hasMore && (
+                  <div ref={loadMoreRef} className="flex justify-center items-center py-8">
+                    <div className="text-sm text-muted-foreground">{t('models.loadingMore')}</div>
+                  </div>
+                )}
               </div>
             )}
           </main>

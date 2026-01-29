@@ -38,7 +38,14 @@ class StorageManager {
       if (item === null) {
         return defaultValue ?? null;
       }
-      return JSON.parse(item) as T;
+      
+      // 尝试解析 JSON，如果失败则返回原始字符串（兼容直接存储的字符串）
+      try {
+        return JSON.parse(item) as T;
+      } catch (parseError) {
+        // 如果不是有效的 JSON，可能是直接存储的字符串，直接返回
+        return item as T;
+      }
     } catch (error) {
       logger.error(`Failed to get storage item: ${key}`, error as Error);
       return defaultValue ?? null;
