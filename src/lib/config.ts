@@ -32,23 +32,21 @@ export const config = {
     baseUrl: import.meta.env.VITE_API_BASE_URL || "",
     timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
     // 模型页面API地址
-    // 开发环境使用代理路径，生产环境使用完整 URL
-    modelsBaseUrl: import.meta.env.VITE_MODELS_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://models.photog.art" : ""),
+    // 开发环境使用代理路径，生产环境也使用相对路径通过 Nginx 代理转发
+    modelsBaseUrl: import.meta.env.VITE_MODELS_API_BASE_URL || "",
     // LIBRARY页面API地址
-    libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || 
-      (import.meta.env.PROD ? "https://photog.art" : ""),
+    // 开发环境使用代理路径，生产环境也使用相对路径通过 Nginx 代理转发
+    libraryBaseUrl: import.meta.env.VITE_LIBRARY_API_BASE_URL || "",
     // AUTH页面API地址
     // 开发环境：使用空字符串，通过 Vite 代理转发（代理配置在 vite.config.ts）
-    // 生产环境：http://94.74.101.163:28080
-    authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || 
-      (import.meta.env.PROD ? "http://94.74.101.163:28080" : ""),
+    // 生产环境：使用空字符串，通过 Nginx 代理转发（代理配置在 nginx-baota-www.oran.cn.conf）
+    authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || "",
     // Image Generation 工具地址
     imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn" : "https://toolbox.oran.cn"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-image" : "https://toolbox.oran.cn/ai-toolbox/text-to-image"),
     // Video Generation 工具地址（与 Image Generation 使用相同地址）
     videoGenUrl: import.meta.env.VITE_VIDEO_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn" : "https://toolbox.oran.cn"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-video" : "https://toolbox.oran.cn/ai-toolbox/text-to-video"),
   },
 
   // 应用信息
