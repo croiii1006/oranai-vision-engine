@@ -77,6 +77,7 @@ const Header: React.FC<HeaderProps> = ({
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const openedFromUrlRef = useRef<boolean>(false); // 记录是否通过 URL 参数打开登录框
   
   // 从缓存加载用户信息（在 App 初始化检查完成后）
   useEffect(() => {
@@ -98,6 +99,26 @@ const Header: React.FC<HeaderProps> = ({
     }, 100);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // 检查 URL 参数，如果存在 ?logon=1，自动弹出登录框
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const logonParam = urlParams.get('logon');
+    
+    if (logonParam === '1') {
+      // 标记为通过 URL 参数打开
+      openedFromUrlRef.current = true;
+      
+      // 打开登录对话框，并设置为登录模式（不是注册模式）
+      setDialogOpen(true);
+      setIsSignUp(false);
+      
+      // 可选：从 URL 中移除 logon 参数，避免刷新页面时再次弹出
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('logon');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
   }, []);
 
   // 清理定时器
@@ -243,6 +264,15 @@ const Header: React.FC<HeaderProps> = ({
 
       setDialogOpen(false);
       resetForm();
+      
+      // 如果是通过 URL 参数打开的登录框，登录成功后返回上一页
+      if (openedFromUrlRef.current) {
+        openedFromUrlRef.current = false; // 重置标记
+        // 延迟一下，确保对话框关闭动画完成
+        setTimeout(() => {
+          window.history.back();
+        }, 300);
+      }
     } catch (error) {
       console.error('Login failed:', error);
       // 如果是 401 错误（token 过期），清除用户状态
@@ -354,6 +384,15 @@ const Header: React.FC<HeaderProps> = ({
     setDialogOpen(true);
   };
 
+  // 处理对话框关闭
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    // 如果用户手动关闭对话框（不是通过登录成功关闭），重置标记
+    if (!open && openedFromUrlRef.current) {
+      openedFromUrlRef.current = false;
+    }
+  };
+
   const handleSendCode = async () => {
     // 验证邮箱
     if (!email || !email.trim()) {
@@ -439,11 +478,11 @@ const Header: React.FC<HeaderProps> = ({
                   <Menu className="w-5 h-5" />
                 )}
               </button> */}
-              <div
+              <div 
                 onClick={() => setActiveTab("hero")}
                 className="glass px-4 py-1.5 rounded-full cursor-pointer hover:bg-accent/50 transition-all duration-300 glow-sm border border-foreground/10 dark:border-transparent"
               >
-                <span
+                <span 
                   className="text-lg font-semibold tracking-tight bg-clip-text text-transparent"
                   style={{
                     backgroundImage: "linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%) 30%, hsl(0 0% 60%) 50%)",
@@ -451,7 +490,7 @@ const Header: React.FC<HeaderProps> = ({
                 >
                   <span className="dark:hidden">OranAI</span>
                 </span>
-                <span
+                <span 
                   className="hidden dark:inline text-lg font-semibold tracking-tight bg-clip-text text-transparent"
                   style={{
                     backgroundImage:
@@ -657,7 +696,7 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Sign In / Sign Up Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[420px] bg-background border border-border rounded-3xl p-8">
           <TooltipProvider>
           {isSignUp ? (
