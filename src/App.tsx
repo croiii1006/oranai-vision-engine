@@ -100,6 +100,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/oauth/callback/google" element={<OAuthCallbackGoogle />} />
+                <Route path="/api/oauth/callback/google" element={<OAuthCallbackGoogle />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
