@@ -13,6 +13,7 @@ import { getToken, clearAuth, saveUserInfo } from "@/lib/utils/auth-storage";
 import { getUserInfo } from "@/lib/api/auth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import OAuthCallbackGoogle from "./pages/OAuthCallbackGoogle";
 
 /**
  * 配置 QueryClient
@@ -98,6 +99,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/oauth/callback/google" element={<OAuthCallbackGoogle />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

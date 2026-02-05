@@ -4,12 +4,21 @@ import { handleHttpResponse, handleApiResponse } from '@/lib/utils/api-response-
 import { createAuthHeaders } from '@/lib/utils/api-request';
 import { authApiClient } from './client';
 
-// 登录请求参数
+// 登录请求参数（邮箱密码）
 export interface LoginRequest {
   clientId: string;
   authType: 'EMAIL_PASSWORD';
   email: string;
   password: string;
+}
+
+// Google OAuth 回调登录请求参数（POST /auth/login）
+export interface GoogleOAuthCallbackLoginRequest {
+  clientId: string;
+  authType: 'SOCIAL';
+  source: 'google';
+  code: string;
+  state: string;
 }
 
 // 登录响应
@@ -79,6 +88,22 @@ export interface SendCaptchaResponse {
   success: boolean;
   timestamp: number;
   data: boolean;
+}
+
+// 忘记密码请求参数（password 需与注册一致使用 RSA 加密）
+export interface ForgotPasswordRequest {
+  email: string;
+  password: string;
+  captcha: string;
+}
+
+// 忘记密码响应
+export interface ForgotPasswordResponse {
+  code: number;
+  msg: string;
+  success: boolean;
+  timestamp: number;
+  data: null;
 }
 
 // Google OAuth 响应
@@ -165,6 +190,25 @@ export async function getUserInfo(token?: string): Promise<UserInfoResponse> {
 }
 
 /**
+ * 忘记密码接口（POST /auth/forgot-password，password 需 RSA 加密）
+ */
+export async function forgotPassword(params: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+  try {
+    const data = await authApiClient.post<null>('/auth/forgot-password', params, {
+      needAuth: false,
+    });
+    logger.info('Forgot password request successful', { email: params.email });
+    return {
+      ...data,
+      data: null,
+    } as ForgotPasswordResponse;
+  } catch (error) {
+    logger.error('Forgot password failed', error as Error);
+    throw error;
+  }
+}
+
+/**
  * 发送验证码接口
  */
 export async function sendCaptcha(params: SendCaptchaRequest): Promise<SendCaptchaResponse> {
@@ -189,11 +233,32 @@ export async function sendCaptcha(params: SendCaptchaRequest): Promise<SendCaptc
 }
 
 /**
- * Google OAuth 登录接口
+ * Google OAuth 回调登录接口（POST /auth/login，用 code/state 换 token）
+ */
+export async function loginWithGoogleCallback(
+  params: GoogleOAuthCallbackLoginRequest,
+): Promise<LoginResponse> {
+  try {
+    const data = await authApiClient.post<{ token: string }>('/auth/login', params, {
+      needAuth: false,
+    });
+    logger.info('Google OAuth callback login successful');
+    return {
+      ...data,
+      data: data.data!,
+    } as LoginResponse;
+  } catch (error) {
+    logger.error('Google OAuth callback login failed', error as Error);
+    throw error;
+  }
+}
+
+/**
+ * Google OAuth 登录接口（GET /auth/google，返回跳转地址）
  */
 export async function getGoogleOAuthUrl(): Promise<GoogleOAuthResponse> {
   try {
-    const data = await authApiClient.get<{ authorizeUrl: string }>('/oauth/google', {
+    const data = await authApiClient.get<{ authorizeUrl: string }>('/auth/google', {
       needAuth: false, // 获取 OAuth URL 不需要认证
     });
     
