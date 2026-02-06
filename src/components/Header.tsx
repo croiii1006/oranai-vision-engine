@@ -732,9 +732,9 @@ const Header: React.FC<HeaderProps> = ({
                   <DropdownMenuTrigger asChild>
                     <button className="focus:outline-none">
                       <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
-                        {user.avatar && <AvatarImage src={user.avatar} alt={user.username || user.nickname} />}
+                        {user.avatar && <AvatarImage src={user.avatar} alt={user.nickname || user.username} />}
                         <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                          {getInitials(user.username || user.nickname)}
+                          {getInitials(user.nickname || user.username)}
                         </AvatarFallback>
                       </Avatar>
                     </button>
@@ -744,7 +744,7 @@ const Header: React.FC<HeaderProps> = ({
                     className="w-48 backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/40"
                   >
                     <div className="px-2 py-1.5 text-sm font-medium text-foreground">
-                      {user.username || user.nickname}
+                      {user.nickname || user.username}
                     </div>
                     <div className="px-2 pb-2 text-xs text-muted-foreground">{user.email}</div>
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
