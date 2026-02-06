@@ -175,8 +175,8 @@ const Header: React.FC<HeaderProps> = ({
           title: language === "en" ? "Scenario Solutions" : "场景解决方案",
           items:
             language === "en"
-              ? ["OranGEO", "TK Full-Chain", "Email Marketing", "Sales Training"]
-              : ["OranGEO", "TK全链路", "邮件营销", "销售培训"],
+              ? ["GEO", "TSocial Media Marketing", "Email Marketing", "Sales Support"]
+              : ["GEO", "社媒营销", "邮件营销", "销售客服"],
         },
         {
           title: language === "en" ? "Industry Solutions" : "行业解决方案",
@@ -659,13 +659,13 @@ const Header: React.FC<HeaderProps> = ({
                                     onClick={() => {
                                       // Handle external links for solution menu items
                                       const externalLinks: Record<string, string> = {
-                                        OranGEO: "http://orangeo.photog.art",
-                                        "TK Full-Chain": "http://tkfactory.photog.art",
-                                        TK全链路: "http://tkfactory.photog.art",
+                                        GEO: "http://orangeo.photog.art",
+                                        "Social Media Marketing": "http://tkfactory.photog.art",
+                                        社媒营销: "http://tkfactory.photog.art",
                                         "Email Marketing": "http://aigrowth.photog.art",
                                         邮件营销: "http://aigrowth.photog.art",
-                                        "Sales Training": "http://aisales.photog.art",
-                                        销售培训: "http://aisales.photog.art",
+                                        "Sales Support": "http://aisales.photog.art",
+                                        销售客服: "http://aisales.photog.art",
                                         "Beauty & FMCG": "https://industrysolution.photog.art/",
                                         美妆快消: "https://industrysolution.photog.art/",
                                         "Consumer Electronics": "https://industrysolution.photog.art/",
@@ -732,9 +732,9 @@ const Header: React.FC<HeaderProps> = ({
                   <DropdownMenuTrigger asChild>
                     <button className="focus:outline-none">
                       <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
-                        {user.avatar && <AvatarImage src={user.avatar} alt={user.username || user.nickname} />}
+                        {user.avatar && <AvatarImage src={user.avatar} alt={user.nickname || user.username} />}
                         <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                          {getInitials(user.username || user.nickname)}
+                          {getInitials(user.nickname || user.username)}
                         </AvatarFallback>
                       </Avatar>
                     </button>
@@ -744,7 +744,7 @@ const Header: React.FC<HeaderProps> = ({
                     className="w-48 backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/40"
                   >
                     <div className="px-2 py-1.5 text-sm font-medium text-foreground">
-                      {user.username || user.nickname}
+                      {user.nickname || user.username}
                     </div>
                     <div className="px-2 pb-2 text-xs text-muted-foreground">{user.email}</div>
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">

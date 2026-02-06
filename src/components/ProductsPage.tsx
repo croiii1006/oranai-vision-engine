@@ -139,9 +139,9 @@ const ProductsPage: React.FC = () => {
     let targetUrl: string;
     
     if (subTabId === 'imageGen') {
-      targetUrl = config.api.imageGenUrl;
+      targetUrl = searchQuery ? `${config.api.imageGenUrl}?search=${searchQuery}` : config.api.imageGenUrl;
     } else if (subTabId === 'videoGen') {
-      targetUrl = config.api.videoGenUrl;
+      targetUrl = searchQuery ? `${config.api.videoGenUrl}?search=${searchQuery}` : config.api.videoGenUrl;
     } else {
       return;
     }
