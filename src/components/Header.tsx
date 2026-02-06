@@ -175,8 +175,8 @@ const Header: React.FC<HeaderProps> = ({
           title: language === "en" ? "Scenario Solutions" : "场景解决方案",
           items:
             language === "en"
-              ? ["OranGEO", "TK Full-Chain", "Email Marketing", "Sales Training"]
-              : ["OranGEO", "TK全链路", "邮件营销", "销售培训"],
+              ? ["GEO", "TSocial Media Marketing", "Email Marketing", "Sales Support"]
+              : ["GEO", "社媒营销", "邮件营销", "销售客服"],
         },
         {
           title: language === "en" ? "Industry Solutions" : "行业解决方案",
@@ -659,13 +659,13 @@ const Header: React.FC<HeaderProps> = ({
                                     onClick={() => {
                                       // Handle external links for solution menu items
                                       const externalLinks: Record<string, string> = {
-                                        OranGEO: "http://orangeo.photog.art",
-                                        "TK Full-Chain": "http://tkfactory.photog.art",
-                                        TK全链路: "http://tkfactory.photog.art",
+                                        GEO: "http://orangeo.photog.art",
+                                        "Social Media Marketing": "http://tkfactory.photog.art",
+                                        社媒营销: "http://tkfactory.photog.art",
                                         "Email Marketing": "http://aigrowth.photog.art",
                                         邮件营销: "http://aigrowth.photog.art",
-                                        "Sales Training": "http://aisales.photog.art",
-                                        销售培训: "http://aisales.photog.art",
+                                        "Sales Support": "http://aisales.photog.art",
+                                        销售客服: "http://aisales.photog.art",
                                         "Beauty & FMCG": "https://industrysolution.photog.art/",
                                         美妆快消: "https://industrysolution.photog.art/",
                                         "Consumer Electronics": "https://industrysolution.photog.art/",
