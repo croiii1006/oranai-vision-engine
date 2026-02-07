@@ -543,7 +543,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const getInitials = (name: string) => {
-    return name.slice(0, 2).toUpperCase();
+    return name.slice(0, 1).toUpperCase();
   };
 
   return (
