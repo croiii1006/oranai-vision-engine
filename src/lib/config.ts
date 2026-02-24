@@ -43,10 +43,10 @@ export const config = {
     authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || "",
     // Image Generation 工具地址
     imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-image" : "https://toolbox.oran.cn/ai-toolbox/text-to-image"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-image" : "http://localhost:8081/ai-toolbox/text-to-image"),
     // Video Generation 工具地址（与 Image Generation 使用相同地址）
     videoGenUrl: import.meta.env.VITE_VIDEO_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-video" : "https://toolbox.oran.cn/ai-toolbox/text-to-video"),
+      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-video" : "http://localhost:8081/ai-toolbox/text-to-video"),
   },
 
   // 应用信息
