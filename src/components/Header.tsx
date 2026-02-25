@@ -220,7 +220,8 @@ const Header: React.FC<HeaderProps> = ({
     setLanguage(language === "en" ? "zh" : "en");
   };
 
-  const privacyUrl = "https://policies.photog.art/";
+  const termsUrl = `https://policies.photog.art/terms?lang=${language === "en" ? "en" : "zh"}`;
+  const privacyUrl = `https://policies.photog.art/privacy?lang=${language === "en" ? "en" : "zh"}`;
 
   const resetForm = () => {
     setEmail("");
@@ -940,7 +941,7 @@ const Header: React.FC<HeaderProps> = ({
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
                 <button
                   type="button"
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
+                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
@@ -1099,7 +1100,7 @@ const Header: React.FC<HeaderProps> = ({
               <p className="text-xs text-center text-muted-foreground">
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
                 <button
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
+                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
@@ -1246,7 +1247,7 @@ const Header: React.FC<HeaderProps> = ({
               <p className="text-xs text-center text-muted-foreground">
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
                 <button
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
+                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
