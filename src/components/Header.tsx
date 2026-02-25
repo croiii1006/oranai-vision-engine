@@ -550,6 +550,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
@@ -631,87 +632,6 @@ const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
               </nav>
-              <AnimatePresence>
-                {openMenu && menuConfigs[openMenu] && (
-                  <motion.div
-                    key="solution-mega"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed left-0 right-0 top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40 flex justify-center"
-                    onMouseEnter={() => handleMenuOpen(openMenu)}
-                    onMouseLeave={handleMenuClose}
-                  >
-                    <div className="bg-background/80 pointer-events-auto w-fit rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/6 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
-                      {menuConfigs[openMenu]?.sections && (
-                        <div
-                          className={`grid ${
-                            menuConfigs[openMenu].sections.length > 1 ? "grid-cols-2" : "grid-cols-1"
-                          } gap-10`}
-                        >
-                          {menuConfigs[openMenu].sections.map((section) => (
-                            <div className="space-y-3" key={section.title}>
-                              <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                                {section.title}
-                              </div>
-                              <div className="space-y-2">
-                                {section.items.map((item, index) => (
-                                  <button
-                                    key={item}
-                                    onClick={() => {
-                                      // Handle external links for solution menu items
-                                      const externalLinks: Record<string, string> = {
-                                        GEO: "http://orangeo.photog.art",
-                                        "Social Media Marketing": "http://tkfactory.photog.art",
-                                        社媒营销: "http://tkfactory.photog.art",
-                                        "Email Marketing": "http://aigrowth.photog.art",
-                                        邮件营销: "http://aigrowth.photog.art",
-                                        "Sales Support": "http://aisales.photog.art",
-                                        销售客服: "http://aisales.photog.art",
-                                        "Beauty & FMCG": "https://industrysolution.photog.art/",
-                                        美妆快消: "https://industrysolution.photog.art/",
-                                        "Consumer Electronics": "https://industrysolution.photog.art/",
-                                        消费电子: "https://industrysolution.photog.art/",
-                                        "Cross-border Expansion": "https://industrysolution.photog.art/",
-                                        跨境出海: "https://industrysolution.photog.art/",
-                                        "Data Infrastructure": "https://industrysolution.photog.art/",
-                                        数据基建: "https://industrysolution.photog.art/",
-                                        "Insights Hub": "https://insighthub.photog.art",
-                                        洞察中心: "https://insighthub.photog.art",
-                                        "Strategy Engine": "https://strategyengine.photog.art",
-                                        策略引擎: "https://strategyengine.photog.art",
-                                        "Content Factory": "https://toolbox.photog.art",
-                                        内容工厂: "https://toolbox.photog.art",
-                                      };
-
-                                      if (externalLinks[item]) {
-                                        window.open(externalLinks[item], "_blank");
-                                        setOpenMenu(null);
-                                        return;
-                                      }
-                                      // Handle library sub-tab navigation
-                                      if (openMenu === "library" && setLibrarySubTab) {
-                                        const subTabs: ("video" | "voice" | "model")[] = ["video", "voice", "model"];
-                                        setLibrarySubTab(subTabs[index]);
-                                      }
-                                      setActiveTab(openMenu);
-                                      setOpenMenu(null);
-                                    }}
-                                    className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
-                                  >
-                                    {item}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                ))}
-              </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
             {/* Right - Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -1267,6 +1187,90 @@ const Header: React.FC<HeaderProps> = ({
         </DialogContent>
       </Dialog>
     </header>
+
+      {/* Mega Menu - Outside header for backdrop-filter to work */}
+      <AnimatePresence>
+        {openMenu && menuConfigs[openMenu] && (
+          <motion.div
+            key="solution-mega"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-0 right-0 top-16 py-4 pointer-events-none z-40 flex justify-center"
+            onMouseEnter={() => handleMenuOpen(openMenu)}
+            onMouseLeave={handleMenuClose}
+          >
+            <div className="backdrop-blur bg-background/50 pointer-events-auto w-fit rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/10 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
+              {menuConfigs[openMenu]?.sections && (
+                <div
+                  className={`grid ${
+                    menuConfigs[openMenu].sections.length > 1 ? "grid-cols-2" : "grid-cols-1"
+                  } gap-10`}
+                >
+                  {menuConfigs[openMenu].sections.map((section) => (
+                    <div className="space-y-3" key={section.title}>
+                      <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                        {section.title}
+                      </div>
+                      <div className="space-y-2">
+                        {section.items.map((item, index) => (
+                          <button
+                            key={item}
+                            onClick={() => {
+                              // Handle external links for solution menu items
+                              const externalLinks: Record<string, string> = {
+                                GEO: "http://orangeo.photog.art",
+                                "Social Media Marketing": "http://tkfactory.photog.art",
+                                社媒营销: "http://tkfactory.photog.art",
+                                "Email Marketing": "http://aigrowth.photog.art",
+                                邮件营销: "http://aigrowth.photog.art",
+                                "Sales Support": "http://aisales.photog.art",
+                                销售客服: "http://aisales.photog.art",
+                                "Beauty & FMCG": "https://industrysolution.photog.art/",
+                                美妆快消: "https://industrysolution.photog.art/",
+                                "Consumer Electronics": "https://industrysolution.photog.art/",
+                                消费电子: "https://industrysolution.photog.art/",
+                                "Cross-border Expansion": "https://industrysolution.photog.art/",
+                                跨境出海: "https://industrysolution.photog.art/",
+                                "Data Infrastructure": "https://industrysolution.photog.art/",
+                                数据基建: "https://industrysolution.photog.art/",
+                                "Insights Hub": "https://insighthub.photog.art",
+                                洞察中心: "https://insighthub.photog.art",
+                                "Strategy Engine": "https://strategyengine.photog.art",
+                                策略引擎: "https://strategyengine.photog.art",
+                                "Content Factory": "https://toolbox.photog.art",
+                                内容工厂: "https://toolbox.photog.art",
+                              };
+
+                              if (externalLinks[item]) {
+                                window.open(externalLinks[item], "_blank");
+                                setOpenMenu(null);
+                                return;
+                              }
+                              // Handle library sub-tab navigation
+                              if (openMenu === "library" && setLibrarySubTab) {
+                                const subTabs: ("video" | "voice" | "model")[] = ["video", "voice", "model"];
+                                setLibrarySubTab(subTabs[index]);
+                              }
+                              setActiveTab(openMenu);
+                              setOpenMenu(null);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
