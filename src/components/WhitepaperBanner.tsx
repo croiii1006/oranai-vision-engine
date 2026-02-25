@@ -3,13 +3,18 @@ import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+let hasShownInSession = false;
+
 const WhitepaperBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const { language } = useLanguage();
 
   useEffect(() => {
-    // Show banner on every homepage visit
-    setIsVisible(true);
+    // Show once per SPA session; refresh will show again
+    if (!hasShownInSession) {
+      setIsVisible(true);
+      hasShownInSession = true;
+    }
   }, []);
 
   const handleClose = () => {
