@@ -4,6 +4,9 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+// const oran_target = 'http://94.74.101.163:28080'
+const oran_target = 'http://119.13.125.102:29273'
+// const oran_target = 'http://192.168.112.253:8000/'
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -32,16 +35,14 @@ export default defineConfig(({ mode }) => ({
       },
       // AUTH 相关 API 代理 - 代理到开发服务器
       '/auth': {
-        // target: 'http://94.74.101.163:28080',
-        target: 'http://192.168.112.253:8000/',
+        target: oran_target,
         changeOrigin: true,
         secure: false, // 如果是 http，设置为 false
         ws: true, // 支持 WebSocket
       },
       // OAuth 相关 API 代理（/oauth/callback/google 由前端 SPA 处理，不转发到后端）
       '/oauth': {
-        // target: 'http://94.74.101.163:28080',
-        target: 'http://192.168.112.253:8000/',
+        target: oran_target,
         changeOrigin: true,
         secure: false,
         bypass(req) {
@@ -52,22 +53,19 @@ export default defineConfig(({ mode }) => ({
         },
       },
       '/oauth2': {
-        // target: 'http://94.74.101.163:28080',
-        target: 'http://192.168.112.253:8000/',
+        target: oran_target,
         changeOrigin: true,
         secure: false,
       },
       // 验证码 API 代理
       '/api/captcha': {
-        // target: 'http://94.74.101.163:28080',
-        target: 'http://192.168.112.253:8000/',
+        target: oran_target,
         changeOrigin: true,
         secure: false,
       },
       // 注册 API 代理
       '/api/register': {
-        // target: 'http://94.74.101.163:28080',
-        target: 'http://192.168.112.253:8000/',
+        target: oran_target,
         changeOrigin: true,
         secure: false,
       },
