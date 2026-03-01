@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const openedFromUrlRef = useRef<boolean>(false); // 记录是否通过 URL 参数打开登录框
+  const postLoginRedirectRef = useRef<'back' | 'toolbox' | null>(null); // 登录成功后的跳转：back=返回上一页，toolbox=跳转 toolbox
   
   // 从缓存加载用户信息（在 App 初始化检查完成后）
   useEffect(() => {
@@ -104,22 +104,28 @@ const Header: React.FC<HeaderProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // 检查 URL 参数，如果存在 ?logon=1，自动弹出登录框
+  // 检查 URL 参数：?logon=1 / ?login=1 弹出登录框且登录成功后返回上一页；?login=toolbox 弹出登录框且登录成功后跳转 toolbox
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const logonParam = urlParams.get('logon');
-    
-    if (logonParam === '1') {
-      // 标记为通过 URL 参数打开
-      openedFromUrlRef.current = true;
-      
-      // 打开登录对话框，并设置为登录模式（不是注册模式）
+    const loginParam = urlParams.get('login');
+
+    if (loginParam === 'toolbox') {
+      postLoginRedirectRef.current = 'toolbox';
+      sessionStorage.setItem('loginRedirect', 'toolbox');
       setDialogOpen(true);
       setIsSignUp(false);
-      
-      // 可选：从 URL 中移除 logon 参数，避免刷新页面时再次弹出
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('logon');
+      newUrl.searchParams.delete('login');
+      window.history.replaceState({}, '', newUrl.toString());
+    } else if (loginParam === '1') {
+      postLoginRedirectRef.current = 'back';
+      sessionStorage.setItem('loginRedirect', 'back');
+      setDialogOpen(true);
+      setIsSignUp(false);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('logon');
+      newUrl.searchParams.delete('login');
       window.history.replaceState({}, '', newUrl.toString());
     }
   }, []);
@@ -267,13 +273,18 @@ const Header: React.FC<HeaderProps> = ({
 
       setDialogOpen(false);
       resetForm();
-      
-      // 如果是通过 URL 参数打开的登录框，登录成功后返回上一页
-      if (openedFromUrlRef.current) {
-        openedFromUrlRef.current = false; // 重置标记
-        // 延迟一下，确保对话框关闭动画完成
+
+      // 根据 URL 参数决定登录成功后行为：login=1 返回上一页，login=toolbox 跳转 toolbox
+      const redirect = postLoginRedirectRef.current || sessionStorage.getItem('loginRedirect');
+      postLoginRedirectRef.current = null;
+      sessionStorage.removeItem('loginRedirect');
+      if (redirect) {
         setTimeout(() => {
-          window.history.back();
+          if (redirect === 'toolbox') {
+            window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+          } else if (redirect === 'back') {
+            window.history.back();
+          }
         }, 300);
       }
     } catch (error) {
@@ -351,6 +362,20 @@ const Header: React.FC<HeaderProps> = ({
 
       setDialogOpen(false);
       resetForm();
+
+      // 根据 URL 参数决定登录成功后行为（与邮箱登录一致）
+      const redirect = postLoginRedirectRef.current || sessionStorage.getItem('loginRedirect');
+      postLoginRedirectRef.current = null;
+      sessionStorage.removeItem('loginRedirect');
+      if (redirect) {
+        setTimeout(() => {
+          if (redirect === 'toolbox') {
+            window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+          } else if (redirect === 'back') {
+            window.history.back();
+          }
+        }, 300);
+      }
     } catch (error) {
       console.error('Register failed:', error);
       // 如果是 401 错误（token 过期），清除用户状态
@@ -405,9 +430,8 @@ const Header: React.FC<HeaderProps> = ({
     setDialogOpen(open);
     if (!open) {
       setIsForgotPassword(false);
-      if (openedFromUrlRef.current) {
-        openedFromUrlRef.current = false;
-      }
+      postLoginRedirectRef.current = null;
+      sessionStorage.removeItem('loginRedirect');
     }
   };
 

@@ -46,6 +46,16 @@ const OAuthCallbackGoogle = () => {
           saveUserInfo(userRes.data);
         }
         setStatus("success");
+        const loginRedirect = sessionStorage.getItem("loginRedirect");
+        sessionStorage.removeItem("loginRedirect");
+        if (loginRedirect === "toolbox") {
+          window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+          return;
+        }
+        if (loginRedirect === "back") {
+          window.history.back();
+          return;
+        }
         navigate("/", { replace: true });
       } catch (err) {
         setStatus("error");
