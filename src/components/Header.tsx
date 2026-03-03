@@ -883,31 +883,19 @@ const Header: React.FC<HeaderProps> = ({
 
               <p className="text-xs text-center text-muted-foreground">
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
-<<<<<<< HEAD
-                <button
-                  type="button"
-                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
                 </a>
                 {language === "en" ? " and acknowledge our " : " 并确认我们的"}
-<<<<<<< HEAD
-                <button
-                  type="button"
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Privacy Policy" : "隐私政策"}
@@ -1057,29 +1045,19 @@ const Header: React.FC<HeaderProps> = ({
               {/* Terms */}
               <p className="text-xs text-center text-muted-foreground">
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
-<<<<<<< HEAD
-                <button
-                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
                 </a>
                 {language === "en" ? " and acknowledge our " : " 并确认我们的"}
-<<<<<<< HEAD
-                <button
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Privacy Policy" : "隐私政策"}
@@ -1218,29 +1196,19 @@ const Header: React.FC<HeaderProps> = ({
               {/* Terms */}
               <p className="text-xs text-center text-muted-foreground">
                 {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
-<<<<<<< HEAD
-                <button
-                  onClick={() => window.open(termsUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Terms of Service" : "服务条款"}
                 </a>
                 {language === "en" ? " and acknowledge our " : " 并确认我们的"}
-<<<<<<< HEAD
-                <button
-                  onClick={() => window.open(privacyUrl, "_blank", "noopener,noreferrer")}
-=======
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
->>>>>>> feature/jason-dev
                   className="text-foreground font-medium hover:underline"
                 >
                   {language === "en" ? "Privacy Policy" : "隐私政策"}
