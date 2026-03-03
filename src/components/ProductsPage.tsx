@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { ArrowUp, Globe, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -91,12 +91,12 @@ const ProductsPage: React.FC = () => {
       id: 'imageGen',
       labelKey: 'products.imageGen',
       image: imageGenThumb,
-      url: undefined // 动态获取，不在这里设置
+      url: undefined // 鍔ㄦ€佽幏鍙栵紝涓嶅湪杩欓噷璁剧疆
     }, {
       id: 'videoGen',
       labelKey: 'products.videoGen',
       image: videoGenThumb,
-      url: undefined // 动态获取，使用 OAuth2 授权
+      url: undefined // 鍔ㄦ€佽幏鍙栵紝浣跨敤 OAuth2 鎺堟潈
     }, {
       id: 'digitalHuman',
       labelKey: 'products.digitalHuman',
@@ -132,8 +132,8 @@ const ProductsPage: React.FC = () => {
   }, [currentTabConfig, activeSubTab]);
 
   /**
-   * 处理工具跳转
-   * @param subTabId 子标签 ID（如 'imageGen', 'videoGen'）
+   * 澶勭悊宸ュ叿璺宠浆
+   * @param subTabId 瀛愭爣绛?ID锛堝 'imageGen', 'videoGen'锛?
    */
   const handleToolNavigation = (subTabId: string) => {
     let targetUrl: string;
@@ -146,7 +146,7 @@ const ProductsPage: React.FC = () => {
       return;
     }
     
-    // 直接跳转，不需要 OAuth2 授权
+    // 鐩存帴璺宠浆锛屼笉闇€瑕?OAuth2 鎺堟潈
     window.location.href = targetUrl;
   };
   return <div className="min-h-screen pt-24 pb-16">
@@ -288,7 +288,7 @@ const ProductsPage: React.FC = () => {
             <button 
               onClick={() => {
                 if (!activeSubTab || !currentTabConfig?.subTabs) {
-                  // 如果没有选择工具，使用默认行为
+                  // 濡傛灉娌℃湁閫夋嫨宸ュ叿锛屼娇鐢ㄩ粯璁よ涓?
                   window.open('https://toolbox.oran.cn', '_blank');
                   return;
                 }
@@ -304,13 +304,13 @@ const ProductsPage: React.FC = () => {
                   return;
                 }
 
-                // Image Generation 和 Video Generation 直接跳转
+                // Image Generation 鍜?Video Generation 鐩存帴璺宠浆
                 if (subTab.id === 'imageGen' || subTab.id === 'videoGen') {
                   handleToolNavigation(subTab.id);
                 } else if (subTab.url) {
                   window.open(subTab.url, '_blank');
                 } else {
-                  // 默认行为
+                  // 榛樿琛屼负
                   window.open('https://toolbox.oran.cn', '_blank');
                 }
               }}
@@ -321,6 +321,83 @@ const ProductsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Insight Case Card - below search box */}
+        {activeTab === 'insight' && (
+          <div className="max-w-xl mx-auto mb-6">
+            <a
+              href="https://haifeisianalysis.photog.art/"
+              target="_blank"
+              rel="noreferrer"
+              className="block relative group w-full max-w-[350px] max-h-[150px] cursor-pointer"
+            >
+              <div className="absolute -right-3 -bottom-3 h-[70%] w-[70%] rounded-[50px] bg-[radial-gradient(60%_60%_at_100%_100%,rgba(0,0,0,0.18),rgba(0,0,0,0))] blur-[16px] z-0" aria-hidden="true"></div>
+              <div className="absolute inset-0 flex items-center overflow-clip bg-[#f6f6f7] dark:bg-[#0c0c0d] rounded-[20px] backdrop-blur-[5px] z-10" data-name="Query卡片">
+                <div className="-translate-x-1/2 -translate-y-1/2 absolute h-[132px] left-1/2 overflow-clip top-1/2 w-[256px]"></div>
+
+                <div className="absolute flex h-[150px] items-center justify-center right-[-14.15px] top-[1.73px] w-[113.041px] z-10 transition-transform duration-300 ease-out group-hover:translate-x-[-8px] group-hover:translate-y-[-6px]">
+                  <div className="flex-none rotate-[-6deg] transition-transform duration-300 ease-out group-hover:rotate-[-4deg]">
+                    <div className="bg-white overflow-hidden rounded-[4px] shadow-[0px_2px_20px_0px_rgba(35,35,35,0.2)] w-[100px] h-[130px] relative">
+                      <div className="flex items-center gap-[3px] px-[6px] py-[4px]">
+                        <img alt="" className="block max-w-none size-[3px]" src="https://www.figma.com/api/mcp/asset/8434a1fc-659d-48f5-938c-ba64498b102d" />
+                      </div>
+                      <div className="flex items-start gap-[4px] px-[6px] pt-[2px] pb-[4px]">
+                        <div className="flex flex-col gap-[4px] flex-1 min-w-0">
+                          <p className="font-semibold leading-[normal] line-clamp-1 not-italic text-[6px] text-[#141414]">海飞丝市场洞察深度报告</p>
+                          <div className="flex items-center gap-[2px]">
+                            <div className="size-[7px] rounded-full overflow-hidden bg-gray-100">
+                              <img alt="OranAI" src="/logo_dark.svg" className="w-full h-full object-contain" />
+                            </div>
+                            <p className="font-medium leading-[normal] not-italic text-[5px] text-[#919191] truncate">OranAI</p>
+                          </div>
+                          <div className="flex items-center gap-[2.667px]">
+                            <div className="flex items-center gap-px">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-play size-[4px] text-[#919191] fill-[#919191]">
+                                <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                              </svg>
+                              <p className="font-medium leading-[4.85px] not-italic text-[4px] text-[#919191] tracking-[-0.0716px]">1080w</p>
+                            </div>
+                            <div className="flex items-center gap-px">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-heart size-[4px] text-[#919191]">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                              </svg>
+                              <p className="font-medium leading-[normal] not-italic text-[4px] text-[#919191]">28w</p>
+                            </div>
+                            <div className="flex items-center gap-px">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square size-[4px] text-[#919191]">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                              </svg>
+                              <p className="font-medium leading-[normal] not-italic text-[4px] text-[#919191]">12w</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative h-[90px] rounded-[4px] mx-[6px] mb-[6px] overflow-hidden">
+                        <img alt="" className="absolute inset-0 max-w-none object-cover size-full" src="/haifeisi.jpg" />
+                      </div>
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-[#e0e0e2] to-transparent"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[20px] bg-black/55 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <p className="text-white text-[12px] leading-[1.4] font-medium">
+                    点击查看洞察报告案例
+                  </p>
+                </div>
+              </div>
+
+              <div className="absolute bottom-[-0px] h-[85px] left-0 w-[100%] overflow-clip z-20">
+                <div className="absolute left-0 bottom-0 flex flex-col gap-[6px] items-start justify-end p-[18px] py-[13px] w-full" style={{ backgroundSize: 'cover', backgroundPosition: 'center bottom' }}>
+                  <p className="font-semibold leading-[1.35] not-italic relative shrink-0 text-[13px] text-[#363636] w-[232px] whitespace-pre-wrap mb-0 group-hover:opacity-0 transition-opacity duration-200">
+                    海飞丝市场洞察深度报告<br />整合宏观趋势、全球化市场、人群画像、和竞品分析
+                  </p>
+                </div>
+              </div>
+              <div className="absolute inset-0 rounded-[8px] dark:ring-[#333] pointer-events-none z-[30]"></div>
+              <div className="relative h-[210px] w-full"></div>
+            </a>
+          </div>
+        )}
       </div>
     </div>;
 };
