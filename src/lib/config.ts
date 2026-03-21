@@ -19,6 +19,27 @@ export const getEnvironment = (): AppEnvironment => {
 };
 
 /**
+ * 工具箱站点根地址（末尾带 /），用于登录后跳转、外链等。
+ * 优先级：VITE_TOOLBOX_BASE_URL > 按 MODE 默认（dev→localhost:8081，staging→test.toolbox，production→toolbox.oran.cn）
+ */
+function resolveToolboxBaseUrl(): string {
+  const fromEnv = import.meta.env.VITE_TOOLBOX_BASE_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;
+  }
+  if (import.meta.env.MODE === "staging") {
+    return "https://test.toolbox.oran.cn/";
+  }
+  if (import.meta.env.PROD) {
+    return "https://toolbox.oran.cn/";
+  }
+  return "http://localhost:8081/";
+}
+
+const toolboxBaseUrl = resolveToolboxBaseUrl();
+const toolboxOrigin = toolboxBaseUrl.replace(/\/$/, "");
+
+/**
  * 应用配置
  */
 export const config = {
@@ -26,6 +47,12 @@ export const config = {
   env: getEnvironment(),
   isDev: import.meta.env.DEV,
   isProd: import.meta.env.PROD,
+
+  // 工具箱（独立站点）：本地 npm run dev 与测试/生产构建见各 .env.* 中的 VITE_TOOLBOX_BASE_URL
+  toolbox: {
+    baseUrl: toolboxBaseUrl,
+    origin: toolboxOrigin,
+  },
   
   // API 配置
   api: {
@@ -42,11 +69,13 @@ export const config = {
     // 生产环境：使用空字符串，通过 Nginx 代理转发（代理配置在 nginx-baota-www.oran.cn.conf）
     authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || "",
     // Image Generation 工具地址
-    imageGenUrl: import.meta.env.VITE_IMAGE_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-image" : "http://localhost:8081/ai-toolbox/text-to-image"),
+    imageGenUrl:
+      import.meta.env.VITE_IMAGE_GEN_URL ||
+      `${toolboxBaseUrl}ai-toolbox/text-to-image`,
     // Video Generation 工具地址（与 Image Generation 使用相同地址）
-    videoGenUrl: import.meta.env.VITE_VIDEO_GEN_URL || 
-      (import.meta.env.PROD ? "https://toolbox.oran.cn/ai-toolbox/text-to-video" : "http://localhost:8081/ai-toolbox/text-to-video"),
+    videoGenUrl:
+      import.meta.env.VITE_VIDEO_GEN_URL ||
+      `${toolboxBaseUrl}ai-toolbox/text-to-video`,
   },
 
   // 应用信息

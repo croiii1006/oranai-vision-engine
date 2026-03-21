@@ -4,9 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-// const oran_target = 'http://94.74.101.163:28080'
-const oran_target = 'http://119.13.125.102:29273'
-// const oran_target = 'http://192.168.112.253:8000/'
+// 仅 npm run dev 使用下方代理；本地/测试后端同源：119.13.125.102:29273；生产站点由 Nginx 指向 94.74.101.163:28080
+const oran_target = "http://119.13.125.102:29273";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { loginWithGoogleCallback, getUserInfo } from "@/lib/api/auth";
 import { saveToken, saveUserInfo } from "@/lib/utils/auth-storage";
+import { config } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 
 const OAuthCallbackGoogle = () => {
@@ -49,7 +50,7 @@ const OAuthCallbackGoogle = () => {
         const loginRedirect = sessionStorage.getItem("loginRedirect");
         sessionStorage.removeItem("loginRedirect");
         if (loginRedirect === "toolbox") {
-          window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+          window.location.href = config.toolbox.baseUrl;
           return;
         }
         if (loginRedirect === "back") {

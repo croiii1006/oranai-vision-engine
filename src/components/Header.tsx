@@ -30,6 +30,7 @@ import {
   getToken,
 } from "@/lib/utils/auth-storage";
 import type { UserInfo } from "@/lib/api/auth";
+import { config } from "@/lib/config";
 
 interface HeaderProps {
   activeTab: string;
@@ -281,7 +282,7 @@ const Header: React.FC<HeaderProps> = ({
       if (redirect) {
         setTimeout(() => {
           if (redirect === 'toolbox') {
-            window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+            window.location.href = config.toolbox.baseUrl;
           } else if (redirect === 'back') {
             window.history.back();
           }
@@ -370,7 +371,7 @@ const Header: React.FC<HeaderProps> = ({
       if (redirect) {
         setTimeout(() => {
           if (redirect === 'toolbox') {
-            window.location.href = import.meta.env.PROD ? ' https://toolbox.oran.cn/' : 'http://localhost:8081/';
+            window.location.href = config.toolbox.baseUrl;
           } else if (redirect === 'back') {
             window.history.back();
           }
