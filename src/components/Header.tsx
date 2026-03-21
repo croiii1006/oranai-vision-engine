@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, Sun, Moon, LogOut, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -817,9 +817,9 @@ const Header: React.FC<HeaderProps> = ({
           {isForgotPassword ? (
             /* Forgot Password Form */
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-center text-foreground">
+              <DialogTitle className="text-xl font-semibold text-center text-foreground">
                 {language === "en" ? "Forget password" : "忘记密码"}
-              </h2>
+              </DialogTitle>
 
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 {error && (
@@ -984,9 +984,9 @@ const Header: React.FC<HeaderProps> = ({
           ) : isSignUp ? (
             /* Sign Up Form */
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-primary">
+              <DialogTitle className="text-xl font-semibold text-primary">
                 {language === "en" ? "Sign up for an account" : "注册账号"}
-              </h2>
+              </DialogTitle>
 
               <form onSubmit={handleSignUp} className="space-y-4">
                 {/* Error Message */}
@@ -1146,9 +1146,9 @@ const Header: React.FC<HeaderProps> = ({
           ) : (
             /* Login Form */
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-center text-foreground">
+              <DialogTitle className="text-xl font-semibold text-center text-foreground">
                 {language === "en" ? "Create an account or Login" : "创建账号或登录"}
-              </h2>
+              </DialogTitle>
 
               {/* Google Login */}
               <Button

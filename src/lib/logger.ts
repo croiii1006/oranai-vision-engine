@@ -10,8 +10,8 @@ interface LogContext {
 }
 
 class Logger {
-  private isDevelopment = import.meta.env.DEV;
-  private isProduction = import.meta.env.PROD;
+  private isDevelopment = process.env.NODE_ENV === "development";
+  private isProduction = process.env.NODE_ENV === "production";
 
   /**
    * 格式化日志消息

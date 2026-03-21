@@ -1137,18 +1137,20 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // 从 localStorage 读取初始语言，如果没有则默认使用 'en'
-  const [language, setLanguageState] = useState<Language>(() => {
-    const stored = getStoredLanguage() as Language;
-    return (stored === 'zh' || stored === 'en') ? stored : "en";
-  });
+  /**
+   * 首屏必须与 SSR 一致：服务端无 localStorage，不能在这里读存储。
+   * hydration 后再从 localStorage 同步，避免导航文案等出现 Solution/解决方案 的 hydration 报错。
+   * 持久化仅通过 setLanguage（用户切换），避免首屏 effect 用初始 "en" 覆盖存储里的 "zh"。
+   */
+  const [language, setLanguageState] = useState<Language>("en");
 
-  // 当语言改变时，保存到 localStorage
   useEffect(() => {
-    setStoredLanguage(language);
-  }, [language]);
+    const stored = getStoredLanguage() as Language;
+    if (stored === "zh" || stored === "en") {
+      setLanguageState(stored);
+    }
+  }, []);
 
-  // 包装 setLanguage，确保保存到 localStorage
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     setStoredLanguage(lang);

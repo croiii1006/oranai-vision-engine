@@ -11,10 +11,16 @@ import digitalHumanThumb from '@/assets/products/digital-human-thumb.png';
 import geoMonitorThumb from '@/assets/products/geo-monitor-thumb.png';
 import brandHealthThumb from '@/assets/products/brand-health-thumb.png';
 import brandStrategyThumb from '@/assets/products/brand-strategy-thumb.png';
+import type { StaticImageData } from 'next/image';
+
+function getImageSrc(img: string | StaticImageData): string {
+  return typeof img === 'string' ? img : img.src;
+}
+
 interface SubTab {
   id: string;
   labelKey: string;
-  image: string;
+  image: string | StaticImageData;
   url?: string; // URL to navigate to when clicked
 }
 interface TabConfig {
@@ -233,13 +239,16 @@ const ProductsPage: React.FC = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeSubTab ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                      {activeSubTab && currentTabConfig.subTabs?.find(st => st.id === activeSubTab) && (
+                      {activeSubTab && (() => {
+                        const sel = currentTabConfig.subTabs?.find(st => st.id === activeSubTab);
+                        return sel ? (
                         <img 
-                          src={currentTabConfig.subTabs.find(st => st.id === activeSubTab)?.image} 
+                          src={getImageSrc(sel.image)} 
                           alt="" 
                           className="w-4 h-4 rounded object-cover"
                         />
-                      )}
+                        ) : null;
+                      })()}
                       <span>
                         {activeSubTab 
                           ? t(currentTabConfig.subTabs?.find(st => st.id === activeSubTab)?.labelKey || '')

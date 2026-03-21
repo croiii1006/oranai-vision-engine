@@ -1,4 +1,19 @@
-# Logs
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js
+.next
+out
+
+# 构建产物（历史 Vite / 其他）
+dist
+dist-ssr
+build
+
+# 日志
 logs
 *.log
 npm-debug.log*
@@ -7,15 +22,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# 环境变量：本地与密钥勿提交；团队若需提交 .env.development 等，勿使用通配符忽略全部 .env.*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Environment variables
-.env.*
+# Vercel
+.vercel
 
-# Editor directories and files
+# TypeScript
+*.tsbuildinfo
+
+# 测试覆盖率
+coverage
+.nyc_output
+
+# Turbo
+.turbo
+
+# ESLint
+.eslintcache
+
+# 编辑器与系统
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -26,8 +56,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Archive files
-*.zip
+# 证书与密钥文件
+*.pem
 
-# docs
-docs
+# 压缩包
+*.zip

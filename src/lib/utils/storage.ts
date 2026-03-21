@@ -7,9 +7,12 @@ import { STORAGE_KEYS } from "../constants";
 import { logger } from "../logger";
 
 /**
- * 检查 localStorage 是否可用
+ * 检查 localStorage 是否可用（SSR / Node 下无 window/localStorage）
  */
 function isStorageAvailable(): boolean {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") {
+    return false;
+  }
   try {
     const test = "__storage_test__";
     localStorage.setItem(test, test);

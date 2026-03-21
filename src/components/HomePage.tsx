@@ -6,8 +6,9 @@ import { Globe, Sun, Moon } from 'lucide-react';
 import ScrollSolutionPage from './ScrollSolutionPage';
 import PartnerLogoMarquee from './PartnerLogoMarquee';
 import WhitepaperBanner from './WhitepaperBanner';
-import logoDarkSvg from '/logo_dark.svg';
-import logoSvg from '/logo.svg';
+
+const logoDarkSvg = '/logo_dark.svg';
+const logoSvg = '/logo.svg';
 interface HomePageProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
