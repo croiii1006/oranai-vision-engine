@@ -17,10 +17,7 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollToFooter, onHideFooter }) => {
-  const {
-    language,
-    setLanguage
-  } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const {
     theme,
     toggleTheme
@@ -181,27 +178,17 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
                   className="font-sans text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-tight text-foreground dark:opacity-70"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  {language === 'en' ? (
-                    <>
-                      Integrate cutting-edge{' '}
-                      <span className="italic font-medium">Models</span>,{' '}
-                      <span className="italic font-medium">Product Matrices</span>, and{' '}
-                      <span className="italic font-medium">Creative Asset Libraries</span> to build a{' '}
-                      <span className="italic font-medium whitespace-nowrap">One-stop Marketing Solution</span>, empowering the growth of{' '}
-                      <span className="italic font-medium">Global Brands</span>.
-                    </>
-                  ) : (
-                    <>
-                      整合
-                      <span className="italic font-medium">前沿模型</span>、
-                      <span className="italic font-medium">产品矩阵</span>与
-                      <span className="italic font-medium">创意素材库</span>，
-                      打造
-                      <span className="italic font-medium">一站式营销解决方案</span>，
-                      赋能
-                      <span className="italic font-medium">全球品牌增长</span>。
-                    </>
-                  )}
+                  {t('home.hero.s1')}
+                  <span className="italic font-medium">{t('home.hero.em1')}</span>
+                  {t('home.hero.s2')}
+                  <span className="italic font-medium">{t('home.hero.em2')}</span>
+                  {t('home.hero.s3')}
+                  <span className="italic font-medium">{t('home.hero.em3')}</span>
+                  {t('home.hero.s4')}
+                  <span className="italic font-medium whitespace-nowrap">{t('home.hero.em4')}</span>
+                  {t('home.hero.s5')}
+                  <span className="italic font-medium">{t('home.hero.em5')}</span>
+                  {t('home.hero.s6')}
                 </h2>
               </motion.div>
             </div>
@@ -226,9 +213,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeTab, setActiveTab, onScrollTo
                   className="text-[1.2rem] sm:text-[1.35rem] text-foreground text-center font-sans font-semibold"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  {language === 'en'
-                    ? 'One-stop Solution to Marketing Challenges, All-round Support for Brand Growth'
-                    : '一站式解决营销难题，全方位支持品牌增长'}
+                  {t('home.hero.subtitle')}
                 </motion.p>
 
                 <motion.div

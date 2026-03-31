@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { getLanguage as getStoredLanguage, setLanguage as setStoredLanguage } from "@/lib/utils/storage";
+import { partialEn } from "@/i18n/partial-en";
+import { partialZh } from "@/i18n/partial-zh";
 
 type Language = "en" | "zh";
 
@@ -616,6 +618,8 @@ const translations: Record<Language, Record<string, string>> = {
     "about.collaborationDesc": "Building together with partners",
     "about.integrity": "Integrity",
     "about.integrityDesc": "Acting with honesty and transparency",
+
+    ...partialEn,
   },
   zh: {
     // Navigation
@@ -1127,6 +1131,8 @@ const translations: Record<Language, Record<string, string>> = {
     "about.collaborationDesc": "与合作伙伴共同成长",
     "about.integrity": "诚信",
     "about.integrityDesc": "以诚实和透明行事",
+
+    ...partialZh,
   },
 };
 

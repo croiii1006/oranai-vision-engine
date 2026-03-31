@@ -54,9 +54,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        serif: ["EB Garamond", "Georgia", "serif"],
-        mono: ["JetBrains Mono", "SF Mono", "Fira Code", "monospace"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-eb-garamond)", "Georgia", "serif"],
+        mono: ["var(--font-jetbrains-mono)", "SF Mono", "Fira Code", "monospace"],
       },
       keyframes: {
         "accordion-down": {

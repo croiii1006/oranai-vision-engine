@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, Sun, Moon, LogOut, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -6,11 +6,10 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import {
   Tooltip,
   TooltipContent,
@@ -31,14 +30,19 @@ import {
 } from "@/lib/utils/auth-storage";
 import type { UserInfo } from "@/lib/api/auth";
 import { config } from "@/lib/config";
+import type { PlanId } from "@/lib/pricing";
+import { MEGA_MENU_EXTERNAL_URLS } from "@/i18n/menu-external-urls";
 
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  currentPlanId: PlanId;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   isVisible?: boolean;
   setLibrarySubTab?: (tab: "video" | "voice" | "model") => void;
+  /** 递增时打开登录弹窗（定价页等子组件请求登录） */
+  loginDialogTrigger?: number;
 }
 
 interface UserData {
@@ -51,10 +55,12 @@ interface UserData {
 const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
+  currentPlanId,
   sidebarOpen,
   setSidebarOpen,
   isVisible = true,
   setLibrarySubTab,
+  loginDialogTrigger = 0,
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
@@ -82,7 +88,16 @@ const Header: React.FC<HeaderProps> = ({
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
   const postLoginRedirectRef = useRef<'back' | 'toolbox' | null>(null); // 登录成功后的跳转：back=返回上一页，toolbox=跳转 toolbox
-  
+  const prevLoginDialogTriggerRef = useRef(0);
+
+  // 定价页等：父组件递增 loginDialogTrigger 时打开登录框（不设 loginRedirect，登录成功后留在当前页）
+  useEffect(() => {
+    if (loginDialogTrigger <= prevLoginDialogTriggerRef.current) return;
+    prevLoginDialogTriggerRef.current = loginDialogTrigger;
+    setDialogOpen(true);
+    setIsSignUp(false);
+  }, [loginDialogTrigger]);
+
   // 从缓存加载用户信息（在 App 初始化检查完成后）
   useEffect(() => {
     // 延迟一点确保 App 的初始化检查完成
@@ -105,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // 检查 URL 参数：?logon=1 / ?login=1 弹出登录框且登录成功后返回上一页；?login=toolbox 弹出登录框且登录成功后跳转 toolbox
+  // 检查 URL 参数：?login=1 弹出登录框且登录成功后返回上一页；?login=toolbox 弹出登录框且登录成功后跳转 toolbox
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const loginParam = urlParams.get('login');
@@ -116,7 +131,6 @@ const Header: React.FC<HeaderProps> = ({
       setDialogOpen(true);
       setIsSignUp(false);
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('logon');
       newUrl.searchParams.delete('login');
       window.history.replaceState({}, '', newUrl.toString());
     } else if (loginParam === '1') {
@@ -125,7 +139,6 @@ const Header: React.FC<HeaderProps> = ({
       setDialogOpen(true);
       setIsSignUp(false);
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('logon');
       newUrl.searchParams.delete('login');
       window.history.replaceState({}, '', newUrl.toString());
     }
@@ -170,58 +183,47 @@ const Header: React.FC<HeaderProps> = ({
     { id: "library", label: t("nav.library") },
   ];
 
-  const menuConfigs: Record<
-    string,
-    {
-      sections: { title: string; items: string[] }[];
-    }
-  > = {
-    solution: {
-      sections: [
-        {
-          title: language === "en" ? "Scenario Solutions" : "场景解决方案",
-          items:
-            language === "en"
-              ? ["GEO", "TSocial Media Marketing", "Email Marketing", "Sales Support"]
-              : ["GEO", "社媒营销", "邮件营销", "销售客服"],
-        },
-        {
-          title: language === "en" ? "Industry Solutions" : "行业解决方案",
-          items:
-            language === "en"
-              ? ["Beauty & FMCG", "Consumer Electronics", "Cross-border Expansion"]
-              : ["美妆快消", "消费电子", "跨境出海"],
-        },
-      ],
-    },
-    models: {
-      sections: [
-        {
-          title: language === "en" ? "Platform Capabilities" : "平台能力",
-          items: language === "en" ? ["Data Center", "Model Library", "Skills", "MiniApps"] : ["数据中心", "模型库", "Skills", "MiniApps"],
-        },
-      ],
-    },
-    products: {
-      sections: [
-        {
-          title: language === "en" ? "Product Matrix" : "产品矩阵",
-          items:
-            language === "en"
-              ? ["Data Infrastructure", "Insights Hub", "Strategy Engine", "Content Factory"]
-              : ["数据基建", "洞察中心", "策略引擎", "内容工厂"],
-        },
-      ],
-    },
-    library: {
-      sections: [
-        {
-          title: language === "en" ? "Inspiration Library" : "灵感素材库",
-          items: language === "en" ? ["Video", "Voice", "Model"] : ["视频", "语音", "模特"],
-        },
-      ],
-    },
-  };
+  const menuConfigs = useMemo(
+    () => ({
+      solution: {
+        sections: [
+          {
+            title: t("header.mega.scenarioTitle"),
+            items: ["menu.sol.geo", "menu.sol.social", "menu.sol.email", "menu.sol.sales"],
+          },
+          {
+            title: t("header.mega.industryTitle"),
+            items: ["menu.ind.beauty", "menu.ind.electronics", "menu.ind.crossborder", "menu.ind.data"],
+          },
+        ],
+      },
+      models: {
+        sections: [
+          {
+            title: t("header.mega.platformTitle"),
+            items: ["menu.plat.dataCenter", "menu.plat.modelLibrary", "menu.plat.skills", "menu.plat.miniapps"],
+          },
+        ],
+      },
+      products: {
+        sections: [
+          {
+            title: t("header.mega.productTitle"),
+            items: ["menu.prod.dataInfra", "menu.prod.insights", "menu.prod.strategy", "menu.prod.contentFactory"],
+          },
+        ],
+      },
+      library: {
+        sections: [
+          {
+            title: t("header.mega.libraryTitle"),
+            items: ["menu.lib.video", "menu.lib.voice", "menu.lib.model"],
+          },
+        ],
+      },
+    }),
+    [t],
+  );
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "zh" : "en");
@@ -296,11 +298,7 @@ const Header: React.FC<HeaderProps> = ({
         setUser(null);
       }
       setError(
-        error instanceof Error
-          ? error.message
-          : language === "en"
-            ? "Login failed. Please try again."
-            : "登录失败，请重试。",
+        error instanceof Error ? error.message : t("auth.error.loginFailed"),
       );
     } finally {
       setIsLoading(false);
@@ -313,13 +311,12 @@ const Header: React.FC<HeaderProps> = ({
 
     // 验证密码匹配
     if (password !== confirmPassword) {
-      setError(language === "en" ? "Passwords do not match" : "两次密码不一致");
+      setError(t("auth.error.passwordMismatch"));
       return;
     }
 
-    // 验证验证码
     if (!verificationCode || verificationCode.trim() === "") {
-      setError(language === "en" ? "Please enter verification code" : "请输入验证码");
+      setError(t("auth.error.verificationRequired"));
       return;
     }
 
@@ -385,11 +382,7 @@ const Header: React.FC<HeaderProps> = ({
         setUser(null);
       }
       setError(
-        error instanceof Error
-          ? error.message
-          : language === "en"
-            ? "Registration failed. Please try again."
-            : "注册失败，请重试。",
+        error instanceof Error ? error.message : t("auth.error.registerFailed"),
       );
     } finally {
       setIsLoading(false);
@@ -439,14 +432,13 @@ const Header: React.FC<HeaderProps> = ({
   const handleSendCode = async () => {
     // 验证邮箱
     if (!email || !email.trim()) {
-      setError(language === "en" ? "Please enter your email address" : "请输入邮箱地址");
+      setError(t("auth.error.emailRequired"));
       return;
     }
 
-    // 验证邮箱格式
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      setError(language === "en" ? "Please enter a valid email address" : "请输入有效的邮箱地址");
+      setError(t("auth.error.emailInvalid"));
       return;
     }
 
@@ -475,11 +467,7 @@ const Header: React.FC<HeaderProps> = ({
     } catch (error) {
       console.error("Send captcha failed:", error);
       setError(
-        error instanceof Error
-          ? error.message
-          : language === "en"
-            ? "Failed to send verification code. Please try again."
-            : "发送验证码失败，请重试。",
+        error instanceof Error ? error.message : t("auth.error.sendCodeFailed"),
       );
     } finally {
       setIsSendingCode(false);
@@ -495,17 +483,9 @@ const Header: React.FC<HeaderProps> = ({
         window.location.href = res.data.authorizeUrl;
         return;
       }
-      setError(
-        language === "en"
-          ? "Failed to get Google login link."
-          : "获取 Google 登录链接失败。",
-      );
+      setError(t("auth.error.googleUrlFailed"));
     } catch (err) {
-      const msg =
-        language === "en"
-          ? "Google login failed. Please try again."
-          : "Google 登录失败，请重试。";
-      setError(msg);
+      setError(t("auth.error.googleLoginFailed"));
     } finally {
       setIsGoogleLoading(false);
     }
@@ -517,27 +497,27 @@ const Header: React.FC<HeaderProps> = ({
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      setError(language === "en" ? "Please enter your email address" : "请输入邮箱地址");
+      setError(t("auth.error.emailRequired"));
       return;
     }
     if (!emailRegex.test(email.trim())) {
-      setError(language === "en" ? "Please enter a valid email address" : "请输入有效的邮箱地址");
+      setError(t("auth.error.emailInvalid"));
       return;
     }
     if (!verificationCode.trim()) {
-      setError(language === "en" ? "Please enter the verification code" : "请输入验证码");
+      setError(t("auth.error.codeRequiredForgot"));
       return;
     }
     if (!password) {
-      setError(language === "en" ? "Please enter your new password" : "请输入新密码");
+      setError(t("auth.error.newPasswordRequired"));
       return;
     }
     if (password.length < 6) {
-      setError(language === "en" ? "Password must be at least 6 characters" : "密码至少 6 位");
+      setError(t("auth.error.passwordMin"));
       return;
     }
     if (password !== confirmPassword) {
-      setError(language === "en" ? "Passwords do not match" : "两次输入的密码不一致");
+      setError(t("auth.error.passwordMismatchForgot"));
       return;
     }
 
@@ -553,14 +533,10 @@ const Header: React.FC<HeaderProps> = ({
       setIsForgotPassword(false);
       setError(null);
       setDialogOpen(false);
-      toast.success(language === "en" ? "Password reset successfully" : "密码重置成功");
+      toast.success(t("auth.toast.passwordResetOk"));
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : language === "en"
-            ? "Reset password failed. Please try again."
-            : "重置密码失败，请重试。",
+        err instanceof Error ? err.message : t("auth.error.resetFailed"),
       );
     } finally {
       setIsLoading(false);
@@ -569,6 +545,11 @@ const Header: React.FC<HeaderProps> = ({
 
   const getInitials = (name: string) => {
     return name.slice(0, 1).toUpperCase();
+  };
+
+  const currentPlanLabel = t(`pricing.plan.${currentPlanId}`);
+  const handlePlanMenuClick = () => {
+    setActiveTab("pricing");
   };
 
   return (
@@ -678,51 +659,28 @@ const Header: React.FC<HeaderProps> = ({
                                 {section.title}
                               </div>
                               <div className="space-y-2">
-                                {section.items.map((item, index) => (
+                                {section.items.map((itemKey, index) => (
                                   <button
-                                    key={item}
+                                    key={itemKey}
                                     onClick={() => {
-                                      // Handle external links for solution menu items
-                                      const externalLinks: Record<string, string> = {
-                                        GEO: "http://orangeo.photog.art",
-                                        "Social Media Marketing": "http://tkfactory.photog.art",
-                                        社媒营销: "http://tkfactory.photog.art",
-                                        "Email Marketing": "http://aigrowth.photog.art",
-                                        邮件营销: "http://aigrowth.photog.art",
-                                        "Sales Support": "http://aisales.photog.art",
-                                        销售客服: "http://aisales.photog.art",
-                                        "Beauty & FMCG": "https://industrysolution.photog.art/",
-                                        美妆快消: "https://industrysolution.photog.art/",
-                                        "Consumer Electronics": "https://industrysolution.photog.art/",
-                                        消费电子: "https://industrysolution.photog.art/",
-                                        "Cross-border Expansion": "https://industrysolution.photog.art/",
-                                        跨境出海: "https://industrysolution.photog.art/",
-                                        "Data Infrastructure": "https://industrysolution.photog.art/",
-                                        数据基建: "https://industrysolution.photog.art/",
-                                        "Insights Hub": "https://insighthub.photog.art",
-                                        洞察中心: "https://insighthub.photog.art",
-                                        "Strategy Engine": "https://strategyengine.photog.art",
-                                        策略引擎: "https://strategyengine.photog.art",
-                                        "Content Factory": "https://toolbox.photog.art",
-                                        内容工厂: "https://toolbox.photog.art",
-                                      };
-
-                                      if (externalLinks[item]) {
-                                        window.open(externalLinks[item], "_blank");
+                                      const url = MEGA_MENU_EXTERNAL_URLS[itemKey];
+                                      if (url) {
+                                        window.open(url, "_blank");
                                         setOpenMenu(null);
                                         return;
                                       }
-                                      // Handle library sub-tab navigation
                                       if (openMenu === "library" && setLibrarySubTab) {
                                         const subTabs: ("video" | "voice" | "model")[] = ["video", "voice", "model"];
                                         setLibrarySubTab(subTabs[index]);
                                       }
-                                      setActiveTab(openMenu);
+                                      if (openMenu) {
+                                        setActiveTab(openMenu);
+                                      }
                                       setOpenMenu(null);
                                     }}
                                     className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
                                   >
-                                    {item}
+                                    {t(itemKey)}
                                   </button>
                                 ))}
                               </div>
@@ -749,13 +707,19 @@ const Header: React.FC<HeaderProps> = ({
                 className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground transition-colors duration-200"
               >
                 <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline">{language === "en" ? "EN" : "中文"}</span>
+                <span className="hidden sm:inline">
+                  {language === "en" ? t("common.langShortEn") : t("common.langShortZh")}
+                </span>
               </button>
 
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="focus:outline-none">
+                <HoverCard openDelay={80} closeDelay={140}>
+                  <HoverCardTrigger asChild>
+                    <button
+                      type="button"
+                      className="focus:outline-none"
+                      aria-label={t("header.accountMenuAria")}
+                    >
                       <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
                         {user.avatar && <AvatarImage src={user.avatar} alt={user.nickname || user.username} />}
                         <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
@@ -763,27 +727,46 @@ const Header: React.FC<HeaderProps> = ({
                         </AvatarFallback>
                       </Avatar>
                     </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-48 backdrop-blur-md bg-background/80 dark:bg-background/60 border border-border/40"
+                  </HoverCardTrigger>
+                  <HoverCardContent
+                    align="center"
+                    sideOffset={6}
+                    className="w-72 rounded-2xl border border-border/30 bg-background/95 p-2.5 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] ring-1 ring-black/5 backdrop-blur-md dark:bg-background/90 dark:ring-white/10"
                   >
-                    <div className="px-2 py-1.5 text-sm font-medium text-foreground">
-                      {user.nickname || user.username}
+                    <div className="flex flex-col px-2 py-3">
+                      <div className="flex flex-col items-center gap-1 text-center">
+                        <div className="w-full min-w-0 break-all text-base font-semibold leading-snug text-foreground">
+                          {user.nickname || user.username}
+                        </div>
+                        <div className="w-full pb-4 pt-0.5 text-xs leading-relaxed text-muted-foreground">
+                          {user.email}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handlePlanMenuClick}
+                          className="w-full max-w-full rounded-full border border-border/30 bg-[hsl(0_0%_96%)] px-4 py-2.5 text-center text-sm font-medium text-foreground transition-all hover:border-foreground/25 hover:bg-[hsl(0_0%_92%)] dark:border-border/40 dark:bg-muted dark:hover:bg-muted/80"
+                        >
+                          {currentPlanLabel}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        aria-label={t("header.signOutAria")}
+                        className="mt-5 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-[#FF4D4F] transition-colors hover:bg-[#FF4D4F]/8 hover:text-[#E63539] dark:text-[#FF6B6B] dark:hover:bg-[#FF4D4F]/12 dark:hover:text-[#FF8585]"
+                      >
+                        <LogOut className="h-4 w-4 shrink-0" aria-hidden />
+                        <span>{t("header.signOut")}</span>
+                      </button>
                     </div>
-                    <div className="px-2 pb-2 text-xs text-muted-foreground">{user.email}</div>
-                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      {language === "en" ? "Sign Out" : "退出登录"}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </HoverCardContent>
+                </HoverCard>
               ) : (
                 <button
                   onClick={openSignIn}
                   className="text-sm font-light text-foreground/70 hover:text-foreground hover:underline underline-offset-4 transition-all duration-200"
                 >
-                  {language === "en" ? "Sign In" : "登录"}
+                  {t("header.signIn")}
                 </button>
               )}
             </div>
@@ -818,7 +801,7 @@ const Header: React.FC<HeaderProps> = ({
             /* Forgot Password Form */
             <div className="space-y-6">
               <DialogTitle className="text-xl font-semibold text-center text-foreground">
-                {language === "en" ? "Forget password" : "忘记密码"}
+                {t("auth.forgot.title")}
               </DialogTitle>
 
               <form onSubmit={handleForgotPassword} className="space-y-4">
@@ -830,11 +813,11 @@ const Header: React.FC<HeaderProps> = ({
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-primary">
-                    {language === "en" ? "Email Address" : "邮箱地址"}
+                    {t("auth.label.email")}
                   </label>
                   <Input
                     type="email"
-                    placeholder={language === "en" ? "Email" : "邮箱"}
+                    placeholder={t("auth.placeholder.email")}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -848,12 +831,12 @@ const Header: React.FC<HeaderProps> = ({
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-primary">
-                    {language === "en" ? "Verification Code" : "验证码"}
+                    {t("auth.label.code")}
                   </label>
                   <div className="flex gap-3">
                     <Input
                       type="text"
-                      placeholder={language === "en" ? "Verification Code" : "验证码"}
+                      placeholder={t("auth.placeholder.code")}
                       value={verificationCode}
                       onChange={(e) => {
                         setVerificationCode(e.target.value);
@@ -871,26 +854,22 @@ const Header: React.FC<HeaderProps> = ({
                       disabled={isLoading || isSendingCode || codeCountdown > 0}
                     >
                       {isSendingCode
-                        ? language === "en"
-                          ? "Sending..."
-                          : "发送中..."
+                        ? t("auth.sendCode.sending")
                         : codeCountdown > 0
-                          ? `${codeCountdown}s`
-                          : language === "en"
-                            ? "Send Code"
-                            : "发送验证码"}
+                          ? `${codeCountdown}${t("auth.sendCode.seconds")}`
+                          : t("auth.sendCode")}
                     </Button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-primary">
-                    {language === "en" ? "New Password" : "新密码"}
+                    {t("auth.label.newPassword")}
                   </label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder={language === "en" ? "Password" : "密码"}
+                      placeholder={t("auth.placeholder.password")}
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
@@ -912,12 +891,12 @@ const Header: React.FC<HeaderProps> = ({
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-primary">
-                    {language === "en" ? "Confirm Password" : "确认密码"}
+                    {t("auth.label.confirmPassword")}
                   </label>
                   <div className="relative">
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder={language === "en" ? "Confirm" : "确认"}
+                      placeholder={t("auth.placeholder.confirm")}
                       value={confirmPassword}
                       onChange={(e) => {
                         setConfirmPassword(e.target.value);
@@ -938,13 +917,13 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 <div className="text-sm text-muted-foreground">
-                  {language === "en" ? "Already have an account?" : "已有账户？"}{" "}
+                  {t("auth.alreadyHaveAccount")}{" "}
                   <button
                     type="button"
                     onClick={backToLogin}
                     className="text-primary hover:underline font-medium"
                   >
-                    {language === "en" ? "Login" : "登录"}
+                    {t("auth.loginCta")}
                   </button>
                 </div>
 
@@ -953,30 +932,28 @@ const Header: React.FC<HeaderProps> = ({
                   className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium"
                   disabled={isLoading}
                 >
-                  {isLoading
-                    ? (language === "en" ? "Resetting..." : "重置中...")
-                    : (language === "en" ? "Reset Password" : "重置密码")}
+                  {isLoading ? t("auth.resetting") : t("auth.resetPassword")}
                 </Button>
               </form>
 
               <p className="text-xs text-center text-muted-foreground">
-                {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
+                {t("auth.terms.prefix")}
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Terms of Service" : "服务条款"}
+                  {t("auth.terms.service")}
                 </a>
-                {language === "en" ? " and acknowledge our " : " 并确认我们的"}
+                {t("auth.terms.mid")}
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Privacy Policy" : "隐私政策"}
+                  {t("auth.terms.privacy")}
                 </a>
                 。
               </p>
@@ -985,7 +962,7 @@ const Header: React.FC<HeaderProps> = ({
             /* Sign Up Form */
             <div className="space-y-6">
               <DialogTitle className="text-xl font-semibold text-primary">
-                {language === "en" ? "Sign up for an account" : "注册账号"}
+                {t("auth.signup.title")}
               </DialogTitle>
 
               <form onSubmit={handleSignUp} className="space-y-4">
@@ -999,7 +976,7 @@ const Header: React.FC<HeaderProps> = ({
                 {/* Email */}
                 <Input
                   type="email"
-                  placeholder={language === "en" ? "Email" : "邮箱"}
+                  placeholder={t("auth.placeholder.email")}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -1014,7 +991,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder={language === "en" ? "Password" : "密码"}
+                    placeholder={t("auth.placeholder.password")}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -1037,7 +1014,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="relative">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder={language === "en" ? "Confirm" : "确认密码"}
+                    placeholder={t("auth.placeholder.confirmSignup")}
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
@@ -1060,7 +1037,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="flex gap-3">
                   <Input
                     type="text"
-                    placeholder={language === "en" ? "Verification Code" : "验证码"}
+                    placeholder={t("auth.placeholder.code")}
                     value={verificationCode}
                     onChange={(e) => {
                       setVerificationCode(e.target.value);
@@ -1078,20 +1055,16 @@ const Header: React.FC<HeaderProps> = ({
                     disabled={isLoading || isSendingCode || codeCountdown > 0}
                   >
                     {isSendingCode
-                      ? language === "en"
-                        ? "Sending..."
-                        : "发送中..."
+                      ? t("auth.sendCode.sending")
                       : codeCountdown > 0
-                        ? `${codeCountdown}s`
-                        : language === "en"
-                          ? "Send Code"
-                          : "发送验证码"}
+                        ? `${codeCountdown}${t("auth.sendCode.seconds")}`
+                        : t("auth.sendCode")}
                   </Button>
                 </div>
 
                 {/* Already have account */}
                 <div className="text-sm text-muted-foreground">
-                  {language === "en" ? "Already have an account?" : "已有账号？"}{" "}
+                  {t("auth.alreadyHaveAccountAlt")}{" "}
                   <button
                     type="button"
                     onClick={() => {
@@ -1100,7 +1073,7 @@ const Header: React.FC<HeaderProps> = ({
                     }}
                     className="text-primary hover:underline font-medium"
                   >
-                    {language === "en" ? "Login" : "登录"}
+                    {t("auth.loginCta")}
                   </button>
                 </div>
 
@@ -1110,35 +1083,29 @@ const Header: React.FC<HeaderProps> = ({
                   className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium"
                   disabled={isLoading}
                 >
-                  {isLoading
-                    ? language === "en"
-                      ? "Signing up..."
-                      : "注册中..."
-                    : language === "en"
-                      ? "Sign Up"
-                      : "注册"}
+                  {isLoading ? t("auth.signup.submitting") : t("auth.signup.cta")}
                 </Button>
               </form>
 
               {/* Terms */}
               <p className="text-xs text-center text-muted-foreground">
-                {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
+                {t("auth.terms.prefix")}
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Terms of Service" : "服务条款"}
+                  {t("auth.terms.service")}
                 </a>
-                {language === "en" ? " and acknowledge our " : " 并确认我们的"}
+                {t("auth.terms.mid")}
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Privacy Policy" : "隐私政策"}
+                  {t("auth.terms.privacy")}
                 </a>
                 。
               </p>
@@ -1147,7 +1114,7 @@ const Header: React.FC<HeaderProps> = ({
             /* Login Form */
             <div className="space-y-6">
               <DialogTitle className="text-xl font-semibold text-center text-foreground">
-                {language === "en" ? "Create an account or Login" : "创建账号或登录"}
+                {t("auth.login.title")}
               </DialogTitle>
 
               {/* Google Login */}
@@ -1175,20 +1142,18 @@ const Header: React.FC<HeaderProps> = ({
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                {isGoogleLoading
-                  ? (language === "en" ? "Redirecting..." : "跳转中...")
-                  : (language === "en" ? "Continue with Google" : "使用 Google 登录")}
+                {isGoogleLoading ? t("auth.google.redirecting") : t("auth.google.continue")}
               </Button>
 
               {/* Divider */}
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-sm text-muted-foreground">or</span>
+                <span className="text-sm text-muted-foreground">{t("common.or")}</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
 
               {/* Continue with email label */}
-              <p className="text-primary font-medium">{language === "en" ? "Continue with email" : "使用邮箱登录"}</p>
+              <p className="text-primary font-medium">{t("auth.continueEmail")}</p>
 
               <form onSubmit={handleSignIn} className="space-y-4">
                 {/* Error Message */}
@@ -1201,7 +1166,7 @@ const Header: React.FC<HeaderProps> = ({
                 {/* Email */}
                 <Input
                   type="email"
-                  placeholder={language === "en" ? "Email" : "邮箱"}
+                  placeholder={t("auth.placeholder.email")}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -1216,7 +1181,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder={language === "en" ? "Password" : "密码"}
+                    placeholder={t("auth.placeholder.password")}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -1241,13 +1206,7 @@ const Header: React.FC<HeaderProps> = ({
                   className="w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-medium"
                   disabled={isLoading}
                 >
-                  {isLoading
-                    ? language === "en"
-                      ? "Logging in..."
-                      : "登录中..."
-                    : language === "en"
-                      ? "Login"
-                      : "登录"}
+                  {isLoading ? t("auth.login.loggingIn") : t("auth.login.submit")}
                 </Button>
               </form>
 
@@ -1259,7 +1218,7 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={openSignUp}
                   className="flex-1 h-12 rounded-2xl bg-muted/50 text-primary hover:bg-muted font-medium"
                 >
-                  {language === "en" ? "Sign Up" : "注册"}
+                  {t("auth.signUpLink")}
                 </Button>
                 <Button
                   type="button"
@@ -1267,29 +1226,29 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={openForgotPassword}
                   className="flex-1 h-12 rounded-2xl bg-muted/50 text-primary hover:bg-muted font-medium"
                 >
-                  {language === "en" ? "Forgot Password" : "忘记密码"}
+                  {t("auth.forgotLink")}
                 </Button>
               </div>
 
               {/* Terms */}
               <p className="text-xs text-center text-muted-foreground">
-                {language === "en" ? "By continuing, you agree to our " : "继续即表示您同意我们的"}
+                {t("auth.terms.prefix")}
                 <a
                   href={`https://policies.photog.art/terms?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Terms of Service" : "服务条款"}
+                  {t("auth.terms.service")}
                 </a>
-                {language === "en" ? " and acknowledge our " : " 并确认我们的"}
+                {t("auth.terms.mid")}
                 <a
                   href={`https://policies.photog.art/privacy?lang=${language}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground font-medium hover:underline"
                 >
-                  {language === "en" ? "Privacy Policy" : "隐私政策"}
+                  {t("auth.terms.privacy")}
                 </a>
                 。
               </p>

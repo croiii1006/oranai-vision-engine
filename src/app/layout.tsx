@@ -1,6 +1,41 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import { EB_Garamond, Inter, JetBrains_Mono } from "next/font/google";
 import { AppProviders } from "@/components/AppProviders";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const ebGaramond = EB_Garamond({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500"],
+  variable: "--font-eb-garamond",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+const fontVariables = `${inter.variable} ${ebGaramond.variable} ${jetbrainsMono.variable}`;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.oran.cn"),
@@ -34,26 +69,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${fontVariables}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap"
-          rel="stylesheet"
-        />
         <style
           dangerouslySetInnerHTML={{
             __html: `@font-face { font-family: 'Century Gothic'; src: local('Century Gothic'), local('CenturyGothic'); font-weight: normal; font-style: normal; }`,
           }}
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
         />
       </head>
       <body>

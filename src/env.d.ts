@@ -12,6 +12,8 @@ declare namespace NodeJS {
     NEXT_PUBLIC_MODELS_API_BASE_URL?: string;
     NEXT_PUBLIC_LIBRARY_API_BASE_URL?: string;
     NEXT_PUBLIC_AUTH_API_BASE_URL?: string;
+    /** 计费 API 根 URL；不填则复用 AUTH，或开发环境下相对 /billing */
+    NEXT_PUBLIC_BILLING_API_BASE_URL?: string;
     NEXT_PUBLIC_IMAGE_GEN_URL?: string;
     NEXT_PUBLIC_VIDEO_GEN_URL?: string;
     NEXT_PUBLIC_APP_NAME?: string;

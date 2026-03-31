@@ -62,6 +62,12 @@ export const config = {
     modelsBaseUrl: process.env.NEXT_PUBLIC_MODELS_API_BASE_URL || "",
     libraryBaseUrl: process.env.NEXT_PUBLIC_LIBRARY_API_BASE_URL || "",
     authBaseUrl: process.env.NEXT_PUBLIC_AUTH_API_BASE_URL || "",
+    /** 计费网关；未配置时与 auth 同源，仍为空则走站点相对路径 /billing（依赖 Next rewrite） */
+    billingBaseUrl:
+      (process.env.NEXT_PUBLIC_BILLING_API_BASE_URL ||
+        process.env.NEXT_PUBLIC_AUTH_API_BASE_URL ||
+        ""
+      ).replace(/\/$/, ""),
     imageGenUrl:
       process.env.NEXT_PUBLIC_IMAGE_GEN_URL ||
       `${toolboxBaseUrl}ai-toolbox/text-to-image`,

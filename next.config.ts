@@ -10,6 +10,10 @@ const oranTarget = "http://119.13.125.102:29273";
 const nextConfig: NextConfig = {
   /** 避免父目录存在其他 package-lock 时误判 monorepo 根目录 */
   outputFileTracingRoot: __dirname,
+  /** 按需解析子路径，减小 lucide 等包体积 */
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   async rewrites() {
     return {
       afterFiles: [
@@ -23,9 +27,10 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/api/app/:path*",
-          destination: "https://photog.art/api/app/:path*",
+          destination: `${oranTarget}/api/app/:path*`,
         },
         { source: "/auth/:path*", destination: `${oranTarget}/auth/:path*` },
+        { source: "/billing/:path*", destination: `${oranTarget}/billing/:path*` },
         { source: "/oauth2/:path*", destination: `${oranTarget}/oauth2/:path*` },
         {
           source: "/api/captcha/:path*",

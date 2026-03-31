@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import IndexPage from "@/components/IndexPage";
 
 export const metadata: Metadata = {
-  title: "OranAI — AI for Integrated Marketing Intelligence",
+  title: "Pricing — OranAI",
+  description: "Plans and pricing for OranAI.",
 };
 
-export default function Home() {
+export default function PricingRoutePage() {
   return <IndexPage />;
 }

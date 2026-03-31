@@ -154,3 +154,8 @@ export const libraryApiClient = createApiClient(config.api.libraryBaseUrl);
  * 默认的 MODELS API 客户端
  */
 export const modelsApiClient = createApiClient(config.api.modelsBaseUrl);
+
+/**
+ * 计费 API 客户端（POST /billing/...）
+ */
+export const billingApiClient = createApiClient(config.api.billingBaseUrl);

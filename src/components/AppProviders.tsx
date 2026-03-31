@@ -1,38 +1,22 @@
 "use client";
 
+import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { IPDetectionProvider } from "@/contexts/IPDetectionContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { logger } from "@/lib/logger";
-import { useEffect, useRef } from "react";
+import { makeQueryClient } from "@/lib/query-client";
 import { getToken, clearAuth, saveUserInfo } from "@/lib/utils/auth-storage";
 import { getUserInfo } from "@/lib/api/auth";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      retry: 3,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-    },
-    mutations: {
-      retry: 1,
-      onError: (error) => {
-        logger.error("Mutation failed", error as Error);
-      },
-    },
-  },
-});
-
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(makeQueryClient);
   const initializedRef = useRef(false);
 
   useEffect(() => {
