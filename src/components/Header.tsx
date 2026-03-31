@@ -685,6 +685,8 @@ const Header: React.FC<HeaderProps> = ({
                                       // Handle external links for solution menu items
                                       const externalLinks: Record<string, string> = {
                                         GEO: "http://orangeo.photog.art",
+                                        "Data Center": "https://datacenter.oran.cn/",
+                                        数据中心: "https://datacenter.oran.cn/",
                                         "Social Media Marketing": "http://tkfactory.photog.art",
                                         社媒营销: "http://tkfactory.photog.art",
                                         "Email Marketing": "http://aigrowth.photog.art",
