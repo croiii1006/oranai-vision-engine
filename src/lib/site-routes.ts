@@ -1,5 +1,5 @@
 /**
- * 主导航 tab 与 URL 路径对应（App Router）
+ * 主导航 tab 与 URL 路径对应（SPA 路由）
  */
 
 export type SiteNavTab =
@@ -54,5 +54,26 @@ export function tabFromPathname(pathname: string): SiteNavTab {
       return "pricing";
     default:
       return "home";
+  }
+}
+
+const DEFAULT_TITLE = "OranAI — AI for Integrated Marketing Intelligence";
+
+/** 浏览器 document.title（替代 Next metadata） */
+export function documentTitleForPath(pathname: string): string {
+  const tab = tabFromPathname(normalizeSitePath(pathname));
+  switch (tab) {
+    case "models":
+      return "Platform — OranAI";
+    case "products":
+      return "Products — OranAI";
+    case "pricing":
+      return "Pricing — OranAI";
+    case "library":
+      return "Inspiration — OranAI";
+    case "solution":
+      return "Solution — OranAI";
+    default:
+      return DEFAULT_TITLE;
   }
 }

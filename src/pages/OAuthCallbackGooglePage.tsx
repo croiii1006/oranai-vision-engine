@@ -1,15 +1,17 @@
-"use client";
-
-import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { loginWithGoogleCallback, getUserInfo } from "@/lib/api/auth";
 import { saveToken, saveUserInfo } from "@/lib/utils/auth-storage";
 import { config } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 
 function OAuthCallbackGoogleInner() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    document.title = "Google 登录 — OranAI";
+  }, []);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const executedRef = useRef(false);
@@ -59,7 +61,7 @@ function OAuthCallbackGoogleInner() {
           window.history.back();
           return;
         }
-        router.replace("/");
+        navigate("/", { replace: true });
       } catch (err) {
         setStatus("error");
         const msg = err instanceof Error ? err.message : String(err);
@@ -68,7 +70,7 @@ function OAuthCallbackGoogleInner() {
     };
 
     run();
-  }, [searchParams, router]);
+  }, [searchParams, navigate]);
 
   if (status === "error") {
     return (
@@ -76,7 +78,7 @@ function OAuthCallbackGoogleInner() {
         <div className="text-center space-y-4 max-w-md px-4">
           <h1 className="text-xl font-semibold text-destructive">Google 登录失败</h1>
           <p className="text-sm text-muted-foreground">{errorMsg}</p>
-          <Button onClick={() => router.replace("/")}>返回首页</Button>
+          <Button onClick={() => navigate("/", { replace: true })}>返回首页</Button>
         </div>
       </div>
     );

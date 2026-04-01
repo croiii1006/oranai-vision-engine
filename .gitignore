@@ -4,7 +4,7 @@ node_modules
 .pnp.js
 .yarn/install-state.gz
 
-# Next.js
+# 历史 Next 构建目录（若本地仍有）
 .next
 out
 

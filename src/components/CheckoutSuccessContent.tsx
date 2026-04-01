@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -303,10 +301,10 @@ export function CheckoutSuccessContent({
             </Button>
           )}
           <Button variant={checkoutContinueUrl ? "outline" : "default"} asChild>
-            <Link href="/pricing">{t("billing.checkout.success.goPricing")}</Link>
+            <Link to="/pricing">{t("billing.checkout.success.goPricing")}</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/">{t("billing.checkout.success.goHome")}</Link>
+            <Link to="/">{t("billing.checkout.success.goHome")}</Link>
           </Button>
           {showRefresh && (
             <Button

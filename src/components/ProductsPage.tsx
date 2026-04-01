@@ -11,16 +11,15 @@ import digitalHumanThumb from '@/assets/products/digital-human-thumb.png';
 import geoMonitorThumb from '@/assets/products/geo-monitor-thumb.png';
 import brandHealthThumb from '@/assets/products/brand-health-thumb.png';
 import brandStrategyThumb from '@/assets/products/brand-strategy-thumb.png';
-import type { StaticImageData } from 'next/image';
 
-function getImageSrc(img: string | StaticImageData): string {
-  return typeof img === 'string' ? img : img.src;
+function getImageSrc(img: string): string {
+  return img;
 }
 
 interface SubTab {
   id: string;
   labelKey: string;
-  image: string | StaticImageData;
+  image: string;
   url?: string; // URL to navigate to when clicked
 }
 interface TabConfig {

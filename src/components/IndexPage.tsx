@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import HomePage from "@/components/HomePage";
@@ -11,11 +9,16 @@ import LibraryPage from "@/components/LibraryPage";
 import PricingPage from "@/components/PricingPage";
 import Footer from "@/components/Footer";
 import type { PlanId } from "@/lib/pricing";
-import { normalizeSitePath, pathFromTab, tabFromPathname } from "@/lib/site-routes";
+import {
+  documentTitleForPath,
+  normalizeSitePath,
+  pathFromTab,
+  tabFromPathname,
+} from "@/lib/site-routes";
 
 export default function IndexPage() {
-  const pathname = usePathname();
-  const router = useRouter();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const normalizedPath = useMemo(() => normalizeSitePath(pathname), [pathname]);
   const activeTab = useMemo(() => tabFromPathname(normalizedPath), [normalizedPath]);
 
@@ -23,9 +26,9 @@ export default function IndexPage() {
     (tab: string) => {
       const next = pathFromTab(tab);
       if (normalizeSitePath(next) === normalizedPath) return;
-      router.push(next);
+      navigate(next);
     },
-    [normalizedPath, router],
+    [normalizedPath, navigate],
   );
   const [currentPlanId, setCurrentPlanId] = useState<PlanId>("free");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -50,6 +53,10 @@ export default function IndexPage() {
       setShowFooterInSolution(false);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    document.title = documentTitleForPath(pathname);
+  }, [pathname]);
 
   const isHeroView = activeTab === "home" || activeTab === "hero";
 

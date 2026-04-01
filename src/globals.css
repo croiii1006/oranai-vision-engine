@@ -43,6 +43,10 @@
     --gradient-start: 0 0% 8%;
     --gradient-end: 0 0% 3%;
     --noise-opacity: 0.03;
+
+    --font-inter: "Inter", system-ui, sans-serif;
+    --font-eb-garamond: "EB Garamond", Georgia, serif;
+    --font-jetbrains-mono: "JetBrains Mono", ui-monospace, monospace;
   }
 
   .dark {
@@ -102,6 +106,13 @@
     font-weight: 100 900;
     font-style: normal;
     font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Century Gothic";
+    src: local("Century Gothic"), local("CenturyGothic");
+    font-weight: normal;
+    font-style: normal;
   }
 
   /* 固定滚动条占位，避免视口宽度变化导致页面左右抖动 */

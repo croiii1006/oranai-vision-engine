@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <p className="text-sm">
                 应用程序遇到了意外错误。我们已经记录了此错误，并将尽快修复。
               </p>
-              {process.env.NODE_ENV === "development" && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <div className="mt-4 rounded-md bg-destructive/10 p-3">
                   <p className="text-xs font-mono text-destructive">
                     {this.state.error.toString()}

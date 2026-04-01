@@ -1,13 +1,12 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { logger } from "@/lib/logger";
 
-export default function NotFound() {
-  const pathname = usePathname();
+export default function NotFoundPage() {
+  const { pathname } = useLocation();
 
   useEffect(() => {
+    document.title = "404 — OranAI";
     logger.warn("404 Error: User attempted to access non-existent route", {
       pathname,
       timestamp: new Date().toISOString(),
