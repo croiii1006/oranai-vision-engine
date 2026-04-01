@@ -32,4 +32,4 @@ dist-ssr
 # docs
 docs
 
-.next/*
+.next/
