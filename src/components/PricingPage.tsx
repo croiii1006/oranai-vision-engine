@@ -21,7 +21,6 @@ import {
   getBillingSummary,
   isActivePaidSubscription,
   membershipPlanToRank,
-  membershipPlanUsesMonthlyMode,
   subscriptionItemCodeForPlan,
   topUpPackIdToCreditPackItemCode,
   type BillingSummary,
@@ -239,11 +238,7 @@ const PricingPage: React.FC<PricingPageProps> = ({
           : 0;
       const isActiveMember = isActivePaidSubscription(summary);
       const isUpgrade = isActiveMember && nextRank > memberRank;
-      const preferAutoRenew = autoRenewByPlan[plan.id] ?? true;
-      const sameModeMonthly = membershipPlanUsesMonthlyMode(summary?.membershipPlan);
-      const itemCode = isUpgrade
-        ? subscriptionItemCodeForPlan(plan.id, sameModeMonthly)
-        : subscriptionItemCodeForPlan(plan.id, preferAutoRenew);
+      const itemCode = subscriptionItemCodeForPlan(plan.id);
 
       if (isActiveMember && nextRank <= memberRank) {
         setCheckoutLoadingPlanId(null);
@@ -504,12 +499,14 @@ const PricingPage: React.FC<PricingPageProps> = ({
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Zap className="w-3 h-3" />
-                      <span>{plan.credits}</span>
-                      {!plan.isFree && plan.creditsNote && t(`pricing.plans.${plan.id}.creditsNote`).trim() !== '' && (
-                        <span className="ml-0.5">
-                          ({t(`pricing.plans.${plan.id}.creditsNote`)})
-                        </span>
-                      )}
+                      <span>{t(`pricing.plans.${plan.id}.credits`)}</span>
+                      {(() => {
+                        if (plan.isFree || !plan.creditsNote) return null;
+                        const key = `pricing.plans.${plan.id}.creditsNote`;
+                        const note = t(key).trim();
+                        if (!note || note === key) return null;
+                        return <span className="ml-0.5">({note})</span>;
+                      })()}
                     </div>
                   </div>
                 ) : (

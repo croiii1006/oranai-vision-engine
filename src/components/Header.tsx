@@ -31,6 +31,11 @@ import {
 import type { UserInfo } from "@/lib/api/auth";
 import { config } from "@/lib/config";
 import type { PlanId } from "@/lib/pricing";
+import {
+  getBillingSummary,
+  membershipPlanToPlanId,
+  type BillingSummary,
+} from "@/lib/api/billing";
 import { MEGA_MENU_EXTERNAL_URLS } from "@/i18n/menu-external-urls";
 
 interface HeaderProps {
@@ -86,6 +91,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
   const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
   const postLoginRedirectRef = useRef<'back' | 'toolbox' | null>(null); // 登录成功后的跳转：back=返回上一页，toolbox=跳转 toolbox
   const prevLoginDialogTriggerRef = useRef(0);
@@ -119,6 +125,30 @@ const Header: React.FC<HeaderProps> = ({
 
     return () => clearTimeout(timer);
   }, []);
+
+  // 已登录：拉取计费摘要，用于头像菜单展示与定价页一致的套餐档位
+  useEffect(() => {
+    if (!user) {
+      setBillingSummary(null);
+      return;
+    }
+    const token = getToken();
+    if (!token) {
+      setBillingSummary(null);
+      return;
+    }
+    let cancelled = false;
+    getBillingSummary()
+      .then((s) => {
+        if (!cancelled) setBillingSummary(s);
+      })
+      .catch(() => {
+        if (!cancelled) setBillingSummary(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   // 检查 URL 参数：?login=1 弹出登录框且登录成功后返回上一页；?login=toolbox 弹出登录框且登录成功后跳转 toolbox
   useEffect(() => {
@@ -547,7 +577,15 @@ const Header: React.FC<HeaderProps> = ({
     return name.slice(0, 1).toUpperCase();
   };
 
-  const currentPlanLabel = t(`pricing.plan.${currentPlanId}`);
+  const displayPlanId = useMemo((): PlanId => {
+    if (billingSummary?.subscriptionStatus === "ACTIVE") {
+      const pid = membershipPlanToPlanId(billingSummary.membershipPlan);
+      if (pid !== "free") return pid;
+    }
+    return currentPlanId;
+  }, [billingSummary, currentPlanId]);
+
+  const currentPlanLabel = t(`pricing.plan.${displayPlanId}`);
   const handlePlanMenuClick = () => {
     setActiveTab("pricing");
   };
@@ -753,7 +791,7 @@ const Header: React.FC<HeaderProps> = ({
                         type="button"
                         onClick={handleSignOut}
                         aria-label={t("header.signOutAria")}
-                        className="mt-5 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-[#FF4D4F] transition-colors hover:bg-[#FF4D4F]/8 hover:text-[#E63539] dark:text-[#FF6B6B] dark:hover:bg-[#FF4D4F]/12 dark:hover:text-[#FF8585]"
+                        className="mt-5 mx-auto w-auto flex items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-[#FF4D4F] transition-colors hover:bg-[#FF4D4F]/8 hover:text-[#E63539] dark:text-[#FF6B6B] dark:hover:bg-[#FF4D4F]/12 dark:hover:text-[#FF8585]"
                       >
                         <LogOut className="h-4 w-4 shrink-0" aria-hidden />
                         <span>{t("header.signOut")}</span>

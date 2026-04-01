@@ -174,7 +174,7 @@ export async function register(params: RegisterRequest): Promise<RegisterRespons
  */
 export async function getUserInfo(token?: string): Promise<UserInfoResponse> {
   try {
-    const data = await authApiClient.get<UserInfo>('/auth/user/info', {
+    const data = await authApiClient.get<UserInfo>('/api/auth/user/info', {
       needAuth: true,
     });
     

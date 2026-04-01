@@ -14,4 +14,5 @@ export const MEGA_MENU_EXTERNAL_URLS: Record<string, string> = {
   "menu.prod.insights": "https://insighthub.photog.art",
   "menu.prod.strategy": "https://strategyengine.photog.art",
   "menu.prod.contentFactory": "https://toolbox.photog.art",
+  "menu.plat.dataCenter": "https://datacenter.oran.cn/",
 };

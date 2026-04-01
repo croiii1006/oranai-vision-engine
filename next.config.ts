@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
           destination: `${oranTarget}/api/app/:path*`,
         },
         { source: "/auth/:path*", destination: `${oranTarget}/auth/:path*` },
+        { source: "/api/auth/:path*", destination: `${oranTarget}/api/auth/:path*` },
         { source: "/billing/:path*", destination: `${oranTarget}/billing/:path*` },
         { source: "/oauth2/:path*", destination: `${oranTarget}/oauth2/:path*` },
         {

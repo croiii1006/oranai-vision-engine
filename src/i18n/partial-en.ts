@@ -128,16 +128,19 @@ export const partialEn: Record<string, string> = {
 
   "pricing.plans.free.name": "Free",
   "pricing.plans.free.desc": "Sign up and start exploring AI features",
+  "pricing.plans.free.credits": "5 Credit",
   "pricing.plans.free.creditsNote": "One-time",
 
   "pricing.plans.basic.name": "Basic",
   "pricing.plans.basic.desc": "For light creators - daily image gen & insight reports",
   "pricing.plans.basic.priceSub": "/ month",
+  "pricing.plans.basic.credits": "400 Credit",
   "pricing.plans.basic.creditsNote": "~17% premium",
 
   "pricing.plans.pro.name": "Pro",
   "pricing.plans.pro.desc": "For power users - high-frequency reports & video rendering",
   "pricing.plans.pro.priceSub": "/ month",
+  "pricing.plans.pro.credits": "1600 Credit",
   "pricing.plans.pro.creditsNote": "~16% premium",
 
   "pricing.plans.enterprise.name": "Enterprise",
@@ -179,6 +182,29 @@ export const partialEn: Record<string, string> = {
   "pricing.checkout.failed": "Could not start checkout",
   "pricing.checkout.inProgress": "Redirecting to payment…",
   "pricing.checkout.sameOrHigherTier": "You are already on this plan or a higher tier.",
+
+  "billing.checkout.success.title": "Payment status",
+  "billing.checkout.success.loading": "Confirming your order…",
+  "billing.checkout.success.awaitingGateway":
+    "Checkout created; waiting for payment confirmation. If you have not finished paying, return to the payment page. If you have, wait a moment or tap refresh below.",
+  "billing.checkout.success.awaitingAfterReturn":
+    "You are back from the payment page; waiting for the order to update. Continue paying below if needed, or refresh status in a moment.",
+  "billing.checkout.success.continuePay": "Open payment page",
+  "billing.checkout.success.paidTitle": "Payment successful",
+  "billing.checkout.success.paidDesc":
+    "Your order is confirmed. Subscription benefits may take a moment to appear—refresh the pricing page if needed.",
+  "billing.checkout.success.failedTitle": "Payment not completed",
+  "billing.checkout.success.pendingTitle": "Still processing",
+  "billing.checkout.success.pendingDesc":
+    "The payment provider may need a little time. Refresh this page or check your plan on the pricing page.",
+  "billing.checkout.success.missingOrderId":
+    "Missing order id. Open the link from your payment confirmation or contact support.",
+  "billing.checkout.success.needLogin": "Sign in to view your order status.",
+  "billing.checkout.success.goPricing": "Go to pricing",
+  "billing.checkout.success.goHome": "Back to home",
+  "billing.checkout.success.refresh": "Refresh status",
+  "billing.checkout.success.orderNo": "Order no.",
+  "billing.checkout.success.orderId": "Order ID",
 
   "pricing.autoRenew.resumeTitle": "Resume recurring subscription?",
   "pricing.autoRenew.cancelTitle": "Cancel recurring subscription?",

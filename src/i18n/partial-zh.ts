@@ -126,17 +126,20 @@ export const partialZh: Record<string, string> = {
 
   "pricing.plans.free.name": "免费版",
   "pricing.plans.free.desc": "注册即用，零门槛体验 AI 能力",
+  "pricing.plans.free.credits": "5 Credit",
   "pricing.plans.free.creditsNote": "一次性",
 
   "pricing.plans.basic.name": "基础版",
   "pricing.plans.basic.desc": "轻度创作者，满足日常生图和洞察报告需求",
   "pricing.plans.basic.priceSub": "/ 月",
-  "pricing.plans.basic.creditsNote": "",
+  "pricing.plans.basic.credits": "400 Credit",
+  "pricing.plans.basic.creditsNote": "约溢价 17%",
 
   "pricing.plans.pro.name": "专业版",
   "pricing.plans.pro.desc": "重度用户/工作室，满足高频报告生成与短视频渲染需求",
   "pricing.plans.pro.priceSub": "/ 月",
-  "pricing.plans.pro.creditsNote": "",
+  "pricing.plans.pro.credits": "1600 Credit",
+  "pricing.plans.pro.creditsNote": "约溢价 16%",
 
   "pricing.plans.enterprise.name": "企业版",
   "pricing.plans.enterprise.desc": "企业客户，需签署线下合同",
@@ -174,6 +177,26 @@ export const partialZh: Record<string, string> = {
   "pricing.checkout.failed": "创建订单失败",
   "pricing.checkout.inProgress": "正在跳转支付…",
   "pricing.checkout.sameOrHigherTier": "你已是该档位或更高级会员，无需重复购买",
+
+  "billing.checkout.success.title": "支付处理结果",
+  "billing.checkout.success.loading": "正在确认订单状态…",
+  "billing.checkout.success.awaitingGateway":
+    "订单已创建，正在等待支付结果。若尚未在支付页完成付款，请返回继续；若已完成，请稍候同步或点击下方刷新。",
+  "billing.checkout.success.awaitingAfterReturn":
+    "已从支付页返回，正在等待订单确认。若需继续付款，可点击下方按钮；也可稍候刷新状态。",
+  "billing.checkout.success.continuePay": "前往支付页",
+  "billing.checkout.success.paidTitle": "支付成功",
+  "billing.checkout.success.paidDesc": "订单已确认。订阅权益生效可能存在短暂延迟，若定价页未更新请稍后刷新。",
+  "billing.checkout.success.failedTitle": "订单未成功",
+  "billing.checkout.success.pendingTitle": "订单处理中",
+  "billing.checkout.success.pendingDesc": "支付渠道回调可能有延迟，请稍后刷新本页或前往定价页查看权益。",
+  "billing.checkout.success.missingOrderId": "缺少订单号参数。请从支付完成页返回的链接进入，或联系客服。",
+  "billing.checkout.success.needLogin": "请先登录后查看订单状态。",
+  "billing.checkout.success.goPricing": "前往定价页",
+  "billing.checkout.success.goHome": "返回首页",
+  "billing.checkout.success.refresh": "刷新状态",
+  "billing.checkout.success.orderNo": "订单号",
+  "billing.checkout.success.orderId": "订单 ID",
 
   "pricing.autoRenew.resumeTitle": "恢复连续订阅？",
   "pricing.autoRenew.cancelTitle": "取消连续订阅？",
