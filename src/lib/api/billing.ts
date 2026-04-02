@@ -175,15 +175,7 @@ export function membershipPlanToPlanId(membershipPlan: string | null | undefined
   return 'free';
 }
 
-/** 当前会员是否为「月订阅」模式 SKU（与一次性相对），升级目标须同模式 */
-export function membershipPlanUsesMonthlyMode(
-  membershipPlan: string | null | undefined,
-): boolean {
-  if (!membershipPlan || membershipPlan === 'free') return true;
-  return !membershipPlan.toLowerCase().includes('one_time');
-}
-
-/** 定价页「基础版」对应 Starter SKU，「专业版」对应 Pro SKU；autoRenew=true 为月订 SKU */
+/** 定价页「基础版」对应 Starter SKU，「专业版」对应 Pro SKU（一次性 SKU） */
 export function subscriptionItemCodeForPlan(
   planId: 'basic' | 'pro'
 ): string {

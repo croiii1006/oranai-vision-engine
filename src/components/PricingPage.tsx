@@ -151,14 +151,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
   const [isTopUpAccessDialogOpen, setIsTopUpAccessDialogOpen] = useState(false);
   const [isTopUpDialogOpen, setIsTopUpDialogOpen] = useState(false);
   const [selectedTopUpPack, setSelectedTopUpPack] = useState<TopUpPack | null>(null);
-  const [autoRenewByPlan, setAutoRenewByPlan] = useState<Record<string, boolean>>({
-    basic: true,
-    pro: true,
-  });
-  const [pendingAutoRenewChange, setPendingAutoRenewChange] = useState<{
-    planId: PlanId;
-    nextValue: boolean;
-  } | null>(null);
   const [checkoutLoadingPlanId, setCheckoutLoadingPlanId] = useState<string | null>(null);
   const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
   const [billingSummaryLoading, setBillingSummaryLoading] = useState(false);
@@ -341,33 +333,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
     }
   };
 
-  const handleAutoRenewToggle = (planId: PlanId) => {
-    const currentValue = autoRenewByPlan[planId] ?? true;
-
-    setPendingAutoRenewChange({
-      planId,
-      nextValue: !currentValue,
-    });
-  };
-
-  const handleAutoRenewDialogChange = (open: boolean) => {
-    if (!open) {
-      setPendingAutoRenewChange(null);
-    }
-  };
-
-  const handleConfirmAutoRenewChange = () => {
-    if (!pendingAutoRenewChange) {
-      return;
-    }
-
-    setAutoRenewByPlan((current) => ({
-      ...current,
-      [pendingAutoRenewChange.planId]: pendingAutoRenewChange.nextValue,
-    }));
-    setPendingAutoRenewChange(null);
-  };
-
   const getPlanActionLabel = (
     plan: PlanConfig,
     isCurrent: boolean,
@@ -393,10 +358,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
 
     return t('pricing.action.switchTo').replace('{{plan}}', planName);
   };
-
-  const pendingAutoRenewPlan = pendingAutoRenewChange
-    ? plans.find((plan) => plan.id === pendingAutoRenewChange.planId)
-    : null;
 
   return (
     <>
@@ -432,10 +393,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
             const isCurrent = plan.id === resolvedCurrentPlanId;
             const isLower = thisRank < currentRank;
             const isHigher = thisRank > currentRank;
-            const isActiveMember = isActivePaidSubscription(billingSummary);
-            const showAutoRenewToggle =
-              isHigher && !plan.isEnterprise && !isActiveMember;
-            const isAutoRenewEnabled = autoRenewByPlan[plan.id] ?? true;
 
             return (
             <div
@@ -466,7 +423,7 @@ const PricingPage: React.FC<PricingPageProps> = ({
 
                 {/* Price */}
                 {!plan.isEnterprise ? (
-                  <div className="relative space-y-2 pr-28">
+                  <div className="space-y-2">
                     <div className="flex items-end">
                       <div className="flex shrink-0 items-end whitespace-nowrap">
                         <span className="text-3xl font-medium">{plan.price}</span>
@@ -476,26 +433,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
                           </span>
                         )}
                       </div>
-                      {showAutoRenewToggle && (
-                        <button
-                          type="button"
-                          onClick={() => handleAutoRenewToggle(plan.id as PlanId)}
-                          className="absolute bottom-0 right-0 inline-flex items-center gap-1.5 rounded-full px-0.5 py-0.5 text-[11px] leading-none text-muted-foreground transition-colors hover:text-foreground"
-                          role="checkbox"
-                          aria-checked={isAutoRenewEnabled}
-                        >
-                          <span
-                            className={`inline-flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
-                              isAutoRenewEnabled
-                                ? 'border-foreground bg-foreground text-background'
-                                : 'border-border bg-background text-transparent'
-                            }`}
-                          >
-                            <Check className="h-2.5 w-2.5" />
-                          </span>
-                          <span>{t('pricing.autoRenew.label')}</span>
-                        </button>
-                      )}
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Zap className="w-3 h-3" />
@@ -683,50 +620,6 @@ const PricingPage: React.FC<PricingPageProps> = ({
         </section>
         </div>
       </div>
-      <Dialog open={!!pendingAutoRenewChange} onOpenChange={handleAutoRenewDialogChange}>
-        <DialogContent className="!border-black/5 !bg-white/92 backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,23,42,0.14)] dark:!border-border dark:!bg-[hsl(var(--background)/0.95)] dark:backdrop-blur-sm sm:max-w-md">
-          <DialogHeader className="pr-8">
-            <DialogTitle>
-              {pendingAutoRenewChange?.nextValue
-                ? t('pricing.autoRenew.resumeTitle')
-                : t('pricing.autoRenew.cancelTitle')}
-            </DialogTitle>
-            <DialogDescription className="leading-relaxed pt-3">
-              {pendingAutoRenewChange?.nextValue
-                ? t('pricing.autoRenew.resumeDesc').replace(
-                    '{{plan}}',
-                    pendingAutoRenewPlan
-                      ? t(`pricing.plans.${pendingAutoRenewPlan.id}.name`)
-                      : t('pricing.autoRenew.planFallback'),
-                  )
-                : t('pricing.autoRenew.cancelDesc').replace(
-                    '{{plan}}',
-                    pendingAutoRenewPlan
-                      ? t(`pricing.plans.${pendingAutoRenewPlan.id}.name`)
-                      : t('pricing.autoRenew.planFallback'),
-                  )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="pt-2">
-            <Button
-              variant="outline"
-              className="rounded-full px-6"
-              onClick={() => setPendingAutoRenewChange(null)}
-            >
-              {t('pricing.autoRenew.keep')}
-            </Button>
-            <Button
-              className="rounded-full px-6"
-              onClick={handleConfirmAutoRenewChange}
-            >
-              {pendingAutoRenewChange?.nextValue
-                ? t('pricing.autoRenew.resumeConfirm')
-                : t('pricing.autoRenew.cancelConfirm')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Dialog open={isTopUpAccessDialogOpen} onOpenChange={setIsTopUpAccessDialogOpen}>
         <DialogContent className="!border-black/5 !bg-white/92 backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,23,42,0.14)] dark:!border-border dark:!bg-[hsl(var(--background)/0.95)] dark:backdrop-blur-sm sm:max-w-md">
           <DialogHeader className="pr-8">

@@ -147,7 +147,6 @@ export const partialEn: Record<string, string> = {
   "pricing.plans.enterprise.desc": "For large organizations - custom contracts",
 
   "pricing.badge.popular": "Most Popular",
-  "pricing.autoRenew.label": "Auto renew",
   "pricing.enterprise.customPrice": "Custom",
   "pricing.enterprise.customCredits": "Custom Credits",
 
@@ -205,17 +204,6 @@ export const partialEn: Record<string, string> = {
   "billing.checkout.success.refresh": "Refresh status",
   "billing.checkout.success.orderNo": "Order no.",
   "billing.checkout.success.orderId": "Order ID",
-
-  "pricing.autoRenew.resumeTitle": "Resume recurring subscription?",
-  "pricing.autoRenew.cancelTitle": "Cancel recurring subscription?",
-  "pricing.autoRenew.resumeDesc":
-    "Recurring subscription will be re-enabled by default for {{plan}}.",
-  "pricing.autoRenew.cancelDesc":
-    "Recurring subscription will be turned off for {{plan}}.",
-  "pricing.autoRenew.planFallback": "this plan",
-  "pricing.autoRenew.keep": "Keep current",
-  "pricing.autoRenew.resumeConfirm": "Resume recurring",
-  "pricing.autoRenew.cancelConfirm": "Cancel recurring",
 
   "pricing.topUp.accessTitle": "Top-up access notice",
   "pricing.topUp.accessDesc":

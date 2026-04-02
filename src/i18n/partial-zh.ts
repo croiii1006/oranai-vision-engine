@@ -145,7 +145,6 @@ export const partialZh: Record<string, string> = {
   "pricing.plans.enterprise.desc": "企业客户，需签署线下合同",
 
   "pricing.badge.popular": "推荐",
-  "pricing.autoRenew.label": "连续订阅",
   "pricing.enterprise.customPrice": "定制",
   "pricing.enterprise.customCredits": "定制额度",
 
@@ -197,15 +196,6 @@ export const partialZh: Record<string, string> = {
   "billing.checkout.success.refresh": "刷新状态",
   "billing.checkout.success.orderNo": "订单号",
   "billing.checkout.success.orderId": "订单 ID",
-
-  "pricing.autoRenew.resumeTitle": "恢复连续订阅？",
-  "pricing.autoRenew.cancelTitle": "取消连续订阅？",
-  "pricing.autoRenew.resumeDesc": "恢复后，升级至{{plan}}时将默认开启连续续订。",
-  "pricing.autoRenew.cancelDesc": "取消后，升级至{{plan}}时将按非连续订阅处理。",
-  "pricing.autoRenew.planFallback": "该套餐",
-  "pricing.autoRenew.keep": "暂不修改",
-  "pricing.autoRenew.resumeConfirm": "恢复连续订阅",
-  "pricing.autoRenew.cancelConfirm": "取消连续订阅",
 
   "pricing.topUp.accessTitle": "加油包权益提示",
   "pricing.topUp.accessDesc": "解锁更多使用空间：升级后可按需购买加油包",
