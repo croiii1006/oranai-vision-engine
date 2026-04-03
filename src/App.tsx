@@ -28,7 +28,7 @@ export function App() {
         <Route path="/products" element={<IndexPage />} />
         <Route path="/library" element={<IndexPage />} />
         <Route path="/pricing" element={<IndexPage />} />
-        <Route path="/oauth/callback/google" element={<OAuthCallbackGooglePage />} />
+        <Route path="/api/oauth/callback/google" element={<OAuthCallbackGooglePage />} />
         <Route path="/billing/checkout/success" element={<BillingCheckoutSuccessPage />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/404" element={<NotFoundPage />} />
