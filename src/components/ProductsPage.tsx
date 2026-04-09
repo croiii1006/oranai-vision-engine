@@ -174,7 +174,7 @@ const ProductsPage: React.FC = () => {
         </div>
 
         {/* Search Dialog Box */}
-        <div className="max-w-2xl mx-auto mb-6 rounded-xl border-2 border-border bg-background/50 backdrop-blur-sm p-3">
+        <div className="max-w-2xl mx-auto mb-6 rounded-3xl border-2 border-border bg-background/50 backdrop-blur-sm p-3">
           {/* Input Area */}
           <div className="mb-3">
             <input type="text" placeholder={t('products.chatPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full px-3 py-2 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-base" />
@@ -388,9 +388,14 @@ const ProductsPage: React.FC = () => {
 
               <div className="absolute bottom-[-0px] h-[85px] left-0 w-[100%] overflow-clip z-20">
                 <div className="absolute left-0 bottom-0 flex flex-col gap-[6px] items-start justify-end p-[18px] py-[13px] w-full" style={{ backgroundSize: 'cover', backgroundPosition: 'center bottom' }}>
-                  <p className="font-semibold leading-[1.35] not-italic relative shrink-0 text-[13px] text-[#363636] w-[232px] whitespace-pre-wrap mb-0 group-hover:opacity-0 transition-opacity duration-200">
-                    海飞丝市场洞察深度报告<br />整合宏观趋势、全球化市场、人群画像、和竞品分析
-                  </p>
+                  <div className="relative shrink-0 w-[232px] whitespace-pre-wrap mb-0 group-hover:opacity-0 transition-opacity duration-200">
+                    <p className="font-medium leading-[1.35] not-italic text-[16px] text-[#363636]">
+                      海飞丝市场洞察深度报告
+                    </p>
+                    <p className="mt-[8px] font-normal leading-[1.35] not-italic text-[12px] text-[#D33D3D3]">
+                      整合宏观趋势、全球化市场、人群画像、和竞品分析
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="absolute inset-0 rounded-[8px] dark:ring-[#333] pointer-events-none z-[30]"></div>

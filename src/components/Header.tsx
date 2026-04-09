@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const closeMenuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const postLoginRedirectRef = useRef<'back' | 'toolbox' | null>(null); // 登录成功后的跳转：back=返回上一页，toolbox=跳转 toolbox
   
   // 从缓存加载用户信息（在 App 初始化检查完成后）
@@ -197,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({
       sections: [
         {
           title: language === "en" ? "Platform Capabilities" : "平台能力",
-          items: language === "en" ? ["Data Center", "Model Library", "Skills", "MiniApps"] : ["数据中心", "模型库", "Skills", "MiniApps"],
+          items: language === "en" ? ["Data Center", "Model Library", "Skills"] : ["数据中心", "模型库", "Skills"],
         },
       ],
     },
@@ -1252,6 +1252,18 @@ const Header: React.FC<HeaderProps> = ({
                           <button
                             key={item}
                             onClick={() => {
+                              if (openMenu === "models" && index === 0) {
+                                window.open("https://datacenter.oran.cn/", "_blank");
+                                setOpenMenu(null);
+                                return;
+                              }
+
+                              if (openMenu === "models" && index === 2) {
+                                window.open("https://skills.oran.cn/", "_blank");
+                                setOpenMenu(null);
+                                return;
+                              }
+
                               // Handle external links for solution menu items
                               const externalLinks: Record<string, string> = {
                                 GEO: "http://orangeo.photog.art",
