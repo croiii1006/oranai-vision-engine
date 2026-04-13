@@ -231,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({
         sections: [
           {
             title: t("header.mega.platformTitle"),
-            items: ["menu.plat.dataCenter", "menu.plat.modelLibrary", "menu.plat.skills", "menu.plat.miniapps"],
+            items: ["menu.plat.dataCenter", "menu.plat.modelLibrary", "menu.plat.skills"],
           },
         ],
       },

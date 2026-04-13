@@ -98,7 +98,6 @@ export const partialZh: Record<string, string> = {
   "menu.plat.dataCenter": "数据中心",
   "menu.plat.modelLibrary": "模型库",
   "menu.plat.skills": "Skills",
-  "menu.plat.miniapps": "MiniApps",
   "menu.prod.dataInfra": "数据基建",
   "menu.prod.insights": "洞察中心",
   "menu.prod.strategy": "策略引擎",

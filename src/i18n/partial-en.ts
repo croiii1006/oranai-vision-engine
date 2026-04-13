@@ -99,7 +99,6 @@ export const partialEn: Record<string, string> = {
   "menu.plat.dataCenter": "Data Center",
   "menu.plat.modelLibrary": "Model Library",
   "menu.plat.skills": "Skills",
-  "menu.plat.miniapps": "MiniApps",
   "menu.prod.dataInfra": "Data Infrastructure",
   "menu.prod.insights": "Insights Hub",
   "menu.prod.strategy": "Strategy Engine",
