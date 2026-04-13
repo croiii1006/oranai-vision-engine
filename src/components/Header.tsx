@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+﻿import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, Sun, Moon, LogOut, Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -91,8 +91,10 @@ const Header: React.FC<HeaderProps> = ({
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [menuAnchorX, setMenuAnchorX] = useState<number | null>(null);
   const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
   const closeMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const menuTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const postLoginRedirectRef = useRef<'back' | 'toolbox' | null>(null); // 登录成功后的跳转：back=返回上一页，toolbox=跳转 toolbox
   const prevLoginDialogTriggerRef = useRef(0);
 
@@ -184,6 +186,19 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   // 处理菜单打开
+  const updateMenuAnchor = (menuId: string | null) => {
+    if (!menuId) {
+      setMenuAnchorX(null);
+      return;
+    }
+
+    const trigger = menuTriggerRefs.current[menuId];
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    setMenuAnchorX(rect.left + rect.width / 2);
+  };
+
   const handleMenuOpen = (menuId: string | null) => {
     // 清除关闭定时器
     if (closeMenuTimerRef.current) {
@@ -191,6 +206,7 @@ const Header: React.FC<HeaderProps> = ({
       closeMenuTimerRef.current = null;
     }
     setOpenMenu(menuId);
+    updateMenuAnchor(menuId);
   };
 
   // 处理菜单关闭（延迟关闭）
@@ -205,6 +221,21 @@ const Header: React.FC<HeaderProps> = ({
       closeMenuTimerRef.current = null;
     }, 200); // 200ms 延迟
   };
+
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const syncMenuAnchor = () => updateMenuAnchor(openMenu);
+    syncMenuAnchor();
+
+    window.addEventListener("resize", syncMenuAnchor);
+    window.addEventListener("scroll", syncMenuAnchor, true);
+
+    return () => {
+      window.removeEventListener("resize", syncMenuAnchor);
+      window.removeEventListener("scroll", syncMenuAnchor, true);
+    };
+  }, [openMenu]);
 
   const tabs = [
     { id: "solution", label: t("nav.solution") },
@@ -254,6 +285,13 @@ const Header: React.FC<HeaderProps> = ({
     }),
     [t],
   );
+
+  const megaMenuSectionCount = openMenu ? (menuConfigs[openMenu]?.sections.length ?? 0) : 0;
+  const megaMenuPanelWidthClass =
+    megaMenuSectionCount > 1
+      ? "w-[600px] min-w-[600px]"
+      : "w-[280px] min-w-[280px]";
+  const megaMenuGridClass = megaMenuSectionCount > 1 ? "grid-cols-2" : "grid-cols-1";
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "zh" : "en");
@@ -591,6 +629,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
@@ -642,8 +681,14 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="rounded-full px-1.5 py-1.5 flex items-center space-x-1 border-0 dark:border dark:border-border/30 shadow-none dark:shadow-lg bg-transparent dark:bg-background/40 backdrop-blur dark:backdrop-blur-md relative">
                   {tabs.map((tab) =>
                     menuConfigs[tab.id] ? (
-                      <div key={tab.id} className="relative">
+                      <div
+                        key={tab.id}
+                        className="relative"
+                      >
                         <button
+                          ref={(node) => {
+                            menuTriggerRefs.current[tab.id] = node;
+                          }}
                           onMouseEnter={() => handleMenuOpen(tab.id)}
                           onClick={() => setActiveTab(tab.id)}
                           className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -672,64 +717,6 @@ const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
               </nav>
-              <AnimatePresence>
-                {openMenu && menuConfigs[openMenu] && (
-                  <motion.div
-                    key="solution-mega"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed left-0 right-0 top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40 flex justify-center"
-                    onMouseEnter={() => handleMenuOpen(openMenu)}
-                    onMouseLeave={handleMenuClose}
-                  >
-                    <div className="bg-background/80 pointer-events-auto w-fit rounded-3xl border border-border/30 ring-1 ring-white/10 dark:ring-white/6 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] px-8 py-6">
-                      {menuConfigs[openMenu]?.sections && (
-                        <div
-                          className={`grid ${
-                            menuConfigs[openMenu].sections.length > 1 ? "grid-cols-2" : "grid-cols-1"
-                          } gap-10`}
-                        >
-                          {menuConfigs[openMenu].sections.map((section) => (
-                            <div className="space-y-3" key={section.title}>
-                              <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                                {section.title}
-                              </div>
-                              <div className="space-y-2">
-                                {section.items.map((itemKey, index) => (
-                                  <button
-                                    key={itemKey}
-                                    onClick={() => {
-                                      const url = MEGA_MENU_EXTERNAL_URLS[itemKey];
-                                      if (url) {
-                                        window.open(url, "_blank");
-                                        setOpenMenu(null);
-                                        return;
-                                      }
-                                      if (openMenu === "library" && setLibrarySubTab) {
-                                        const subTabs: ("video" | "voice" | "model")[] = ["video", "voice", "model"];
-                                        setLibrarySubTab(subTabs[index]);
-                                      }
-                                      if (openMenu) {
-                                        setActiveTab(openMenu);
-                                      }
-                                      setOpenMenu(null);
-                                    }}
-                                    className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
-                                  >
-                                    {t(itemKey)}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                ))}
-              </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
             {/* Right - Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
@@ -1296,6 +1283,68 @@ const Header: React.FC<HeaderProps> = ({
         </DialogContent>
       </Dialog>
     </header>
+    <AnimatePresence>
+      {openMenu && menuConfigs[openMenu] && (
+        <motion.div
+          key="solution-mega"
+          initial={{ opacity: 0, x: "-30%", y: -8 }}
+          animate={{ opacity: 1, x: "-30%", y: 0 }}
+          exit={{ opacity: 0, x: "-30%", y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="fixed top-20 px-6 sm:px-10 lg:px-16 pointer-events-none z-40"
+          style={{
+            left: menuAnchorX ?? "50%",
+          }}
+          onMouseEnter={() => handleMenuOpen(openMenu)}
+          onMouseLeave={handleMenuClose}
+        >
+          <div
+            className={`backdrop-blur bg-background/50 pointer-events-auto overflow-hidden rounded-3xl border border-border/30 ring-1 ring-white/10 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.65)] dark:bg-background/50 dark:ring-white/10 ${megaMenuPanelWidthClass}`}
+          >
+            <div className="px-8 py-6">
+              {menuConfigs[openMenu]?.sections && (
+                <div className={`grid ${megaMenuGridClass} gap-10`}>
+                  {menuConfigs[openMenu].sections.map((section) => (
+                    <div className="space-y-3" key={section.title}>
+                      <div className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                        {section.title}
+                      </div>
+                      <div className="space-y-2">
+                        {section.items.map((itemKey, index) => (
+                          <button
+                            key={itemKey}
+                            onClick={() => {
+                              const url = MEGA_MENU_EXTERNAL_URLS[itemKey];
+                              if (url) {
+                                window.open(url, "_blank");
+                                setOpenMenu(null);
+                                return;
+                              }
+                              if (openMenu === "library" && setLibrarySubTab) {
+                                const subTabs: ("video" | "voice" | "model")[] = ["video", "voice", "model"];
+                                setLibrarySubTab(subTabs[index]);
+                              }
+                              if (openMenu) {
+                                setActiveTab(openMenu);
+                              }
+                              setOpenMenu(null);
+                            }}
+                            className="w-full text-left px-3 py-2 rounded-xl text-sm text-foreground/80 hover:text-foreground hover:bg-foreground/5 transition-all"
+                          >
+                            {t(itemKey)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 

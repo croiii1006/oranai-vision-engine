@@ -156,9 +156,9 @@ const ProductsPage: React.FC = () => {
   };
   return <div className="min-h-screen pt-24 pb-16">
       <div className="w-full px-6 sm:px-10 lg:px-16 py-[61px]">
-        {/* Product Title */}
-        <h1 className="text-3xl tracking-tight mb-12 md:text-base py-0 font-extralight">
-          {t('products.title')}
+        {/* Preserve original layout spacing without showing the title text */}
+        <h1 aria-hidden="true" className="invisible text-3xl tracking-tight mb-12 md:text-base py-0 font-extralight">
+          Placeholder
         </h1>
 
         {/* Hero Section */}
