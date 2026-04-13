@@ -65,3 +65,5 @@ coverage
 # 根目录 Markdown（本地/草案文档勿提交；子目录如 src 下不受影响）
 /*.md
 !README.md
+
+*.conf
